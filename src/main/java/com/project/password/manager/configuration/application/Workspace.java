@@ -28,12 +28,16 @@ public class Workspace {
 		return HOLDER.instance;
 	}
 
-	public static boolean workspaceExists() {
+	public boolean workspaceExists() {
 		return workspace.exists();
 	}
 
+	public boolean fileExists(@NotNull File directory) {
+		return directory.exists();
+	}
+
 	public static void configureWorkSpace() {
-		if (!workspaceExists()) {
+		if (!workspace.exists()) {
 			log.info("Workspace not found. Initializing workspace at: " + workspace.getAbsolutePath());
 			if (workspace.mkdir()) {
 				log.info("Workspace successfully created at: " + workspace.getAbsolutePath());
@@ -73,9 +77,18 @@ public class Workspace {
 
 	private static void createPropertiesFile() throws IOException {
 		Properties properties = new Properties();
-		FileOutputStream fileOutputStream = new FileOutputStream(workspace + ProperitesReader.PROPERTY_FILE_PATH);
-		properties.setProperty(ApplicationProperties.PROPERTY_APP_NAME, "1.0.0");
+		FileOutputStream fileOutputStream = new FileOutputStream(
+				new File(workspace, PropertiesReader.PROPERTY_FILE_PATH));
+		properties.setProperty(ApplicationProperties.PROPERTY_APP_VERSION, "1.0.0");
 		properties.setProperty(ApplicationProperties.PROPERTY_APP_NAME, "password-manager-cli");
+		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_ENABLED, "false");
+		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_TYPE, "sql");
+		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_USERNAME, "username");
+		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_PASSWORD, "password");
+		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_PORT, "5432");
+		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_VENDOR, "postgres");
+		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_CONNECTION_STRING, "connection-string");
+		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_HOST, "host");
 		properties.store(fileOutputStream, "Application properties setup while initiating the project");
 		fileOutputStream.close();
 	}

@@ -28,26 +28,44 @@ public class PropertiesReader {
 		return HOLDER.instance;
 	}
 
+	@NotNull
+	private File getPropertiesFile() {
+		return new File(Workspace.getInstance().getRoot(), PROPERTY_FILE_PATH);
+	}
+
 	@Nullable
-	public static String getPropertyAsString(@NotNull String key) {
-		if (propertiesMap.containsKey(key)) {
-			return propertiesMap.get(key).toString();
+	public String readPropertyAsString(@NotNull String key) {
+		Object value = readPropertiesFromPropertiesMap(key);
+		return value != null ? value.toString() : null;
+	}
+
+	public int readPropertyAsIntger(@NotNull String key, int defaultValue) {
+		String property = readPropertiesFromPropertiesMap(key).toString();
+		if (property != null) {
+			return Integer.parseInt(readPropertiesFromPropertiesMap(key).toString());
 		}
-		return null;
+		return defaultValue;
+	}
+
+	public boolean readPropertyAsBoolean(@NotNull String key, boolean defaultValue) {
+		String property = readPropertiesFromPropertiesMap(key).toString();
+		if (property != null) {
+			return Boolean.parseBoolean(readPropertiesFromPropertiesMap(key).toString());
+		}
+		return defaultValue;
 	}
 
 	private void extractProperties() {
-		if (propertyFileExist()) {
-			try {
-				Properties properties = new Properties();
-				InputStream propertiesFileStream = new FileInputStream(PROPERTIES_FILE);
-				properties.load(propertiesFileStream);
-				properties.entrySet().forEach(entry -> propertiesMap.put(entry.getKey().toString(), entry.getValue()));
-			} catch (Exception ex) {
-				throw new RuntimeException("Error reading the properties file: " + ex.getMessage());
-			}
+		if (!propertyFileExist()) {
+			throw new RuntimeException("Properties file does not exist in the workspace");
 		}
-		throw new RuntimeException("Properties file does not exist in the workspace");
+		try (InputStream propertiesFileStream = new FileInputStream(getPropertiesFile())) {
+			Properties properties = new Properties();
+			properties.load(propertiesFileStream);
+			properties.entrySet().forEach(entry -> propertiesMap.put(entry.getKey().toString(), entry.getValue()));
+		} catch (Exception ex) {
+			throw new RuntimeException("Error reading the properties file", ex);
+		}
 	}
 
 	private boolean propertyFileExist() {
@@ -56,5 +74,13 @@ public class PropertiesReader {
 			return true;
 		}
 		return false;
+	}
+
+	@Nullable
+	private static Object readPropertiesFromPropertiesMap(@NotNull String key) {
+		if (propertiesMap.containsKey(key)) {
+			return propertiesMap.get(key);
+		}
+		return null;
 	}
 }
