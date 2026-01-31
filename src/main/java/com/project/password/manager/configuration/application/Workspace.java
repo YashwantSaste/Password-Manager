@@ -94,16 +94,14 @@ public class Workspace {
 		Properties properties = new Properties();
 		properties.setProperty(ApplicationProperties.PROPERTY_APP_VERSION, "1.0.0");
 		properties.setProperty(ApplicationProperties.PROPERTY_APP_NAME, "password-manager-cli");
-
 		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_ENABLED, "false");
 		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_TYPE, "sql");
 		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_USERNAME, "username");
 		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_PASSWORD, "password");
 		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_PORT, "5432");
 		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_VENDOR, "postgres");
-		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_CONNECTION_STRING, "connection-string");
+		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_NAME, "name");
 		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_HOST, "host");
-
 		try (FileOutputStream fos = new FileOutputStream(propertiesFile)) {
 			properties.store(fos, "Application properties created during workspace initialization");
 		}

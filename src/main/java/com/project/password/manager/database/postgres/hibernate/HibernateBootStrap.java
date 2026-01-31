@@ -3,6 +3,7 @@ package com.project.password.manager.database.postgres.hibernate;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
@@ -26,7 +27,6 @@ public final class HibernateBootStrap {
 		if (sessionFactory != null) {
 			return sessionFactory;
 		}
-
 		StandardServiceRegistry registry = null;
 		try {
 			registry = new StandardServiceRegistryBuilder().applySettings(hibernateConfiguration(databaseConfiguration))
@@ -43,6 +43,15 @@ public final class HibernateBootStrap {
 		}
 	}
 
+	@NotNull
+	public static Session getSession() {
+		return sessionFactory.getCurrentSession();
+	}
+
+	public static void close() {
+		sessionFactory.close();
+	}
+
 	private static Map<String, Object> hibernateConfiguration(@NotNull IDatabaseConfiguration databaseConfiguration) {
 		DatabaseVendor vendor = DatabaseVendor.from(databaseConfiguration.vendor());
 		Map<String, Object> config = new HashMap<>();
@@ -50,10 +59,12 @@ public final class HibernateBootStrap {
 		config.put(Environment.JAKARTA_JDBC_URL, buildJdbcURl(databaseConfiguration, vendor));
 		config.put(Environment.JAKARTA_JDBC_USER, databaseConfiguration.username());
 		config.put(Environment.JAKARTA_JDBC_PASSWORD, databaseConfiguration.password());
-		config.put(Environment.DIALECT, vendor.dialect());
+		// config.put(Environment.DIALECT, vendor.dialect());
 		config.put(Environment.HBM2DDL_AUTO, databaseConfiguration.ddlMode());
-		config.put(Environment.SHOW_SQL, "false");
+		config.put(Environment.SHOW_SQL, "true");
 		config.put(Environment.FORMAT_SQL, "true");
+		config.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
+		System.out.println(config);
 		return config;
 	}
 

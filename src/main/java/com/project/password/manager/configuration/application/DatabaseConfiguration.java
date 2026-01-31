@@ -56,7 +56,7 @@ public class DatabaseConfiguration implements IDatabaseConfiguration {
 	@Override
 	@NotNull
 	public String databaseName() {
-		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_DATABASE_DDL_MODE);
+		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_DATABASE_NAME);
 	}
 
 	@Override
