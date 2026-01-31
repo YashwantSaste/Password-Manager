@@ -12,4 +12,5 @@ public class ApplicationProperties {
 	public static final String PROPERTY_DATABASE_VENDOR = "app.database.vendor";
 	public static final String PROPERTY_DATABASE_CONNECTION_STRING = "app.database.connection.string";
 	public static final String PROPERTY_DATABASE_HOST = "app.database.host";
+	public static final String PROPERTY_DATABASE_DDL_MODE = "app.database.ddl.mode";
 }

@@ -1,4 +1,4 @@
-package com.project.password.manager.confiuration;
+package com.project.password.manager.configuration;
 
 import org.jetbrains.annotations.NotNull;
 

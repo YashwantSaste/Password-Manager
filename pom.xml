@@ -42,5 +42,25 @@
 			<version>26.0.2</version>
 			<scope>compile</scope>
 		</dependency>
+		<!-- Source: https://mvnrepository.com/artifact/jakarta.persistence/jakarta.persistence-api -->
+		<dependency>
+		    <groupId>jakarta.persistence</groupId>
+		    <artifactId>jakarta.persistence-api</artifactId>
+		    <version>4.0.0-M1</version>
+		    <scope>compile</scope>
+		</dependency>
+		<!-- Hibernate ORM (JPA implementation) -->
+	    <dependency>
+	        <groupId>org.hibernate.orm</groupId>
+	        <artifactId>hibernate-core</artifactId>
+	        <version>6.4.4.Final</version>
+	    </dependency>
+
+	    <!-- PostgreSQL JDBC Driver -->
+	    <dependency>
+	        <groupId>org.postgresql</groupId>
+	        <artifactId>postgresql</artifactId>
+	        <version>42.7.3</version>
+	    </dependency>
 	</dependencies>
 </project>

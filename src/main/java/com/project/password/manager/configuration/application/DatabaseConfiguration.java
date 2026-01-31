@@ -2,7 +2,7 @@ package com.project.password.manager.configuration.application;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.project.password.manager.confiuration.IDatabaseConfiguration;
+import com.project.password.manager.configuration.IDatabaseConfiguration;
 
 public class DatabaseConfiguration implements IDatabaseConfiguration {
 
@@ -49,14 +49,20 @@ public class DatabaseConfiguration implements IDatabaseConfiguration {
 
 	@Override
 	@NotNull
-	public String connectionString() {
-		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_DATABASE_CONNECTION_STRING);
-	}
-	
-	@Override
-	@NotNull
 	public String host() {
 		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_DATABASE_HOST);
+	}
+
+	@Override
+	@NotNull
+	public String databaseName() {
+		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_DATABASE_DDL_MODE);
+	}
+
+	@Override
+	@NotNull
+	public String ddlMode() {
+		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_DATABASE_DDL_MODE);
 	}
 
 }

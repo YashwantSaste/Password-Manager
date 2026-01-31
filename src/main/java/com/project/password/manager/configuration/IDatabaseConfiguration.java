@@ -1,4 +1,4 @@
-package com.project.password.manager.confiuration;
+package com.project.password.manager.configuration;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -21,8 +21,11 @@ public interface IDatabaseConfiguration {
 	int port();
 
 	@NotNull
-	String connectionString();
-	
-	@NotNull
 	String host();
+
+	@NotNull
+	String databaseName();
+
+	@NotNull
+	String ddlMode();
 }

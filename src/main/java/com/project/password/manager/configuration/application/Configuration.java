@@ -2,8 +2,8 @@ package com.project.password.manager.configuration.application;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.project.password.manager.confiuration.IConfiguration;
-import com.project.password.manager.confiuration.IDatabaseConfiguration;
+import com.project.password.manager.configuration.IConfiguration;
+import com.project.password.manager.configuration.IDatabaseConfiguration;
 
 public class Configuration implements IConfiguration {
 
