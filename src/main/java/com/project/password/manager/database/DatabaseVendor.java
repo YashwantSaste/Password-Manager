@@ -4,25 +4,19 @@ import org.jetbrains.annotations.NotNull;
 
 public enum DatabaseVendor {
 
-	POSTGRES("postgres", "org.postgresql.Driver", "org.hibernate.dialect.PostgreSQLDialect",
-			"jdbc:postgresql://%s:%d/%s"),
-
-	MYSQL("mysql", "com.mysql.cj.jdbc.Driver", "org.hibernate.dialect.MySQLDialect", "jdbc:mysql://%s:%d/%s");
+	POSTGRES("postgres", "org.postgresql.Driver", "jdbc:postgresql://%s:%d/%s"),
+	MYSQL("mysql", "com.mysql.cj.jdbc.Driver", "jdbc:mysql://%s:%d/%s");
 
 	@NotNull
 	private final String id;
 	@NotNull
 	private final String driver;
 	@NotNull
-	private final String dialect;
-	@NotNull
 	private final String jdbcUrlPattern;
 
-	DatabaseVendor(@NotNull String id, @NotNull String driver, @NotNull String dialect,
-			@NotNull String jdbcUrlPattern) {
+	DatabaseVendor(@NotNull String id, @NotNull String driver, @NotNull String jdbcUrlPattern) {
 		this.id = id;
 		this.driver = driver;
-		this.dialect = dialect;
 		this.jdbcUrlPattern = jdbcUrlPattern;
 	}
 
@@ -39,11 +33,6 @@ public enum DatabaseVendor {
 	@NotNull
 	public String driver() {
 		return driver;
-	}
-
-	@NotNull
-	public String dialect() {
-		return dialect;
 	}
 
 	@NotNull

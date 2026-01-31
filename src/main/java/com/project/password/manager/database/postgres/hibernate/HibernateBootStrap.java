@@ -59,7 +59,6 @@ public final class HibernateBootStrap {
 		config.put(Environment.JAKARTA_JDBC_URL, buildJdbcURl(databaseConfiguration, vendor));
 		config.put(Environment.JAKARTA_JDBC_USER, databaseConfiguration.username());
 		config.put(Environment.JAKARTA_JDBC_PASSWORD, databaseConfiguration.password());
-		// config.put(Environment.DIALECT, vendor.dialect());
 		config.put(Environment.HBM2DDL_AUTO, databaseConfiguration.ddlMode());
 		config.put(Environment.SHOW_SQL, "true");
 		config.put(Environment.FORMAT_SQL, "true");
