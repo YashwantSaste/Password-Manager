@@ -22,7 +22,7 @@ public interface IDatabaseConfiguration {
 
 	@NotNull
 	String connectionString();
-
+	
 	@NotNull
 	String host();
 }

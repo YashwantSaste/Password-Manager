@@ -10,12 +10,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.project.password.manager.util.Logger;
+
 public class PropertiesReader {
+
+	private static final Logger log = Logger.getLogger(PropertiesReader.class);
+
 	public static final String PROPERTY_FILE_PATH = "password-manager.properties";
-	private static final Map<String, Object> propertiesMap = new ConcurrentHashMap<String, Object>();
-	private static final File PROPERTIES_FILE = new File(Workspace.getInstance().getRoot(), PROPERTY_FILE_PATH);
+	private static final Map<String, Object> propertiesMap = new ConcurrentHashMap<>();
 
 	private PropertiesReader() {
+		log.info("Initializing PropertiesReader");
 		extractProperties();
 	}
 
@@ -25,55 +30,73 @@ public class PropertiesReader {
 
 	@NotNull
 	public static PropertiesReader getInstance() {
+		log.debug("Returning PropertiesReader singleton instance");
 		return HOLDER.instance;
 	}
 
 	@NotNull
 	private File getPropertiesFile() {
-		return new File(Workspace.getInstance().getRoot(), PROPERTY_FILE_PATH);
+		File file = new File(Workspace.getInstance().getRoot(), PROPERTY_FILE_PATH);
+		log.debug("Resolved properties file path: " + file.getAbsolutePath());
+		return file;
 	}
 
 	@Nullable
 	public String readPropertyAsString(@NotNull String key) {
 		Object value = readPropertiesFromPropertiesMap(key);
+		log.debug("Reading property [String] key=" + key + " value=" + value);
 		return value != null ? value.toString() : null;
 	}
 
 	public int readPropertyAsIntger(@NotNull String key, int defaultValue) {
-		String property = readPropertiesFromPropertiesMap(key).toString();
-		if (property != null) {
-			return Integer.parseInt(readPropertiesFromPropertiesMap(key).toString());
+		Object value = readPropertiesFromPropertiesMap(key);
+		if (value != null) {
+			log.debug("Reading property [Integer] key=" + key + " value=" + value);
+			return Integer.parseInt(value.toString());
 		}
+		log.warn("Property not found for key=" + key + ", using default=" + defaultValue);
 		return defaultValue;
 	}
 
 	public boolean readPropertyAsBoolean(@NotNull String key, boolean defaultValue) {
-		String property = readPropertiesFromPropertiesMap(key).toString();
-		if (property != null) {
-			return Boolean.parseBoolean(readPropertiesFromPropertiesMap(key).toString());
+		Object value = readPropertiesFromPropertiesMap(key);
+		if (value != null) {
+			log.debug("Reading property [Boolean] key=" + key + " value=" + value);
+			return Boolean.parseBoolean(value.toString());
 		}
+		log.warn("Property not found for key=" + key + ", using default=" + defaultValue);
 		return defaultValue;
 	}
 
 	private void extractProperties() {
+		log.info("Extracting application properties");
 		if (!propertyFileExist()) {
-			throw new RuntimeException("Properties file does not exist in the workspace");
+			String msg = "Properties file does not exist in workspace: " + getPropertiesFile().getAbsolutePath();
+			log.error(msg);
+			throw new RuntimeException(msg);
 		}
+
 		try (InputStream propertiesFileStream = new FileInputStream(getPropertiesFile())) {
 			Properties properties = new Properties();
 			properties.load(propertiesFileStream);
-			properties.entrySet().forEach(entry -> propertiesMap.put(entry.getKey().toString(), entry.getValue()));
+			properties.entrySet().forEach(entry -> {
+				propertiesMap.put(entry.getKey().toString(), entry.getValue());
+				log.debug("Loaded property: " + entry.getKey() + "=" + entry.getValue());
+			});
+
+			log.info("Successfully loaded " + propertiesMap.size() + " properties");
 		} catch (Exception ex) {
+			log.error("Error reading the properties file", ex);
 			throw new RuntimeException("Error reading the properties file", ex);
 		}
 	}
 
 	private boolean propertyFileExist() {
 		Workspace workspace = Workspace.getInstance();
-		if (workspace.workspaceExists() && workspace.fileExists(new File(workspace.getRoot(), PROPERTY_FILE_PATH))) {
-			return true;
-		}
-		return false;
+		boolean exists = workspace.workspaceExists()
+				&& workspace.fileExists(new File(workspace.getRoot(), PROPERTY_FILE_PATH));
+		log.debug("Properties file existence check -> " + exists);
+		return exists;
 	}
 
 	@Nullable

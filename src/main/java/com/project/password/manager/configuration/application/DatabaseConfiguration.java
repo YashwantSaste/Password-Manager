@@ -52,7 +52,7 @@ public class DatabaseConfiguration implements IDatabaseConfiguration {
 	public String connectionString() {
 		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_DATABASE_CONNECTION_STRING);
 	}
-
+	
 	@Override
 	@NotNull
 	public String host() {
