@@ -15,7 +15,4 @@ public interface IEntry {
 
 	@NotNull
 	String getTag();
-
-	@NotNull
-	String metadata();
 }

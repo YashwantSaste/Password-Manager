@@ -1,10 +1,10 @@
 package com.project.password.manager.model.database.sql;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.database.file.storage.User;
@@ -83,13 +83,7 @@ public class JpaUser implements IUser {
 	}
 
 	@Override
-	public @NotNull LocalDateTime createdAt() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public @NotNull LocalDateTime updatedAt() {
+	public @NotNull IMetadata metadata() {
 		// TODO Auto-generated method stub
 		return null;
 	}
