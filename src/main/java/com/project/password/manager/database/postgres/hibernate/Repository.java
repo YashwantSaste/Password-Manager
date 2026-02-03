@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.model.IBase;
 
-public class Repository<T, Id> implements DataRepository<IBase, Id> {
+public class Repository<T extends IBase, Id> implements DataRepository<IBase, Id> {
 
 	@NotNull
 	private final SessionFactory sessionFactory;
@@ -44,17 +44,23 @@ public class Repository<T, Id> implements DataRepository<IBase, Id> {
 		executeTransaction(session -> session.merge(entity));
 	}
 
-	private void executeTransaction(@NotNull DatabaseTransaction<T> action) {
+	private void executeTransaction(DatabaseTransaction<IBase> action) {
 		Transaction tx = null;
-		try (Session session = sessionFactory.openSession()) {
+		Session session = null;
+		try {
+			session = sessionFactory.openSession();
 			tx = session.beginTransaction();
 			action.accept(session);
 			tx.commit();
-		} catch (Exception ex) {
+		} catch (Exception e) {
 			if (tx != null && tx.isActive()) {
 				tx.rollback();
 			}
-			throw new RuntimeException(ex);
+			throw new RuntimeException(e);
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
 		}
 	}
 
