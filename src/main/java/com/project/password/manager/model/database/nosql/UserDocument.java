@@ -33,13 +33,13 @@ public class UserDocument implements IUser {
 	}
 
 	@Override
-	public @NotNull String getSalt() {
+	public @NotNull String getLoginSalt() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public @NotNull String getDefaultVaultID() {
+	public @NotNull String getDefaultVaultId() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -52,6 +52,12 @@ public class UserDocument implements IUser {
 
 	@Override
 	public @NotNull IMetadata metadata() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public @NotNull String getKeySalt() {
 		// TODO Auto-generated method stub
 		return null;
 	}

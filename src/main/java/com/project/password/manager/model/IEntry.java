@@ -14,5 +14,5 @@ public interface IEntry {
 	ILogin getLogin();
 
 	@NotNull
-	String getTag();
+	ITag getTag();
 }

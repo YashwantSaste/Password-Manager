@@ -15,10 +15,13 @@ public interface IUser extends IBase {
 	String getAuthVerifier();
 
 	@NotNull
-	String getSalt();
+	String getLoginSalt();
 
 	@NotNull
-	String getDefaultVaultID();
+	String getKeySalt();
+
+	@NotNull
+	String getDefaultVaultId();
 
 	@NotNull
 	List<IVault> getVaults();
