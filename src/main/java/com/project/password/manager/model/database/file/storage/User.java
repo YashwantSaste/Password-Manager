@@ -8,7 +8,7 @@ import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 
-public class User implements IUser {
+public class User implements IUser, IFileStorableEntity {
 
 	private String id;
 	private String name;
@@ -69,6 +69,12 @@ public class User implements IUser {
 	@NotNull
 	public String getKeySalt() {
 		return null;
+	}
+
+	@Override
+	@NotNull
+	public String getFileName() {
+		return "user.json";
 	}
 
 }

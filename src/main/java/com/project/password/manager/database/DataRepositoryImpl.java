@@ -27,9 +27,6 @@ public class DataRepositoryImpl implements DataRepository<IEntity, Id> {
 			@NotNull Class<? extends IEntity> clazz) {
 		this.databaseConfiguration = databaseConfiguration;
 		this.clazz = clazz;
-		if (databaseConfiguration.databaseEnabled()) {
-			log.warn("Database is not enabled hence using local file system as storage");
-		}
 	}
 
 	@Override
@@ -56,12 +53,13 @@ public class DataRepositoryImpl implements DataRepository<IEntity, Id> {
 	}
 
 	@NotNull
-	private DataRepository<? extends IEntity, Id> provideLinkedDataRepository() {
+	public DataRepository<? extends IEntity, Id> getEnabledDataRepository() {
 		if (databaseConfiguration.databaseEnabled()
 				&& databaseConfiguration.type() == IDatabaseConfiguration.DATABASE_TYPE_SQL) {
 			SessionFactory factory = HibernateBootStrap.init(databaseConfiguration, new HibernateEntityProvider());
 			return new HibernateRepository<IEntity, Id>(factory, clazz);
 		}
+		log.warn("Database is not enabled hence using local file system as storage");
 		return new FileStorageRepository<IEntity, Id>(Workspace.getInstance().getRoot());
 	}
 }

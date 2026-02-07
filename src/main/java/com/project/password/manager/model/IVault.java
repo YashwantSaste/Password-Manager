@@ -2,7 +2,7 @@ package com.project.password.manager.model;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface IVault {
+public interface IVault extends IEntity {
 	@NotNull
 	String getId();
 
@@ -12,6 +12,7 @@ public interface IVault {
 	@NotNull
 	String getEncryptedBlob();
 
+	@Override
 	@NotNull
-	String metadata();
+	IMetadata metadata();
 }
