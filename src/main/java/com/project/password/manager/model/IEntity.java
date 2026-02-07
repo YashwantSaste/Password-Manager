@@ -2,8 +2,8 @@ package com.project.password.manager.model;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface IBase {
-	// marker interface for Hiberate class entries
+public interface IEntity {
+
 	@NotNull
 	IMetadata metadata();
 }

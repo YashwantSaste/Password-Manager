@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface IUser extends IBase {
+public interface IUser extends IEntity {
 	@NotNull
 	String getId();
 

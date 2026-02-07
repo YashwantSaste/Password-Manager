@@ -7,44 +7,44 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.database.DataRepository;
-import com.project.password.manager.model.IBase;
+import com.project.password.manager.model.IEntity;
 
-public class HibernateRepository<T extends IBase, Id> implements DataRepository<IBase, Id> {
+public class HibernateRepository<T extends IEntity, Id> implements DataRepository<IEntity, Id> {
 
 	@NotNull
 	private final SessionFactory sessionFactory;
 	@NotNull
-	private final Class<? extends IBase> entity;
+	private final Class<? extends IEntity> entity;
 
-	public HibernateRepository(@NotNull SessionFactory sessionFactory, @NotNull Class<? extends IBase> entity) {
+	public HibernateRepository(@NotNull SessionFactory sessionFactory, @NotNull Class<? extends IEntity> entity) {
 		this.sessionFactory = sessionFactory;
 		this.entity = entity;
 	}
 
 	@Override
-	public void save(@NotNull IBase entity) {
+	public void save(@NotNull IEntity entity) {
 		executeTransaction(session -> session.persist(entity));
 	}
 
 	@Override
 	@Nullable
-	public IBase findById(@NotNull Id id) {
+	public IEntity findById(@NotNull Id id) {
 		try (Session session = sessionFactory.openSession()) {
 			return session.get(entity, (java.io.Serializable) id);
 		}
 	}
 
 	@Override
-	public void delete(@NotNull IBase entity) {
+	public void delete(@NotNull IEntity entity) {
 		executeTransaction(session -> session.remove(entity));
 	}
 
 	@Override
-	public void update(@NotNull IBase entity) {
+	public void update(@NotNull IEntity entity) {
 		executeTransaction(session -> session.merge(entity));
 	}
 
-	private void executeTransaction(DatabaseTransaction<IBase> action) {
+	private void executeTransaction(DatabaseTransaction<IEntity> action) {
 		Transaction tx = null;
 		Session session = null;
 		try {

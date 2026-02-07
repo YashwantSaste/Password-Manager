@@ -8,21 +8,21 @@ import com.project.password.manager.configuration.IDatabaseConfiguration;
 import com.project.password.manager.database.postgres.hibernate.HibernateBootStrap;
 import com.project.password.manager.database.postgres.hibernate.HibernateEntityProvider;
 import com.project.password.manager.database.postgres.hibernate.HibernateRepository;
-import com.project.password.manager.model.IBase;
+import com.project.password.manager.model.IEntity;
 import com.project.password.manager.util.Logger;
 
 import jakarta.persistence.Id;
 
-public class DataRepositoryImpl implements DataRepository<IBase, Id> {
+public class DataRepositoryImpl implements DataRepository<IEntity, Id> {
 
 	private static final Logger log = Logger.getLogger(DataRepositoryImpl.class);
 	@NotNull
 	private final IDatabaseConfiguration databaseConfiguration;
 	@NotNull
-	private final Class<? extends IBase> clazz;
+	private final Class<? extends IEntity> clazz;
 
 	public DataRepositoryImpl(@NotNull IDatabaseConfiguration databaseConfiguration,
-			@NotNull Class<? extends IBase> clazz) {
+			@NotNull Class<? extends IEntity> clazz) {
 		this.databaseConfiguration = databaseConfiguration;
 		this.clazz = clazz;
 		if (databaseConfiguration.databaseEnabled()) {
@@ -31,34 +31,34 @@ public class DataRepositoryImpl implements DataRepository<IBase, Id> {
 	}
 
 	@Override
-	public void save(@NotNull IBase entity) {
+	public void save(@NotNull IEntity entity) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public @Nullable IBase findById(@NotNull Id id) {
+	public @Nullable IEntity findById(@NotNull Id id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void delete(@NotNull IBase entity) {
+	public void delete(@NotNull IEntity entity) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void update(@NotNull IBase id) {
+	public void update(@NotNull IEntity id) {
 		// TODO Auto-generated method stub
 	}
 
 	@NotNull
-	private DataRepository<? extends IBase, Id> provideLinkedDataRepository() {
+	private DataRepository<? extends IEntity, Id> provideLinkedDataRepository() {
 		if (databaseConfiguration.databaseEnabled()
 				&& databaseConfiguration.type() == IDatabaseConfiguration.DATABASE_TYPE_SQL) {
 			SessionFactory factory = HibernateBootStrap.init(databaseConfiguration, new HibernateEntityProvider());
-			return new HibernateRepository<IBase, Id>(factory, clazz);
+			return new HibernateRepository<IEntity, Id>(factory, clazz);
 		}
 		return null;
 	}

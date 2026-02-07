@@ -15,28 +15,32 @@ public class Argon2Configuration implements IArgon2Configuration {
 
 	@Override
 	public int memoryKb() {
-		return propertiesReader.readPropertyAsIntger(ApplicationProperties.PROPERTY_ARGON2_MEMORY_SIZE, 60 * 1024);
+		return readProperty(ApplicationProperties.PROPERTY_ARGON2_MEMORY_SIZE, 60 * 1024);
 	}
 
 	@Override
 	public int iterations() {
-		return propertiesReader.readPropertyAsIntger(ApplicationProperties.PROPERTY_ARGON2_ITERATIONS, 3);
+		return readProperty(ApplicationProperties.PROPERTY_ARGON2_ITERATIONS, 3);
 	}
 
 	@Override
 	public int parallelism() {
-		return propertiesReader.readPropertyAsIntger(ApplicationProperties.PROPERTY_ARGON2_PARALLELISM, 1);
+		return readProperty(ApplicationProperties.PROPERTY_ARGON2_PARALLELISM, 1);
 	}
 
 	@Override
 	public int saltLengthBytes() {
-		return propertiesReader.readPropertyAsIntger(ApplicationProperties.PROPERTY_ARGON2_SALT_LENGTH, 16);
+		return readProperty(ApplicationProperties.PROPERTY_ARGON2_SALT_LENGTH, 16);
 
 	}
 
 	@Override
 	public int hashLengthBytes() {
-		return propertiesReader.readPropertyAsIntger(ApplicationProperties.PROPERTY_ARGON2_HASH_LENGTH, 32);
+		return readProperty(ApplicationProperties.PROPERTY_ARGON2_HASH_LENGTH, 32);
+	}
+
+	private int readProperty(@NotNull String propertyName, @NotNull int defaultValue) {
+		return propertiesReader.readPropertyAsIntger(propertyName, defaultValue);
 	}
 
 }
