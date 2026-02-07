@@ -6,4 +6,8 @@ public interface IConfiguration {
 
 	@NotNull
 	IDatabaseConfiguration databaseConfiguration();
+
+	@NotNull
+	IArgon2Configuration argon2Configuration();
+
 }

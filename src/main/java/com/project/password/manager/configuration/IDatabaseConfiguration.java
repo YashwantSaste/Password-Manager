@@ -4,6 +4,9 @@ import org.jetbrains.annotations.NotNull;
 
 public interface IDatabaseConfiguration {
 
+	String DATABASE_TYPE_SQL = "sql";
+	String DATABASE_TYPE_NO_SQL = "nosql";
+
 	boolean databaseEnabled();
 
 	@NotNull

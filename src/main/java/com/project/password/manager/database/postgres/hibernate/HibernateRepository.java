@@ -9,14 +9,14 @@ import org.jetbrains.annotations.Nullable;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.model.IBase;
 
-public class Repository<T extends IBase, Id> implements DataRepository<IBase, Id> {
+public class HibernateRepository<T extends IBase, Id> implements DataRepository<IBase, Id> {
 
 	@NotNull
 	private final SessionFactory sessionFactory;
 	@NotNull
 	private final Class<? extends IBase> entity;
 
-	public Repository(@NotNull SessionFactory sessionFactory, @NotNull Class<? extends IBase> entity) {
+	public HibernateRepository(@NotNull SessionFactory sessionFactory, @NotNull Class<? extends IBase> entity) {
 		this.sessionFactory = sessionFactory;
 		this.entity = entity;
 	}
@@ -66,7 +66,6 @@ public class Repository<T extends IBase, Id> implements DataRepository<IBase, Id
 
 	@FunctionalInterface
 	private interface DatabaseTransaction<T> {
-		void accept(Session session);
+		void accept(@NotNull Session session);
 	}
-
 }

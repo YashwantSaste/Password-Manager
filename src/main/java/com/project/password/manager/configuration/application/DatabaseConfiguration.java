@@ -6,6 +6,8 @@ import com.project.password.manager.configuration.IDatabaseConfiguration;
 
 public class DatabaseConfiguration implements IDatabaseConfiguration {
 
+	public static final String DATABASE_TYPE_SQL = "sql";
+	public static final String DATABASE_TYPE_NO_SQL = "nosql";
 	@NotNull
 	private final PropertiesReader reader;
 
@@ -21,7 +23,12 @@ public class DatabaseConfiguration implements IDatabaseConfiguration {
 	@Override
 	@NotNull
 	public String type() {
-		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_DATABASE_TYPE);
+		String databaseTypeProperty = reader.readPropertyAsString(ApplicationProperties.PROPERTY_DATABASE_TYPE);
+		if (!DATABASE_TYPE_SQL.equalsIgnoreCase(databaseTypeProperty)
+				|| !DATABASE_TYPE_NO_SQL.equalsIgnoreCase(databaseTypeProperty)) {
+			throw new UnsupportedOperationException("Unsupported Database Type");
+		}
+		return databaseTypeProperty;
 	}
 
 	@Override

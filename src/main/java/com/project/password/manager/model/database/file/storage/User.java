@@ -31,38 +31,43 @@ public class User implements IUser {
 	}
 
 	@Override
-	public @NotNull String getAuthVerifier() {
+	@NotNull
+	public String getAuthVerifier() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public @NotNull String getLoginSalt() {
+	@NotNull
+	public String getLoginSalt() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public @NotNull String getDefaultVaultId() {
+	@NotNull
+	public String getDefaultVaultId() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public @NotNull List<IVault> getVaults() {
+	@NotNull
+	public List<IVault> getVaults() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public @NotNull IMetadata metadata() {
+	@NotNull
+	public IMetadata metadata() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public @NotNull String getKeySalt() {
-		// TODO Auto-generated method stub
+	@NotNull
+	public String getKeySalt() {
 		return null;
 	}
 
