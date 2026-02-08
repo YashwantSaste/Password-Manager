@@ -9,38 +9,38 @@ import org.jetbrains.annotations.Nullable;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.model.IEntity;
 
-public class HibernateRepository<T extends IEntity, Id> implements DataRepository<IEntity, Id> {
+public class HibernateRepository<T extends IEntity, Id> implements DataRepository<T, Id> {
 
 	@NotNull
 	private final SessionFactory sessionFactory;
 	@NotNull
-	private final Class<? extends IEntity> entity;
+	private final Class<T> entity;
 
-	public HibernateRepository(@NotNull SessionFactory sessionFactory, @NotNull Class<? extends IEntity> entity) {
+	public HibernateRepository(@NotNull SessionFactory sessionFactory, @NotNull Class<T> entity) {
 		this.sessionFactory = sessionFactory;
 		this.entity = entity;
 	}
 
 	@Override
-	public void save(@NotNull IEntity entity) {
+	public void save(@NotNull T entity) {
 		executeTransaction(session -> session.persist(entity));
 	}
 
 	@Override
 	@Nullable
-	public IEntity findById(@NotNull Id id) {
+	public T findById(@NotNull Id id) {
 		try (Session session = sessionFactory.openSession()) {
 			return session.get(entity, (java.io.Serializable) id);
 		}
 	}
 
 	@Override
-	public void delete(@NotNull IEntity entity) {
+	public void delete(@NotNull T entity) {
 		executeTransaction(session -> session.remove(entity));
 	}
 
 	@Override
-	public void update(@NotNull Id id, @NotNull IEntity entity) {
+	public void update(@NotNull Id id, @NotNull T entity) {
 		executeTransaction(session -> session.merge(entity));
 	}
 

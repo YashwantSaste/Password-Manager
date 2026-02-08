@@ -2,7 +2,9 @@ package com.project.password.manager.model.database.file.storage;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface IFileStorableEntity {
+import com.project.password.manager.model.IEntity;
+
+public interface IFileStorableEntity extends IEntity {
 
 	@NotNull
 	String getId();

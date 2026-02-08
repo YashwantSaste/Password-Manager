@@ -4,14 +4,20 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements IUser, IFileStorableEntity {
 
 	private String id;
 	private String name;
+
+	public User() {
+		// for jackson
+	}
 
 	public User(String id, String name) {
 		this.id = id;

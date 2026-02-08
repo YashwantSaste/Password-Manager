@@ -6,12 +6,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.database.DataRepository;
-import com.project.password.manager.model.IEntity;
 import com.project.password.manager.model.database.file.storage.IFileStorableEntity;
 import com.project.password.manager.util.Logger;
 
-public abstract class FileStorageRepository<T extends IEntity & IFileStorableEntity, Id>
-		implements DataRepository<T, Id> {
+public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> implements DataRepository<T, Id> {
 
 	private static final Logger log = Logger.getLogger("FileRepository class");
 	@NotNull
@@ -41,10 +39,11 @@ public abstract class FileStorageRepository<T extends IEntity & IFileStorableEnt
 	@Nullable
 	public T findById(@NotNull Id id) {
 		File entityDir = resolveEntityDirectoryInFileSystem(id.toString());
-		File entityFile = new File(entityDir, id.toString());
-		if (!entityFile.exists()) {
+		if (!entityDir.exists()) {
+			log.warn("File related to related ID does not exist in the workspace");
 			return null;
 		}
+		File entityFile = new File(entityDir, getEntityFileName());
 		fileManager = new FileManager<T>(entityFile, getEntityClass());
 		return fileManager.readFromFile();
 	}

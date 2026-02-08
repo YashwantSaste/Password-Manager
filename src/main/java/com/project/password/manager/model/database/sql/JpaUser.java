@@ -1,6 +1,7 @@
 package com.project.password.manager.model.database.sql;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -9,10 +10,10 @@ import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.database.file.storage.User;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
@@ -20,9 +21,16 @@ import jakarta.persistence.Table;
 public class JpaUser implements IUser {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(nullable = false, updatable = false)
 	private String id;
 	private String name;
+
+	@PrePersist
+	void generateId() {
+		if (id == null) {
+			id = UUID.randomUUID().toString();
+		}
+	}
 
 	protected JpaUser() {
 		// for hibernate
