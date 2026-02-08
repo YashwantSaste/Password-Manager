@@ -24,8 +24,7 @@ public class Configuration implements IConfiguration {
 	@Override
 	@NotNull
 	public IArgon2Configuration argon2Configuration() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Argon2Configuration(propertiesReader);
 	}
 
 }
