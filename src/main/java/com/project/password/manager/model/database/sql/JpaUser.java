@@ -55,7 +55,7 @@ public class JpaUser implements IUser {
 
 	@NotNull
 	public User toDomain() {
-		return new User(id, name);
+		return new User();
 	}
 
 	@NotNull

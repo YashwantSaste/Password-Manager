@@ -14,14 +14,27 @@ public class User implements IUser, IFileStorableEntity {
 
 	private String id;
 	private String name;
+	private String authVerifier;
+	private String loginSalt;
+	private String keySalt;
+	private String defaultVaultId;
+	private List<IVault> vaults;
+	private IMetadata metadata;
 
 	public User() {
 		// for jackson
 	}
 
-	public User(String id, String name) {
+	public User(String id, String name, String authVerifier, String loginSalt, String keySalt, String defaultVaultId,
+			List<IVault> vaults, IMetadata metadata) {
 		this.id = id;
 		this.name = name;
+		this.authVerifier = authVerifier;
+		this.keySalt = keySalt;
+		this.loginSalt = loginSalt;
+		this.defaultVaultId = defaultVaultId;
+		this.vaults = vaults;
+		this.metadata = metadata;
 	}
 
 	@Override
@@ -39,42 +52,37 @@ public class User implements IUser, IFileStorableEntity {
 	@Override
 	@NotNull
 	public String getAuthVerifier() {
-		// TODO Auto-generated method stub
-		return null;
+		return authVerifier;
 	}
 
 	@Override
 	@NotNull
 	public String getLoginSalt() {
-		// TODO Auto-generated method stub
-		return null;
+		return loginSalt;
 	}
 
 	@Override
 	@NotNull
 	public String getDefaultVaultId() {
-		// TODO Auto-generated method stub
-		return null;
+		return defaultVaultId;
 	}
 
 	@Override
 	@NotNull
 	public List<IVault> getVaults() {
-		// TODO Auto-generated method stub
-		return null;
+		return vaults;
 	}
 
 	@Override
 	@NotNull
 	public IMetadata metadata() {
-		// TODO Auto-generated method stub
-		return null;
+		return metadata;
 	}
 
 	@Override
 	@NotNull
 	public String getKeySalt() {
-		return null;
+		return keySalt;
 	}
 
 	@Override
