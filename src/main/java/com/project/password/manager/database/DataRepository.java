@@ -12,5 +12,5 @@ public interface DataRepository<T, Id> {
 
 	void delete(@NotNull T entity);
 
-	void update(@NotNull T id);
+	void update(@NotNull Id id, @NotNull T entity);
 }

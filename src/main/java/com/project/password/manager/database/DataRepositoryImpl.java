@@ -5,8 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.configuration.IDatabaseConfiguration;
-import com.project.password.manager.configuration.application.Workspace;
-import com.project.password.manager.database.file.storage.FileStorageRepository;
 import com.project.password.manager.database.postgres.hibernate.HibernateBootStrap;
 import com.project.password.manager.database.postgres.hibernate.HibernateEntityProvider;
 import com.project.password.manager.database.postgres.hibernate.HibernateRepository;
@@ -48,7 +46,7 @@ public class DataRepositoryImpl implements DataRepository<IEntity, Id> {
 	}
 
 	@Override
-	public void update(@NotNull IEntity id) {
+	public void update(@NotNull Id id, @NotNull IEntity entity) {
 		// TODO Auto-generated method stub
 	}
 
@@ -60,6 +58,8 @@ public class DataRepositoryImpl implements DataRepository<IEntity, Id> {
 			return new HibernateRepository<IEntity, Id>(factory, clazz);
 		}
 		log.warn("Database is not enabled hence using local file system as storage");
-		return new FileStorageRepository<IEntity, Id>(Workspace.getInstance().getRoot());
+		// return new FileStorageRepository<IEntity,
+		// Id>(Workspace.getInstance().getRoot());
+		return null;
 	}
 }

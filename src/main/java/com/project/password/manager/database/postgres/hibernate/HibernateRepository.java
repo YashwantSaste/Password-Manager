@@ -40,7 +40,7 @@ public class HibernateRepository<T extends IEntity, Id> implements DataRepositor
 	}
 
 	@Override
-	public void update(@NotNull IEntity entity) {
+	public void update(@NotNull Id id, @NotNull IEntity entity) {
 		executeTransaction(session -> session.merge(entity));
 	}
 

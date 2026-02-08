@@ -55,7 +55,7 @@ public abstract class FileStorageRepository<T extends IEntity & IFileStorableEnt
 	}
 
 	@Override
-	public void update(@NotNull T id) {
+	public void update(@NotNull Id id, @NotNull T entity) {
 		// TODO Add update logic
 	}
 
