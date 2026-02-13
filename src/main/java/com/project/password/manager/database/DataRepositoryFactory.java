@@ -12,7 +12,7 @@ import com.project.password.manager.database.postgres.hibernate.HibernateBootStr
 import com.project.password.manager.database.postgres.hibernate.HibernateEntityProvider;
 import com.project.password.manager.database.postgres.hibernate.HibernateRepository;
 import com.project.password.manager.model.IEntity;
-import com.project.password.manager.model.database.file.storage.User;
+import com.project.password.manager.model.IUser;
 import com.project.password.manager.util.Logger;
 
 public class DataRepositoryFactory {
@@ -35,7 +35,7 @@ public class DataRepositoryFactory {
 		}
 		log.warn("Database is not enabled hence using local file system as storage");
 		File workspace = Workspace.getInstance().getRoot();
-		if (entityClass.equals(User.class)) {
+		if (entityClass.equals(IUser.class)) {
 			@SuppressWarnings("unchecked")
 			DataRepository<T, Id> repo = (DataRepository<T, Id>) new UserRepository(workspace);
 			return repo;
