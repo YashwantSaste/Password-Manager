@@ -48,6 +48,16 @@ public class PropertiesReader {
 		return value != null ? value.toString() : null;
 	}
 
+	public long readPropertyAsLong(@NotNull String key, long defaultValue) {
+		Object value = readPropertiesFromPropertiesMap(key);
+		if (value != null) {
+			log.debug("Reading property [Long] key=" + key + " value=" + value);
+			return Long.parseLong(value.toString());
+		}
+		log.warn("Property not found for key=" + key + ", using default=" + defaultValue);
+		return defaultValue;
+	}
+
 	public int readPropertyAsIntger(@NotNull String key, int defaultValue) {
 		Object value = readPropertiesFromPropertiesMap(key);
 		if (value != null) {

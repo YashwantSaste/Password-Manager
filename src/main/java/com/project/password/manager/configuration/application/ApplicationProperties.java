@@ -21,5 +21,13 @@ public class ApplicationProperties {
 	public static final String PROPERTY_ARGON2_PARALLELISM = "app.crypto.argon2.parallelism";
 	public static final String PROPERTY_ARGON2_SALT_LENGTH = "app.crypto.argon2.salt.length";
 	public static final String PROPERTY_ARGON2_HASH_LENGTH = "app.crypto.argon2.hash.length";
+	/** JWT Configurations **/
+	public static final String PROPERTY_JWT_ALGORITHM = "app.jwt.algorithm";
+	public static final String PROPERTY_JWT_ISSUER = "app.jwt.issuer";
+	public static final String PROPERTY_JWT_REFRESH_EXPIRATION = "app.jwt.refresh.expiration.ms";
+	public static final String PROPERTY_JWT_ACCESS_EXPIRATION = "app.jwt.access.expiration.ms";
+	public static final String PROPERTY_JWT_SECRET = "app.jwt.secret";
+	public static final String PROPERTY_JWT_PRIVATE_KEY_PATH = "app.jwt.private.key.path";
+	public static final String PROPERTY_JWT_PUBLIC_KEY_PATH = "app.jwt.public.key.path";
 
 }

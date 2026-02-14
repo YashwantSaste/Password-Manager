@@ -33,7 +33,7 @@ public class FileManager<T extends IEntity> {
 		return file.exists();
 	}
 
-	/* Returns the JSON of the object model stored in the file system */
+	/* Returns the object model stored in the file system */
 	public T readFromFile() {
 		return readFromInputStreamSafely();
 	}
