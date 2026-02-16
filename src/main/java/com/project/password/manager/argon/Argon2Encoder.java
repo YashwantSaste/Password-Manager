@@ -23,8 +23,7 @@ public class Argon2Encoder {
 				normalValue.toCharArray());
 	}
 
-	@NotNull
-	public boolean verfiy(@NotNull String hashValue, @NotNull String value) {
+	public boolean verify(@NotNull String hashValue, @NotNull String value) {
 		return argon2().verify(hashValue, value.toCharArray());
 	}
 

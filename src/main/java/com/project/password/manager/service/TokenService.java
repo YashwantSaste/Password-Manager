@@ -1,36 +1,68 @@
 package com.project.password.manager.service;
 
 import java.util.Date;
-import java.util.UUID;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.JWTVerifier;
 import com.project.password.manager.auth.jwt.JwtAlgorithmFactory;
 import com.project.password.manager.configuration.IJwtConfiguration;
+import com.project.password.manager.configuration.application.Configuration;
+import com.project.password.manager.database.DataRepository;
+import com.project.password.manager.database.DataRepositoryFactory;
+import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 
 public class TokenService implements IService {
 
+	private static final Map<String,String> tokenCache = new ConcurrentHashMap<String, String>();
 	@NotNull
 	private final IJwtConfiguration jwtConfiguration;
+	@NotNull
+	private final DataRepository<IToken, String> tokenRepo;
+	@NotNull
+	private final Algorithm algorithm;
 
 	public TokenService(@NotNull IJwtConfiguration jwtConfiguration) {
 		this.jwtConfiguration = jwtConfiguration;
+		this.algorithm = new JwtAlgorithmFactory(jwtConfiguration).createAlgorithm();
+		this.tokenRepo = new DataRepositoryFactory(new Configuration().databaseConfiguration()).getRepository(IToken.class, String.class);
 	}
 
+	@NotNull
 	public String createToken(@NotNull IUser user) {
-		try {
-			return JWT.create()
-					.withIssuer(jwtConfiguration.issuer())
-					.withSubject(user.getId())
-					.withJWTId(UUID.randomUUID().toString())
-					.withIssuedAt(new Date())
-					.withExpiresAt(new Date(System.currentTimeMillis() + jwtConfiguration.accessExpirationMs()))
-					.sign(new JwtAlgorithmFactory(jwtConfiguration).createAlgorithm());
-		} catch (Exception ex) {
-			throw new RuntimeException("Error while generating token: " + ex);
-		}
-
+		String token = JWT.create()
+				.withIssuer(jwtConfiguration.issuer())
+				.withSubject(user.getId())
+				.withIssuedAt(new Date())
+				.withExpiresAt(new Date(System.currentTimeMillis() + jwtConfiguration.accessExpirationMs()))
+				.sign(algorithm);
+		tokenCache.put(user.getId(),token);
+		return token;
 	}
+
+	@Nullable
+	public DecodedJWT verify(@NotNull String token, @NotNull IUser user) {
+		JWTVerifier verifier = JWT.require(algorithm)
+				.withIssuer(jwtConfiguration.issuer())
+				.withSubject(user.getId())
+				.build();
+		return verifier.verify(token);
+	}
+
+	@NotNull
+	public String getToken(@NotNull IUser user) {
+		String userId = user.getId();
+		if(tokenCache.containsKey(userId)) {
+			return tokenCache.get(userId);
+		}
+		return tokenRepo.findById(user.getId()).getToken();
+	}
+
 }

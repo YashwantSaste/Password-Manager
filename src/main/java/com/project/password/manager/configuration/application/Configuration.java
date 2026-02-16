@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import com.project.password.manager.configuration.IArgon2Configuration;
 import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
+import com.project.password.manager.configuration.IJwtConfiguration;
 
 public class Configuration implements IConfiguration {
 
@@ -25,6 +26,12 @@ public class Configuration implements IConfiguration {
 	@NotNull
 	public IArgon2Configuration argon2Configuration() {
 		return new Argon2Configuration(propertiesReader);
+	}
+
+	@Override
+	@NotNull
+	public IJwtConfiguration jwtConfiguration() {
+		return new JwtConfiguration(propertiesReader);
 	}
 
 }

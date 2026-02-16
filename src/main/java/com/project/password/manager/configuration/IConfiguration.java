@@ -10,4 +10,6 @@ public interface IConfiguration {
 	@NotNull
 	IArgon2Configuration argon2Configuration();
 
+	@NotNull
+	IJwtConfiguration jwtConfiguration();
 }
