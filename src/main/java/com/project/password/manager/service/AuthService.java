@@ -29,6 +29,18 @@ public class AuthService {
 			throw new RuntimeException("Password mismatch. Kindly check your password");
 		}
 		String token = tokenService.createToken(user);
+		tokenService.saveToken(user,token);
+	}
+
+	public void signup(@NotNull String username,@NotNull String password) {
+		IUser user = userService.getUser(username);
+		if(user!=null) {
+			throw new RuntimeException("User with the username already exists");
+		}
+		String authHash= encoder.getHashValue(password);
+		String keySalt = SecureRandomSaltGenerator.generate(); // 16–32 bytes base64
+		byte[] vaultKey = encoder.deriveKey(password, keySalt);
+		//to derive vault key byte[] vaultKey = encoder.deriveKey(password, user.getKeySalt());
 
 	}
 }

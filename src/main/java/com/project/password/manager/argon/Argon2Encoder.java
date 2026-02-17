@@ -11,24 +11,28 @@ import de.mkammerer.argon2.Argon2Factory.Argon2Types;
 public class Argon2Encoder {
 
 	@NotNull
+	private Argon2 argon2;
+	@NotNull
 	private final IArgon2Configuration configuration;
 
 	public Argon2Encoder(@NotNull IArgon2Configuration configuration, @NotNull String value) {
 		this.configuration = configuration;
+		this.argon2 = Argon2Factory.create(Argon2Types.ARGON2i);
 	}
 
 	@NotNull
 	public String getHashValue(@NotNull String normalValue) {
-		return argon2().hash(configuration.iterations(), configuration.memoryKb(), configuration.parallelism(),
+		return argon2.hash(configuration.iterations(), configuration.memoryKb(), configuration.parallelism(),
 				normalValue.toCharArray());
 	}
 
 	public boolean verify(@NotNull String hashValue, @NotNull String value) {
-		return argon2().verify(hashValue, value.toCharArray());
+		return argon2.verify(hashValue, value.toCharArray());
 	}
 
-	@NotNull
-	private Argon2 argon2() {
-		return Argon2Factory.create(Argon2Types.ARGON2i);
-	}
+	//	public byte[] deriveKey(String password, String base64Salt) {
+	//		byte[] salt = Base64.getDecoder().decode(base64Salt).t;
+	//		return getHashValue(salt).getBytes();
+	//	}
+
 }

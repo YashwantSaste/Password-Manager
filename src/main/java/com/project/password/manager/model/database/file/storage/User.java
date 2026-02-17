@@ -15,7 +15,6 @@ public class User implements IUser, IFileStorableEntity {
 	private String id;
 	private String name;
 	private String authVerifier;
-	private String loginSalt;
 	private String keySalt;
 	private String defaultVaultId;
 	private List<IVault> vaults;
@@ -25,13 +24,12 @@ public class User implements IUser, IFileStorableEntity {
 		// for jackson
 	}
 
-	public User(String id, String name, String authVerifier, String loginSalt, String keySalt, String defaultVaultId,
+	public User(String id, String name, String authVerifier, String keySalt, String defaultVaultId,
 			List<IVault> vaults, IMetadata metadata) {
 		this.id = id;
 		this.name = name;
 		this.authVerifier = authVerifier;
 		this.keySalt = keySalt;
-		this.loginSalt = loginSalt;
 		this.defaultVaultId = defaultVaultId;
 		this.vaults = vaults;
 		this.metadata = metadata;
@@ -53,12 +51,6 @@ public class User implements IUser, IFileStorableEntity {
 	@NotNull
 	public String getAuthVerifier() {
 		return authVerifier;
-	}
-
-	@Override
-	@NotNull
-	public String getLoginSalt() {
-		return loginSalt;
 	}
 
 	@Override

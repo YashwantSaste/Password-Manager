@@ -15,9 +15,6 @@ public interface IUser extends IEntity {
 	String getAuthVerifier();
 
 	@NotNull
-	String getLoginSalt();
-
-	@NotNull
 	String getKeySalt();
 
 	@NotNull

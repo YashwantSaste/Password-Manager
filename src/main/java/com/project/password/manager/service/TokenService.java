@@ -18,6 +18,7 @@ import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.database.DataRepositoryFactory;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
+import com.project.password.manager.model.database.file.storage.Token;
 
 public class TokenService implements IService {
 
@@ -63,6 +64,11 @@ public class TokenService implements IService {
 			return tokenCache.get(userId);
 		}
 		return tokenRepo.findById(user.getId()).getToken();
+	}
+
+	public void saveToken(@NotNull IUser user,@NotNull String token) {
+		IToken tokenEntity = new Token(user.getId(),token);
+		tokenRepo.save(tokenEntity);
 	}
 
 }
