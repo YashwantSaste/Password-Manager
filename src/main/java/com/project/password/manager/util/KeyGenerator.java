@@ -4,6 +4,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Base64;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -12,12 +13,14 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.project.password.manager.configuration.IAESConfiguration;
 import com.project.password.manager.configuration.ISaltKeyConfiguration;
 import com.project.password.manager.configuration.application.Configuration;
 
 public class KeyGenerator {
 
 	static ISaltKeyConfiguration saltKeyConfiguration = new Configuration().saltKeyConfiguration();
+	static IAESConfiguration aesConfiguration = new Configuration().aesConfiguration();
 	static SecureRandom random =  new SecureRandom();
 
 	private KeyGenerator() {
@@ -37,8 +40,18 @@ public class KeyGenerator {
 	}	
 
 	@NotNull
+	public static SecretKey getSecretKeyFromUserKeySalt(@NotNull String keySalt) {
+		byte[] decodedKey = Base64.getDecoder().decode(keySalt);
+		return new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+	}
+
+	public static byte[] generateIv() {
+		return getSaltForKeyGeneration();
+	}
+
+	@NotNull
 	private static byte[] getSaltForKeyGeneration() {
-		byte[] salt = new byte[16];
+		byte[] salt = new byte[aesConfiguration.ivLength()];
 		random.nextBytes(salt);
 		return salt;
 	}
