@@ -8,18 +8,16 @@ import com.project.password.manager.model.database.file.storage.Vault;
 
 public class VaultRepository extends FileStorageRepository<Vault, String> {
 
-	@NotNull
-	private final String userId;
+	private static final String VAULTS_WORKSPACE_FOLDER = "vaults";
 
-	protected VaultRepository(@NotNull File workspace, @NotNull String userId) {
-		super(new File(workspace, "users/" + userId + "/vaults"));
-		this.userId = userId;
+	public VaultRepository(@NotNull File workspace) {
+		super(new File(workspace, VAULTS_WORKSPACE_FOLDER));
 	}
 
 	@Override
 	@NotNull
 	protected File resolveEntityDirectoryInFileSystem(@NotNull String id) {
-		return workspace;
+		return new File(workspace, id);
 	}
 
 	@Override

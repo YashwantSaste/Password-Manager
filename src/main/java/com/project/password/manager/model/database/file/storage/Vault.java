@@ -8,17 +8,23 @@ import com.project.password.manager.model.IVault;
 public class Vault implements IVault, IFileStorableEntity {
 
 	private String id;
+	private String userId;
 
-	@Override
-	public @NotNull String getId() {
-		// TODO Auto-generated method stub
-		return null;
+	public Vault(@NotNull String id, @NotNull String userId, @NotNull String encyrptedBlob) {
+		this.id = id;
+		this.userId = userId;
 	}
 
 	@Override
-	public @NotNull String getUserId() {
-		// TODO Auto-generated method stub
-		return null;
+	@NotNull
+	public String getId() {
+		return id;
+	}
+
+	@Override
+	@NotNull
+	public String getUserId() {
+		return userId;
 	}
 
 	@Override

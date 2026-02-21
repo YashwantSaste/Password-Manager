@@ -29,5 +29,12 @@ public class ApplicationProperties {
 	public static final String PROPERTY_JWT_SECRET = "app.jwt.secret";
 	public static final String PROPERTY_JWT_PRIVATE_KEY_PATH = "app.jwt.private.key.path";
 	public static final String PROPERTY_JWT_PUBLIC_KEY_PATH = "app.jwt.public.key.path";
-
+	/** AES Configurations **/
+	public static final String PROPERTY_AES_TRANSFORMATION= "app.aes.transformation";
+	public static final String PROPERTY_AES_KEY_SIZE = "app.aes.key.size";
+	public static final String PROPERTY_AES_TAG_LENGTH = "app.aes.tag.length";
+	public static final String PROPERTY_AES_IV_LENGTH = "app.aes.iv.length";
+	/** Salt key generation Configurations */
+	public static final String PROPERTY_SALT_KEY_ITERATIONS= "app.salt.iterations";
+	public static final String PROPERTY_SALT_KEY_LENGTH = "app.salt.key.size";
 }

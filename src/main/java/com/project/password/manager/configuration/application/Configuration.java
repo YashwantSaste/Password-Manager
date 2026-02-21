@@ -2,10 +2,12 @@ package com.project.password.manager.configuration.application;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.project.password.manager.configuration.IAESConfiguration;
 import com.project.password.manager.configuration.IArgon2Configuration;
 import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
 import com.project.password.manager.configuration.IJwtConfiguration;
+import com.project.password.manager.configuration.ISaltKeyConfiguration;
 
 public class Configuration implements IConfiguration {
 
@@ -32,6 +34,18 @@ public class Configuration implements IConfiguration {
 	@NotNull
 	public IJwtConfiguration jwtConfiguration() {
 		return new JwtConfiguration(propertiesReader);
+	}
+
+	@Override
+	@NotNull
+	public  IAESConfiguration aesConfiguration() {
+		return new AESConfiguration(propertiesReader);
+	}
+
+	@Override
+	@NotNull
+	public  ISaltKeyConfiguration saltKeyConfiguration() {
+		return new SaltKeyConfigurations(propertiesReader);
 	}
 
 }

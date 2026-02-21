@@ -12,4 +12,10 @@ public interface IConfiguration {
 
 	@NotNull
 	IJwtConfiguration jwtConfiguration();
+
+	@NotNull
+	IAESConfiguration aesConfiguration();
+
+	@NotNull
+	ISaltKeyConfiguration saltKeyConfiguration();
 }

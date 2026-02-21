@@ -17,4 +17,8 @@ public class UserService implements IService {
 	public IUser getUser(@NotNull String id) {
 		return userRepository.findById(id);
 	}
+
+	public void saveUser(@NotNull IUser user) {
+		userRepository.save(user);
+	}
 }

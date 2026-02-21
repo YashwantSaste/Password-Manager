@@ -23,16 +23,18 @@ public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> i
 
 	@Override
 	public void save(@NotNull T entity) {
+		if (entity.getId() == null) {
+			throw new IllegalStateException("Entity ID cannot be null before saving.");
+		}
 		File entityDirectory = resolveEntityDirectoryInFileSystem(entity.getId());
 		entityDirectory.mkdirs();
 		File entityFile = new File(entityDirectory, entity.getFileName());
-		fileManager = new FileManager<T>(entityFile, getEntityClass());
+		fileManager = new FileManager<>(entityFile, getEntityClass());
 		if (!fileManager.doFileExist()) {
 			fileManager.writeToFile(entity);
 		} else {
-			log.warn("Given file already exists in the worksapce: " + entityFile.getAbsolutePath());
+			log.warn("Given file already exists in the workspace: " + entityFile.getAbsolutePath());
 		}
-
 	}
 
 	@Override
@@ -40,7 +42,7 @@ public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> i
 	public T findById(@NotNull Id id) {
 		File entityDir = resolveEntityDirectoryInFileSystem(id.toString());
 		if (!entityDir.exists()) {
-			log.warn("File related to related ID does not exist in the workspace");
+			log.debug("File related to related ID does not exist in the workspace");
 			return null;
 		}
 		File entityFile = new File(entityDir, getEntityFileName());

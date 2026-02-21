@@ -15,7 +15,7 @@ public class Argon2Encoder {
 	@NotNull
 	private final IArgon2Configuration configuration;
 
-	public Argon2Encoder(@NotNull IArgon2Configuration configuration, @NotNull String value) {
+	public Argon2Encoder(@NotNull IArgon2Configuration configuration) {
 		this.configuration = configuration;
 		this.argon2 = Argon2Factory.create(Argon2Types.ARGON2i);
 	}
