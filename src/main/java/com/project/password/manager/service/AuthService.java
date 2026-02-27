@@ -7,9 +7,9 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.argon.Argon2Encoder;
+import com.project.password.manager.guice.PlatformEntityProvider;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
-import com.project.password.manager.model.database.file.storage.User;
 import com.project.password.manager.util.KeyGenerator;
 
 public class AuthService {
@@ -47,7 +47,7 @@ public class AuthService {
 		if (userService.getUser(username) != null) {
 			throw new RuntimeException("User already exists");
 		}
-		User newUser = new User();
+		IUser newUser = PlatformEntityProvider.getEntityProvider().getUser();
 		newUser.setId(username);
 		newUser.setName(username);
 		newUser.setAuthVerifier(encoder.getHashValue(password));
@@ -55,14 +55,10 @@ public class AuthService {
 		String keySalt = Base64.getEncoder().encodeToString(saltBytes);
 		newUser.setKeySalt(keySalt);
 		IVault defaultVault = vaultService.createDefaultVault(newUser);
-
 		List<IVault> vaults = new ArrayList<>();
 		vaults.add(defaultVault);
-
 		newUser.setVaults(vaults);
 		newUser.setDefaultVaultId(defaultVault.getId());
-
-		// 4️⃣ Save user
 		userService.saveUser(newUser);
 	}
 }

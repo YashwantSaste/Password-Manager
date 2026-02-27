@@ -14,6 +14,7 @@ public class UserService implements IService {
 		this.userRepository = userRepository;
 	}
 
+	@NotNull
 	public IUser getUser(@NotNull String id) {
 		return userRepository.findById(id);
 	}

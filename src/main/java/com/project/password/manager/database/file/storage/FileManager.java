@@ -10,7 +10,10 @@ import org.jetbrains.annotations.NotNull;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.project.password.manager.model.IEntity;
+import com.project.password.manager.model.IVault;
+import com.project.password.manager.model.database.file.storage.Vault;
 import com.project.password.manager.util.Logger;
 
 public class FileManager<T extends IEntity> {
@@ -27,6 +30,9 @@ public class FileManager<T extends IEntity> {
 		this.file = file;
 		this.clazz = clazz;
 		this.mapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addAbstractTypeMapping(IVault.class, Vault.class);
+		mapper.registerModule(module);
 	}
 
 	public boolean doFileExist() {

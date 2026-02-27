@@ -83,30 +83,37 @@ public class User implements IUser, IFileStorableEntity {
 		return "user.json";
 	}
 
+	@Override
 	public void setId(@NotNull String id) {
 		this.id = id;
 	}
 
+	@Override
 	public void setName(@NotNull String name) {
 		this.name = name;
 	}
 
+	@Override
 	public void setAuthVerifier(@NotNull String authVerifier) {
 		this.authVerifier = authVerifier;
 	}
 
+	@Override
 	public void setKeySalt(@NotNull String keySalt) {
 		this.keySalt = keySalt;
 	}
 
+	@Override
 	public void setDefaultVaultId(@NotNull String defaultVaultId) {
 		this.defaultVaultId = defaultVaultId;
 	}
 
+	@Override
 	public void setVaults(@NotNull List<IVault> vaults) {
 		this.vaults = vaults;
 	}
 
+	@Override
 	public void setMetadata(@NotNull IMetadata metadata) {
 		this.metadata = metadata;
 	}

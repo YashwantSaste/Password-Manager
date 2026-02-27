@@ -95,4 +95,46 @@ public class JpaUser implements IUser {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public void setMetadata(@NotNull IMetadata metadata) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setId(@NotNull String id) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setName(@NotNull String name) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setAuthVerifier(@NotNull String authVerifier) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setKeySalt(@NotNull String keySalt) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setDefaultVaultId(@NotNull String defaultVaultId) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setVaults(@NotNull List<IVault> vaults) {
+		// TODO Auto-generated method stub
+
+	}
 }

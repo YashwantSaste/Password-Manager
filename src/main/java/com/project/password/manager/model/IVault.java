@@ -12,7 +12,15 @@ public interface IVault extends IEntity {
 	@NotNull
 	String getEncryptedBlob();
 
-	@Override
 	@NotNull
 	IMetadata metadata();
+
+	void setId(@NotNull String vaultId);
+
+	void setUserId(@NotNull String userId);
+
+	void setEncryptedBlob(@NotNull String encryptedBlob);
+
+	void setMetadata(@NotNull IMetadata metadata);
+
 }

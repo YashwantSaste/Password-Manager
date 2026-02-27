@@ -23,4 +23,20 @@ public interface IUser extends IEntity {
 	@NotNull
 	List<IVault> getVaults();
 
+	@NotNull
+	IMetadata metadata();
+
+	void setId(@NotNull String id);
+
+	void setName(@NotNull String name);
+
+	void setAuthVerifier(@NotNull String authVerifier);
+
+	void setKeySalt(@NotNull String keySalt);
+
+	void setDefaultVaultId(@NotNull String defaultVaultId);
+
+	void setVaults(@NotNull List<IVault> vaults);
+
+	void setMetadata(@NotNull IMetadata metadata);
 }
