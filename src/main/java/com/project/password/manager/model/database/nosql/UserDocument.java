@@ -20,13 +20,6 @@ public class UserDocument implements IUser {
 	}
 
 	@Override
-	@NotNull
-	public String getName() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public @NotNull String getAuthVerifier() {
 		// TODO Auto-generated method stub
 		return null;
@@ -64,12 +57,6 @@ public class UserDocument implements IUser {
 
 	@Override
 	public void setId(@NotNull String id) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setUserSalt(@NotNull String name) {
 		// TODO Auto-generated method stub
 
 	}
