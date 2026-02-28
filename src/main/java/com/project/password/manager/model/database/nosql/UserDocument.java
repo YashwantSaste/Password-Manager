@@ -69,7 +69,7 @@ public class UserDocument implements IUser {
 	}
 
 	@Override
-	public void setName(@NotNull String name) {
+	public void setUserSalt(@NotNull String name) {
 		// TODO Auto-generated method stub
 
 	}

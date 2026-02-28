@@ -9,9 +9,6 @@ public interface IUser extends IEntity {
 	String getId();
 
 	@NotNull
-	String getName();
-
-	@NotNull
 	String getAuthVerifier();
 
 	@NotNull
@@ -27,8 +24,6 @@ public interface IUser extends IEntity {
 	IMetadata metadata();
 
 	void setId(@NotNull String id);
-
-	void setName(@NotNull String name);
 
 	void setAuthVerifier(@NotNull String authVerifier);
 

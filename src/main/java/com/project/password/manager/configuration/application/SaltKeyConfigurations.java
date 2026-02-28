@@ -22,4 +22,9 @@ public class SaltKeyConfigurations implements ISaltKeyConfiguration{
 		return reader.readPropertyAsIntger(ApplicationProperties.PROPERTY_SALT_KEY_LENGTH, 256);
 	}
 
+	@Override
+	public int saltLength() {
+		return reader.readPropertyAsIntger(ApplicationProperties.PROPERTY_SALT_KEY_LENGTH, 16);
+	}
+
 }

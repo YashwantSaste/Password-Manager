@@ -5,4 +5,6 @@ public interface ISaltKeyConfiguration {
 	int iterations();
 
 	int keyLength();
+
+	int saltLength();
 }

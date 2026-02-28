@@ -29,10 +29,4 @@ public class Argon2Encoder {
 	public boolean verify(@NotNull String hashValue, @NotNull String value) {
 		return argon2.verify(hashValue, value.toCharArray());
 	}
-
-	//	public byte[] deriveKey(String password, String base64Salt) {
-	//		byte[] salt = Base64.getDecoder().decode(base64Salt).t;
-	//		return getHashValue(salt).getBytes();
-	//	}
-
 }

@@ -23,7 +23,6 @@ public class JpaUser implements IUser {
 	@Id
 	@Column(nullable = false, updatable = false)
 	private String id;
-	private String name;
 
 	@PrePersist
 	void generateId() {
@@ -36,21 +35,14 @@ public class JpaUser implements IUser {
 		// for hibernate
 	}
 
-	public JpaUser(String id, String name) {
+	public JpaUser(String id) {
 		this.id = id;
-		this.name = name;
 	}
 
 	@Override
 	@NotNull
 	public String getId() {
 		return id;
-	}
-
-	@Override
-	@NotNull
-	public String getName() {
-		return name;
 	}
 
 	@NotNull
@@ -62,7 +54,6 @@ public class JpaUser implements IUser {
 	public static JpaUser from(@NotNull User user) {
 		JpaUser jpaUser = new JpaUser();
 		jpaUser.id = user.getId();
-		jpaUser.name = user.getName();
 		return jpaUser;
 	}
 
@@ -96,6 +87,7 @@ public class JpaUser implements IUser {
 		return null;
 	}
 
+
 	@Override
 	public void setMetadata(@NotNull IMetadata metadata) {
 		// TODO Auto-generated method stub
@@ -108,11 +100,6 @@ public class JpaUser implements IUser {
 
 	}
 
-	@Override
-	public void setName(@NotNull String name) {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void setAuthVerifier(@NotNull String authVerifier) {

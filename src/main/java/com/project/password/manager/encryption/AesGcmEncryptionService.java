@@ -1,5 +1,7 @@
 package com.project.password.manager.encryption;
 
+import java.util.Base64;
+
 import javax.crypto.SecretKey;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,22 +21,34 @@ public class AesGcmEncryptionService implements IEncryptionService {
 
 	@Override
 	@NotNull
-	public String encrypt(@NotNull String plainText, @NotNull String userId) throws Exception {
+	public String encrypt(@NotNull String plainText, @NotNull String userId, @NotNull String password) throws Exception {
 		IUser user = userService.getUser(userId);
-		SecretKey key = deriveKeyForUser(user);
+		SecretKey key = deriveKeyForUser(user, password);
 		return AesGcmUtils.encrypt(key, plainText);
 	}
 
 	@Override
 	@NotNull
-	public String decrypt(@NotNull String encryptedText, @NotNull String userId) throws Exception {
+	public String decrypt(@NotNull String encryptedText, @NotNull String userId, @NotNull String password) throws Exception {
 		IUser user = userService.getUser(userId);
-		SecretKey key = deriveKeyForUser(user);
+		SecretKey key = deriveKeyForUser(user, password);
 		return AesGcmUtils.decrypt(key, encryptedText);
 	}
 
+	/**
+	 * Securely derives an encryption key for the user using their password and stored salt.
+	 * The key is derived fresh each time to avoid storing encryption keys.
+	 * 
+	 * @param user The user entity containing the salt
+	 * @param password The user's password for key derivation
+	 * @return AES encryption key
+	 */
 	@NotNull
-	private SecretKey deriveKeyForUser(@NotNull IUser user) {
-		return KeyGenerator.getSecretKeyFromUserKeySalt(user.getKeySalt());
+	private SecretKey deriveKeyForUser(@NotNull IUser user, @NotNull String password) {
+		if (user.getKeySalt() == null || user.getKeySalt().isEmpty()) {
+			throw new IllegalArgumentException("User does not have a valid key salt");
+		}
+		byte[] salt = Base64.getDecoder().decode(user.getKeySalt());
+		return KeyGenerator.generateKeyFromPassword(password, salt);
 	}
 }

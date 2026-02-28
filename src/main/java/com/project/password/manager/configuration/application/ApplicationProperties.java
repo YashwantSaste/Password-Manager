@@ -37,4 +37,5 @@ public class ApplicationProperties {
 	/** Salt key generation Configurations */
 	public static final String PROPERTY_SALT_KEY_ITERATIONS= "app.salt.iterations";
 	public static final String PROPERTY_SALT_KEY_LENGTH = "app.salt.key.size";
+	public static final String PROPERTY_SALT_LENGTH = "app.salt.size";
 }

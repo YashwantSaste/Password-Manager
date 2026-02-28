@@ -13,7 +13,6 @@ import com.project.password.manager.model.IVault;
 public class User implements IUser, IFileStorableEntity {
 
 	private String id;
-	private String name;
 	private String authVerifier;
 	private String keySalt;
 	private String defaultVaultId;
@@ -24,10 +23,9 @@ public class User implements IUser, IFileStorableEntity {
 		// for jackson
 	}
 
-	public User(String id, String name, String authVerifier, String keySalt, String defaultVaultId,
+	public User(String id, String authVerifier, String keySalt, String defaultVaultId,
 			List<IVault> vaults, IMetadata metadata) {
 		this.id = id;
-		this.name = name;
 		this.authVerifier = authVerifier;
 		this.keySalt = keySalt;
 		this.defaultVaultId = defaultVaultId;
@@ -39,12 +37,6 @@ public class User implements IUser, IFileStorableEntity {
 	@NotNull
 	public String getId() {
 		return id;
-	}
-
-	@Override
-	@NotNull
-	public String getName() {
-		return name;
 	}
 
 	@Override
@@ -89,11 +81,6 @@ public class User implements IUser, IFileStorableEntity {
 	}
 
 	@Override
-	public void setName(@NotNull String name) {
-		this.name = name;
-	}
-
-	@Override
 	public void setAuthVerifier(@NotNull String authVerifier) {
 		this.authVerifier = authVerifier;
 	}
@@ -117,4 +104,5 @@ public class User implements IUser, IFileStorableEntity {
 	public void setMetadata(@NotNull IMetadata metadata) {
 		this.metadata = metadata;
 	}
+
 }

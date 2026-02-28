@@ -49,10 +49,9 @@ public class AuthService {
 		}
 		IUser newUser = PlatformEntityProvider.getEntityProvider().getUser();
 		newUser.setId(username);
-		newUser.setName(username);
 		newUser.setAuthVerifier(encoder.getHashValue(password));
-		byte[] saltBytes = KeyGenerator.generateKeyFromPassword(password).getEncoded();
-		String keySalt = Base64.getEncoder().encodeToString(saltBytes);
+		byte[] userSalt = KeyGenerator.generateUserSalt();
+		String keySalt = Base64.getEncoder().encodeToString(userSalt);
 		newUser.setKeySalt(keySalt);
 		IVault defaultVault = vaultService.createDefaultVault(newUser);
 		List<IVault> vaults = new ArrayList<>();
