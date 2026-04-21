@@ -39,6 +39,10 @@ public class TokenService implements IService {
 
 	@NotNull
 	public String createToken(@NotNull IUser user) {
+		String tokenIfAlreadyExists = getToken(user);
+		if ((tokenIfAlreadyExists) != null && verify(tokenIfAlreadyExists, user) != null) {
+			return tokenIfAlreadyExists;
+		}
 		String token = JWT.create()
 				.withIssuer(jwtConfiguration.issuer())
 				.withSubject(user.getId())
@@ -58,7 +62,7 @@ public class TokenService implements IService {
 		return verifier.verify(token);
 	}
 
-	@NotNull
+	@Nullable
 	public String getToken(@NotNull IUser user) {
 		String userId = user.getId();
 		String cachedToken = tokenCacheFor.getIfPresent(userId);
