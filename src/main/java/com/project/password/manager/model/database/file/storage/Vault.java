@@ -20,6 +20,7 @@ public class Vault implements IVault, IFileStorableEntity {
 	public Vault(@NotNull String id, @NotNull String userId, @NotNull String encyrptedBlob) {
 		this.id = id;
 		this.userId = userId;
+		this.encryptedBlob = encyrptedBlob;
 	}
 
 	@Override
@@ -37,7 +38,7 @@ public class Vault implements IVault, IFileStorableEntity {
 	@Override
 	@NotNull
 	public String getEncryptedBlob() {
-		return encryptedBlob;
+		return encryptedBlob != null ? encryptedBlob : "";
 	}
 
 	@Override
@@ -71,8 +72,7 @@ public class Vault implements IVault, IFileStorableEntity {
 
 	@Override
 	public void setMetadata(@NotNull IMetadata metadata) {
-		// TODO Auto-generated method stub
-
+		this.metadata = metadata;
 	}
 
 }

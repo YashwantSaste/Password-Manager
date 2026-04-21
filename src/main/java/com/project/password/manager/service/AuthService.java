@@ -2,7 +2,6 @@ package com.project.password.manager.service;
 
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -57,10 +56,8 @@ public class AuthService {
 		byte[] saltBytes = KeyGenerator.generateKeyFromPassword(password).getEncoded();
 		String keySalt = Base64.getEncoder().encodeToString(saltBytes);
 		newUser.setKeySalt(keySalt);
+		newUser.setVaults(new ArrayList<>());
 		IVault defaultVault = vaultService.createDefaultVault(newUser);
-		List<IVault> vaults = new ArrayList<>();
-		vaults.add(defaultVault);
-		newUser.setVaults(vaults);
 		newUser.setDefaultVaultId(defaultVault.getId());
 		userService.saveUser(newUser);
 		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();

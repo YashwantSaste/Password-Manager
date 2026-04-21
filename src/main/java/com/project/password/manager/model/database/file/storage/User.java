@@ -1,5 +1,6 @@
 package com.project.password.manager.model.database.file.storage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
@@ -62,6 +63,9 @@ public class User implements IUser, IFileStorableEntity {
 	@Override
 	@NotNull
 	public List<IVault> getVaults() {
+		if (vaults == null) {
+			vaults = new ArrayList<>();
+		}
 		return vaults;
 	}
 
