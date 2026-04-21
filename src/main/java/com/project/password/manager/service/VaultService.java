@@ -5,9 +5,9 @@ import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.database.DataRepository;
+import com.project.password.manager.guice.PlatformEntityProvider;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
-import com.project.password.manager.model.database.file.storage.Vault;
 
 public class VaultService {
 	@NotNull
@@ -21,9 +21,13 @@ public class VaultService {
 		this.vaultRepository = vaultRepository;
 	}
 
+	@NotNull
 	public IVault createDefaultVault(@NotNull IUser user) {
 		String defaultVaultId = UUID.randomUUID().toString();
-		IVault defaultVault = new Vault(defaultVaultId, user.getId(), null);
+		IVault defaultVault = PlatformEntityProvider.getEntityProvider().getVault();
+		defaultVault.setId(defaultVaultId);
+		defaultVault.setUserId(user.getId());
+		defaultVault.setEncryptedBlob(null);
 		vaultRepository.save(defaultVault);
 		return defaultVault;
 	}

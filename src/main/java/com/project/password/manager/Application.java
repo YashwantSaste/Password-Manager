@@ -27,7 +27,7 @@ public class Application {
 				factory.getRepository(IVault.class, String.class));
 		AuthService service = new AuthService(tokenService, userService,
 				new Argon2Encoder(configuration.argon2Configuration()), vaultService);
-		service.signup("token-user-new", "new password");
+		service.signup("token-user-yashwant", "new password");
 		IUser user = userService.getUser("token-user-new");
 		System.out.println(user.getAuthVerifier());
 		System.out.println(tokenService.getToken(user));
