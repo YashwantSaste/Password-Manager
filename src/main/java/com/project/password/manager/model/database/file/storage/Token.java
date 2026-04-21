@@ -37,4 +37,15 @@ public class Token implements IToken, IFileStorableEntity{
 	public String getToken() {
 		return token;
 	}
+
+	@Override
+	@NotNull
+	public void setToken(@NotNull String token) {
+		this.token = token;
+	}
+
+	@Override
+	public void setUserId(@NotNull String userId) {
+		this.userId = userId;
+	}
 }

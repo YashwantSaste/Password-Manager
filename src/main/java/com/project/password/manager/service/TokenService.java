@@ -1,8 +1,7 @@
 package com.project.password.manager.service;
 
 import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,6 +10,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.project.password.manager.auth.jwt.JwtAlgorithmFactory;
 import com.project.password.manager.configuration.IJwtConfiguration;
 import com.project.password.manager.configuration.application.Configuration;
@@ -18,11 +19,11 @@ import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.database.DataRepositoryFactory;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
-import com.project.password.manager.model.database.file.storage.Token;
 
 public class TokenService implements IService {
 
-	private static final Map<String,String> tokenCache = new ConcurrentHashMap<String, String>();
+	private final Cache<String, String> tokenCacheFor = Caffeine.newBuilder()
+			.expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
 	@NotNull
 	private final IJwtConfiguration jwtConfiguration;
 	@NotNull
@@ -44,7 +45,7 @@ public class TokenService implements IService {
 				.withIssuedAt(new Date())
 				.withExpiresAt(new Date(System.currentTimeMillis() + jwtConfiguration.accessExpirationMs()))
 				.sign(algorithm);
-		tokenCache.put(user.getId(),token);
+		tokenCacheFor.put(user.getId(), token);
 		return token;
 	}
 
@@ -60,15 +61,15 @@ public class TokenService implements IService {
 	@NotNull
 	public String getToken(@NotNull IUser user) {
 		String userId = user.getId();
-		if(tokenCache.containsKey(userId)) {
-			return tokenCache.get(userId);
+		String cachedToken = tokenCacheFor.getIfPresent(userId);
+		if (cachedToken != null) {
+			return cachedToken;
 		}
 		return tokenRepo.findById(user.getId()).getToken();
 	}
 
-	public void saveToken(@NotNull IUser user,@NotNull String token) {
-		IToken tokenEntity = new Token(user.getId(),token);
-		tokenRepo.save(tokenEntity);
+	public void saveToken(@NotNull IUser user, @NotNull IToken token) {
+		tokenRepo.save(token);
 	}
 
 }

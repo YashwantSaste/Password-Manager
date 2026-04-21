@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.argon.Argon2Encoder;
 import com.project.password.manager.guice.PlatformEntityProvider;
+import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.util.KeyGenerator;
@@ -39,8 +40,10 @@ public class AuthService {
 		if(!encoder.verify(user.getAuthVerifier(),password)) {
 			throw new RuntimeException("Password mismatch. Kindly check your password");
 		}
-		String token = tokenService.createToken(user);
-		tokenService.saveToken(user,token);
+		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
+		tokenEntity.setUserId(user.getId());
+		tokenEntity.setToken(tokenService.createToken(user));
+		tokenService.saveToken(user,tokenEntity);
 	}
 
 	public void signup(@NotNull String username, @NotNull String password) {
@@ -60,5 +63,9 @@ public class AuthService {
 		newUser.setVaults(vaults);
 		newUser.setDefaultVaultId(defaultVault.getId());
 		userService.saveUser(newUser);
+		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
+		tokenEntity.setUserId(newUser.getId());
+		tokenEntity.setToken(tokenService.createToken(newUser));
+		tokenService.saveToken(newUser, tokenEntity);
 	}
 }
