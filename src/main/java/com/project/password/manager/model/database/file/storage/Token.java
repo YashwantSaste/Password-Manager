@@ -3,7 +3,6 @@ package com.project.password.manager.model.database.file.storage;
 import org.jetbrains.annotations.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IToken;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,14 +18,6 @@ public class Token implements IToken, IFileStorableEntity{
 	public Token(@NotNull String userId,@NotNull String token) {
 		this.userId=userId;
 		this.token=token;
-	}
-
-
-	@Override
-	@NotNull
-	public IMetadata metadata() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -47,4 +38,14 @@ public class Token implements IToken, IFileStorableEntity{
 		return token;
 	}
 
+	@Override
+	@NotNull
+	public void setToken(@NotNull String token) {
+		this.token = token;
+	}
+
+	@Override
+	public void setUserId(@NotNull String userId) {
+		this.userId = userId;
+	}
 }

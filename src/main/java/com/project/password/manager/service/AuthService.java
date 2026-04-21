@@ -2,14 +2,14 @@ package com.project.password.manager.service;
 
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.argon.Argon2Encoder;
+import com.project.password.manager.guice.PlatformEntityProvider;
+import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
-import com.project.password.manager.model.database.file.storage.User;
 import com.project.password.manager.util.KeyGenerator;
 
 public class AuthService {
@@ -39,30 +39,30 @@ public class AuthService {
 		if(!encoder.verify(user.getAuthVerifier(),password)) {
 			throw new RuntimeException("Password mismatch. Kindly check your password");
 		}
-		String token = tokenService.createToken(user);
-		tokenService.saveToken(user,token);
+		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
+		tokenEntity.setUserId(user.getId());
+		tokenEntity.setToken(tokenService.createToken(user));
+		tokenService.saveToken(user,tokenEntity);
 	}
 
 	public void signup(@NotNull String username, @NotNull String password) {
 		if (userService.getUser(username) != null) {
 			throw new RuntimeException("User already exists");
 		}
-		User newUser = new User();
+		IUser newUser = PlatformEntityProvider.getEntityProvider().getUser();
 		newUser.setId(username);
 		newUser.setName(username);
 		newUser.setAuthVerifier(encoder.getHashValue(password));
 		byte[] saltBytes = KeyGenerator.generateKeyFromPassword(password).getEncoded();
 		String keySalt = Base64.getEncoder().encodeToString(saltBytes);
 		newUser.setKeySalt(keySalt);
+		newUser.setVaults(new ArrayList<>());
 		IVault defaultVault = vaultService.createDefaultVault(newUser);
-
-		List<IVault> vaults = new ArrayList<>();
-		vaults.add(defaultVault);
-
-		newUser.setVaults(vaults);
 		newUser.setDefaultVaultId(defaultVault.getId());
-
-		// 4️⃣ Save user
 		userService.saveUser(newUser);
+		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
+		tokenEntity.setUserId(newUser.getId());
+		tokenEntity.setToken(tokenService.createToken(newUser));
+		tokenService.saveToken(newUser, tokenEntity);
 	}
 }

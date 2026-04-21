@@ -35,6 +35,4 @@ public class TokenRepository extends FileStorageRepository<Token, String>{
 		return "token.json";
 	}
 
-
-
 }

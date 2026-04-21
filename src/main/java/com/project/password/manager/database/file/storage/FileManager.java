@@ -1,16 +1,21 @@
 package com.project.password.manager.database.file.storage;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.project.password.manager.model.IEntity;
+import com.project.password.manager.model.IVault;
+import com.project.password.manager.model.database.file.storage.Vault;
 import com.project.password.manager.util.Logger;
 
 public class FileManager<T extends IEntity> {
@@ -27,6 +32,9 @@ public class FileManager<T extends IEntity> {
 		this.file = file;
 		this.clazz = clazz;
 		this.mapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addAbstractTypeMapping(IVault.class, Vault.class);
+		mapper.registerModule(module);
 	}
 
 	public boolean doFileExist() {
@@ -42,14 +50,18 @@ public class FileManager<T extends IEntity> {
 		createOutputStreamSafely(objectToWrite);
 	}
 
-	@NotNull
+	@Nullable
 	private T readFromInputStreamSafely() {
 		try {
 			T retrivedEntity = mapper.readValue(file, clazz);
 			return retrivedEntity;
 		} catch (JsonParseException | JsonMappingException ex) {
 			throw new RuntimeException("Failed to deserialise JSON into object entity: " + ex);
-		} catch (IOException ex) {
+		} catch (FileNotFoundException ex) {
+			log.error("The given file does not exists in the workspace: " + file);
+			return null;
+		}
+		catch (IOException ex) {
 			throw new RuntimeException("Unexpected error during retriving data to the file system " + ex);
 		}
 	}

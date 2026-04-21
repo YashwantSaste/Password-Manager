@@ -14,7 +14,18 @@ public class Configuration implements IConfiguration {
 	@NotNull
 	private final PropertiesReader propertiesReader = PropertiesReader.getInstance();
 
-	public Configuration() {
+	@NotNull
+	private static Configuration configuration;
+
+	public static Configuration getInstance()
+	{
+		if (configuration == null) {
+			configuration = new Configuration();
+		}
+		return configuration;
+	}
+
+	private Configuration() {
 		//
 	}
 
