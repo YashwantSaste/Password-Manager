@@ -19,8 +19,8 @@ public class GuiceModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		IConfiguration configuration = new Configuration();
-		bind(IConfiguration.class).to(Configuration.class).asEagerSingleton();
+		IConfiguration configuration = Configuration.getInstance();
+		bind(IConfiguration.class).toInstance(configuration);
 		if (!configuration.databaseConfiguration().databaseEnabled()) {
 			bind(IUser.class).to(User.class);
 			bind(IVault.class).to(Vault.class);

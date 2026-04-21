@@ -34,7 +34,8 @@ public class TokenService implements IService {
 	public TokenService(@NotNull IJwtConfiguration jwtConfiguration) {
 		this.jwtConfiguration = jwtConfiguration;
 		this.algorithm = new JwtAlgorithmFactory(jwtConfiguration).createAlgorithm();
-		this.tokenRepo = new DataRepositoryFactory(new Configuration().databaseConfiguration()).getRepository(IToken.class, String.class);
+		this.tokenRepo = new DataRepositoryFactory(Configuration.getInstance().databaseConfiguration())
+				.getRepository(IToken.class, String.class);
 	}
 
 	@NotNull
@@ -69,11 +70,25 @@ public class TokenService implements IService {
 		if (cachedToken != null) {
 			return cachedToken;
 		}
-		return tokenRepo.findById(user.getId()).getToken();
+		IToken persistedToken = tokenRepo.findById(userId);
+		if (persistedToken == null) {
+			return null;
+		}
+		String token = persistedToken.getToken();
+		if (token != null) {
+			tokenCacheFor.put(userId, token);
+		}
+		return token;
 	}
 
 	public void saveToken(@NotNull IUser user, @NotNull IToken token) {
-		tokenRepo.save(token);
+		String userId = user.getId();
+		tokenCacheFor.put(userId, token.getToken());
+		if (tokenRepo.findById(userId) == null) {
+			tokenRepo.save(token);
+			return;
+		}
+		tokenRepo.update(userId, token);
 	}
 
 }

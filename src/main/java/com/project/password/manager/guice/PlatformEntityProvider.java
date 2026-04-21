@@ -37,13 +37,18 @@ public class PlatformEntityProvider {
 	}
 
 	@NotNull
-	public IMetadata metadata() {
-		return GuicePlatform.getInjector().getInstance((IMetadata.class));
+	public IToken getToken() {
+		return getEntityInstance(IToken.class);
 	}
 
 	@NotNull
-	public IToken getToken() {
-		return GuicePlatform.getInjector().getInstance(IToken.class);
+	public IMetadata metadata() {
+		return getInstance(IMetadata.class);
+	}
+
+	@NotNull
+	public <T> T getInstance(@NotNull Class<T> clazz) {
+		return GuicePlatform.getInjector().getInstance(clazz);
 	}
 
 	@NotNull

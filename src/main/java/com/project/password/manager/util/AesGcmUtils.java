@@ -14,7 +14,7 @@ import com.project.password.manager.configuration.IAESConfiguration;
 import com.project.password.manager.configuration.application.Configuration;
 
 public class AesGcmUtils {
-	static IAESConfiguration aesConfiguration = new Configuration().aesConfiguration();
+	static IAESConfiguration aesConfiguration = Configuration.getInstance().aesConfiguration();
 
 	public static byte[] generateIv() {
 		return KeyGenerator.generateIv();

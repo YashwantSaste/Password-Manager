@@ -57,7 +57,14 @@ public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> i
 
 	@Override
 	public void update(@NotNull Id id, @NotNull T entity) {
-		// TODO Add update logic
+		if (entity.getId() == null) {
+			throw new IllegalStateException("Entity ID cannot be null before updating.");
+		}
+		File entityDirectory = resolveEntityDirectoryInFileSystem(id.toString());
+		entityDirectory.mkdirs();
+		File entityFile = new File(entityDirectory, entity.getFileName());
+		fileManager = new FileManager<>(entityFile, getEntityClass());
+		fileManager.writeToFile(entity);
 	}
 
 	@NotNull

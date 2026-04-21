@@ -14,13 +14,15 @@ import javax.crypto.spec.SecretKeySpec;
 import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.configuration.IAESConfiguration;
+import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.ISaltKeyConfiguration;
 import com.project.password.manager.configuration.application.Configuration;
 
 public class KeyGenerator {
 
-	static ISaltKeyConfiguration saltKeyConfiguration = new Configuration().saltKeyConfiguration();
-	static IAESConfiguration aesConfiguration = new Configuration().aesConfiguration();
+	static IConfiguration configuration = Configuration.getInstance();
+	static ISaltKeyConfiguration saltKeyConfiguration = configuration.saltKeyConfiguration();
+	static IAESConfiguration aesConfiguration = configuration.aesConfiguration();
 	static SecureRandom random =  new SecureRandom();
 
 	private KeyGenerator() {

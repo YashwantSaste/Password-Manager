@@ -20,11 +20,12 @@ public class Configuration implements IConfiguration {
 	public static Configuration getInstance()
 	{
 		if (configuration == null) {
-			return configuration;
+			configuration = new Configuration();
 		}
-		return new Configuration();
+		return configuration;
 	}
-	public Configuration() {
+
+	private Configuration() {
 		//
 	}
 
