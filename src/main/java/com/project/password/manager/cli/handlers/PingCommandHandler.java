@@ -20,6 +20,12 @@ public class PingCommandHandler extends AbstractAuthorizedCommandHandler<PingCom
 	@Override
 	@RequireAuthorization
 	public void handle(@NotNull PingCommand.Request request) {
-		output.info("pong " + currentUserId());
+		output.info(com.project.password.manager.cli.runtime.CliTheme.successPanel("Session Healthy",
+				com.project.password.manager.cli.runtime.CliTheme.key("user")
+						+ com.project.password.manager.cli.runtime.CliTheme.muted(" : ")
+						+ com.project.password.manager.cli.runtime.CliTheme.secondary(currentUserId()),
+				com.project.password.manager.cli.runtime.CliTheme.key("status")
+						+ com.project.password.manager.cli.runtime.CliTheme.muted(" : ")
+						+ com.project.password.manager.cli.runtime.CliTheme.success("pong")));
 	}
 }

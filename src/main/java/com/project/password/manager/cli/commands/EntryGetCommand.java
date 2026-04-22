@@ -16,13 +16,16 @@ public class EntryGetCommand extends DelegatingCliCommand<EntryGetCommand.Reques
 	@Nullable
 	private String vaultReference;
 
+	@Option(names = "--show-ids", description = "Shows internal entry identifiers in the output.")
+	private boolean showIds;
+
 	@Parameters(index = "0", paramLabel = "entryReference", description = "Entry id or exact label")
 	private String entryReference;
 
 	@Override
 	@NotNull
 	protected Request buildRequest() {
-		return new Request(vaultReference, entryReference);
+		return new Request(vaultReference, entryReference, showIds);
 	}
 
 	public static final class Request {
@@ -30,10 +33,12 @@ public class EntryGetCommand extends DelegatingCliCommand<EntryGetCommand.Reques
 		private final String vaultReference;
 		@NotNull
 		private final String entryReference;
+		private final boolean showIds;
 
-		public Request(@Nullable String vaultReference, @NotNull String entryReference) {
+		public Request(@Nullable String vaultReference, @NotNull String entryReference, boolean showIds) {
 			this.vaultReference = vaultReference;
 			this.entryReference = entryReference;
+			this.showIds = showIds;
 		}
 
 		@Nullable
@@ -44,6 +49,10 @@ public class EntryGetCommand extends DelegatingCliCommand<EntryGetCommand.Reques
 		@NotNull
 		public String getEntryReference() {
 			return entryReference;
+		}
+
+		public boolean isShowIds() {
+			return showIds;
 		}
 	}
 }

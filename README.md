@@ -37,14 +37,18 @@ The application starts in `src/main/java/com/project/password/manager/Applicatio
 
 ```java
 public static void main(String[] args) throws IOException {
-    CLI.initCLI();
+  Workspace.configureWorkSpace();
+  CliTheme.initialize(resolveCliTheme());
+  CLI.initCLI(args);
 }
 ```
 
-The CLI prompt is:
+The interactive prompt now uses the active CLI theme and a badge-style shell prompt. In plain mode it falls back to a simpler text prompt.
+
+Typical prompt shape:
 
 ```text
-password_manager>>
+[ VAULT ] pm::workspace ❯
 ```
 
 Type `exit` to leave the shell.
@@ -58,6 +62,7 @@ Top-level commands:
 - `logout`
 - `whoami`
 - `ping`
+- `theme ...`
 - `vault ...`
 - `entry ...`
 - `help`
@@ -92,6 +97,27 @@ Validate the current session:
 
 ```bash
 ping
+```
+
+### Theme Commands
+
+List supported themes:
+
+```bash
+theme list
+```
+
+Preview all themes or a specific theme:
+
+```bash
+theme preview
+theme preview copper-dusk
+```
+
+Persist a theme for future runs:
+
+```bash
+theme set paper-retro
 ```
 
 ### Vault Commands
@@ -268,9 +294,13 @@ C:\Users\<your-user>\password-manager\password-manager.properties
 
 ### Important Current Behavior
 
-The project contains `Workspace.configureWorkSpace()` to create the workspace and a starter property file, but the current `Application.main(...)` does not call it automatically.
+The application now calls `Workspace.configureWorkSpace()` on startup.
 
-That means you should ensure the workspace directory and property file already exist before running the CLI.
+That means the first run will automatically:
+
+- create the workspace directory if it does not exist
+- create `password-manager.properties` if it does not exist
+- backfill missing default properties for existing workspaces when new config keys are introduced
 
 ### Minimal Recommended Properties
 
@@ -279,6 +309,7 @@ For local file-backed usage with HMAC JWTs, create `password-manager.properties`
 ```properties
 app.name=password-manager-cli
 app.version=1.0.0
+app.cli.theme=warm-retro
 
 app.database.enabled=false
 app.database.type=sql
@@ -311,6 +342,40 @@ app.salt.iterations=65536
 app.salt.key.size=256
 ```
 
+### CLI Theme Customization
+
+The CLI theme can now be customized without code changes.
+
+Supported themes:
+
+- `warm-retro`
+- `ocean`
+- `copper-dusk`
+- `paper-retro`
+- `plain`
+
+Precedence order:
+
+1. Environment variable: `PM_CLI_THEME=<theme>`
+2. Workspace property: `app.cli.theme=<theme>`
+
+Examples:
+
+```powershell
+$env:PM_CLI_THEME = "plain"
+java -jar target/password.manager-1.0.0-beta-standalone.jar
+```
+
+`plain` is useful for consoles that do not render ANSI styling well.
+
+You can also inspect and persist themes from inside the CLI with:
+
+```bash
+theme list
+theme preview paper-retro
+theme set copper-dusk
+```
+
 ### JWT Algorithm Configuration
 
 Supported algorithms include:
@@ -341,7 +406,7 @@ and the following properties must point to the file names inside that folder:
 
 ## Output Shape
 
-The CLI prints plain text views.
+The CLI prints structured terminal views.
 
 Examples of current output fields include:
 
@@ -358,7 +423,12 @@ Examples of current output fields include:
 - creation time
 - update time
 
-When listing multiple vaults or entries, each item is printed as a separate block.
+Current output behavior:
+
+- the interactive shell starts with a themed startup panel
+- users, vaults, and entries render as framed panels rather than flat key-value text
+- status, hints, and command failures use themed cards for consistency
+- when listing multiple vaults or entries, each item is printed as a separate panel block
 
 ## Architecture Overview
 
@@ -471,7 +541,7 @@ This now produces a self-contained jar with dependencies under `target/`.
 Example artifact:
 
 ```text
-target/password.manager-0.0.1-SNAPSHOT-standalone.jar
+target/password.manager-1.0.0-beta-standalone.jar
 ```
 
 ### Run
@@ -627,7 +697,6 @@ Expected behavior:
 
 ## Known Limitations
 
-- `Application.main(...)` does not currently bootstrap the workspace automatically.
 - The root CLI uses an interactive shell; non-interactive automation is not the primary path right now.
 - SQL and NoSQL entry repositories are not implemented yet.
 - Automated test coverage is still very thin.
@@ -665,7 +734,6 @@ src/test/java/com/project/password/manager/
 
 ## Recommended Next Improvements
 
-- Call `Workspace.configureWorkSpace()` during startup or document a bootstrap command.
 - Add a Maven plugin or script for straightforward CLI launching outside the IDE.
 - Add integration tests for signup, login, vault creation, and entry CRUD flows.
 - Add dedicated SQL and NoSQL entry repository implementations.

@@ -25,6 +25,6 @@ public class VaultListCommandHandler extends AbstractAuthorizedCommandHandler<Va
 	@Override
 	@RequireAuthorization
 	public void handle(@NotNull VaultListCommand.Request request) {
-		output.info(CliViewPrinter.formatVaults(vaultService.getAllVaults(currentUserId())));
+		output.info(CliViewPrinter.formatVaults(vaultService.getAllVaults(currentUserId()), request.isShowIds()));
 	}
 }

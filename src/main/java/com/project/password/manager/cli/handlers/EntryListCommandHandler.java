@@ -26,6 +26,8 @@ public class EntryListCommandHandler extends AbstractVaultScopedCommandHandler<E
 	@Override
 	@RequireAuthorization
 	public void handle(@NotNull EntryListCommand.Request request) {
-		output.info(CliViewPrinter.formatEntries(entryService.getEntries(currentUserId(), resolveVaultId(request.getVaultReference()))));
+		output.info(CliViewPrinter.formatEntries(
+				entryService.getEntries(currentUserId(), resolveVaultId(request.getVaultReference())),
+				request.isShowIds()));
 	}
 }

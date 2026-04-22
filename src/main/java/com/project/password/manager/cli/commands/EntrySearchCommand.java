@@ -16,13 +16,16 @@ public class EntrySearchCommand extends DelegatingCliCommand<EntrySearchCommand.
 	@Nullable
 	private String vaultReference;
 
+	@Option(names = "--show-ids", description = "Shows internal entry identifiers in the output.")
+	private boolean showIds;
+
 	@Parameters(index = "0", paramLabel = "query", description = "Search query")
 	private String query;
 
 	@Override
 	@NotNull
 	protected Request buildRequest() {
-		return new Request(vaultReference, query);
+		return new Request(vaultReference, query, showIds);
 	}
 
 	public static final class Request {
@@ -30,10 +33,12 @@ public class EntrySearchCommand extends DelegatingCliCommand<EntrySearchCommand.
 		private final String vaultReference;
 		@NotNull
 		private final String query;
+		private final boolean showIds;
 
-		public Request(@Nullable String vaultReference, @NotNull String query) {
+		public Request(@Nullable String vaultReference, @NotNull String query, boolean showIds) {
 			this.vaultReference = vaultReference;
 			this.query = query;
+			this.showIds = showIds;
 		}
 
 		@Nullable
@@ -44,6 +49,10 @@ public class EntrySearchCommand extends DelegatingCliCommand<EntrySearchCommand.
 		@NotNull
 		public String getQuery() {
 			return query;
+		}
+
+		public boolean isShowIds() {
+			return showIds;
 		}
 	}
 }

@@ -15,23 +15,32 @@ public class EntryListCommand extends DelegatingCliCommand<EntryListCommand.Requ
 	@Nullable
 	private String vaultReference;
 
+	@Option(names = "--show-ids", description = "Shows internal entry identifiers in the output.")
+	private boolean showIds;
+
 	@Override
 	@NotNull
 	protected Request buildRequest() {
-		return new Request(vaultReference);
+		return new Request(vaultReference, showIds);
 	}
 
 	public static final class Request {
 		@Nullable
 		private final String vaultReference;
+		private final boolean showIds;
 
-		public Request(@Nullable String vaultReference) {
+		public Request(@Nullable String vaultReference, boolean showIds) {
 			this.vaultReference = vaultReference;
+			this.showIds = showIds;
 		}
 
 		@Nullable
 		public String getVaultReference() {
 			return vaultReference;
+		}
+
+		public boolean isShowIds() {
+			return showIds;
 		}
 	}
 }

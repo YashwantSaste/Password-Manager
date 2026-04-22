@@ -25,7 +25,7 @@ public class VaultCreateCommandHandler extends AbstractAuthorizedCommandHandler<
 	@Override
 	@RequireAuthorization
 	public void handle(@NotNull VaultCreateCommand.Request request) {
-		String vaultId = vaultService.createVaultForUser(currentUserId(), request.getVaultName());
-		output.info("Created vault " + vaultId);
+		vaultService.createVaultForUser(currentUserId(), request.getVaultName());
+		output.info(com.project.password.manager.cli.runtime.CliTheme.success("Created vault " + request.getVaultName()));
 	}
 }
