@@ -6,12 +6,14 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.project.password.manager.cli.handlers.EntryCreateCommandHandler;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 @Command(name = "create", mixinStandardHelpOptions = true, description = "Creates an entry in a vault.")
-public class EntryCreateCommand extends DelegatingCliCommand<EntryCreateCommand.Request, com.project.password.manager.cli.handlers.EntryCreateCommandHandler> {
+public class EntryCreateCommand extends DelegatingCliCommand<EntryCreateCommand.Request, EntryCreateCommandHandler> {
 
 	@Option(names = "--vault", description = "Vault name or id. Defaults to the user's default vault.")
 	@Nullable

@@ -6,12 +6,14 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.project.password.manager.cli.handlers.EntryUpdateCommandHandler;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 @Command(name = "update", mixinStandardHelpOptions = true, description = "Updates an existing entry in a vault.")
-public class EntryUpdateCommand extends DelegatingCliCommand<EntryUpdateCommand.Request, com.project.password.manager.cli.handlers.EntryUpdateCommandHandler> {
+public class EntryUpdateCommand extends DelegatingCliCommand<EntryUpdateCommand.Request, EntryUpdateCommandHandler> {
 
 	@Option(names = "--vault", description = "Vault name or id. Defaults to the user's default vault.")
 	@Nullable

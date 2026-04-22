@@ -3,12 +3,14 @@ package com.project.password.manager.cli.commands;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.project.password.manager.cli.handlers.EntryGetCommandHandler;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 @Command(name = "get", mixinStandardHelpOptions = true, description = "Gets entries by id or exact label from one vault or across all vaults.")
-public class EntryGetCommand extends DelegatingCliCommand<EntryGetCommand.Request, com.project.password.manager.cli.handlers.EntryGetCommandHandler> {
+public class EntryGetCommand extends DelegatingCliCommand<EntryGetCommand.Request, EntryGetCommandHandler> {
 
 	@Option(names = "--vault", description = "Vault name or id. Defaults to the user's default vault.")
 	@Nullable

@@ -4,12 +4,41 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.matcher.Matchers;
+import com.project.password.manager.cli.commands.EntryCreateCommand;
+import com.project.password.manager.cli.commands.EntryDeleteCommand;
+import com.project.password.manager.cli.commands.EntryGetCommand;
+import com.project.password.manager.cli.commands.EntryListCommand;
+import com.project.password.manager.cli.commands.EntrySearchCommand;
+import com.project.password.manager.cli.commands.EntryUpdateCommand;
+import com.project.password.manager.cli.commands.LoginCommand;
+import com.project.password.manager.cli.commands.LogoutCommand;
+import com.project.password.manager.cli.commands.PingCommand;
+import com.project.password.manager.cli.commands.SignupCommand;
+import com.project.password.manager.cli.commands.VaultCreateCommand;
+import com.project.password.manager.cli.commands.VaultDefaultCommand;
+import com.project.password.manager.cli.commands.VaultListCommand;
+import com.project.password.manager.cli.commands.WhoAmICommand;
+import com.project.password.manager.cli.handlers.EntryCreateCommandHandler;
+import com.project.password.manager.cli.handlers.EntryDeleteCommandHandler;
+import com.project.password.manager.cli.handlers.EntryGetCommandHandler;
+import com.project.password.manager.cli.handlers.EntryListCommandHandler;
+import com.project.password.manager.cli.handlers.EntrySearchCommandHandler;
+import com.project.password.manager.cli.handlers.EntryUpdateCommandHandler;
+import com.project.password.manager.cli.handlers.LoginCommandHandler;
+import com.project.password.manager.cli.handlers.LogoutCommandHandler;
+import com.project.password.manager.cli.handlers.PingCommandHandler;
+import com.project.password.manager.cli.handlers.SignupCommandHandler;
+import com.project.password.manager.cli.handlers.VaultCreateCommandHandler;
+import com.project.password.manager.cli.handlers.VaultDefaultCommandHandler;
+import com.project.password.manager.cli.handlers.VaultListCommandHandler;
+import com.project.password.manager.cli.handlers.WhoAmICommandHandler;
 import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
 import com.project.password.manager.configuration.application.Configuration;
 import com.project.password.manager.argon.Argon2Encoder;
 import com.project.password.manager.cli.runtime.CliOutput;
 import com.project.password.manager.cli.runtime.CliSession;
+import com.project.password.manager.cli.runtime.CommandHandlerRegistry;
 import com.project.password.manager.cli.runtime.CommandHandlerInvoker;
 import com.project.password.manager.cli.runtime.ConsoleCliOutput;
 import com.project.password.manager.database.DataRepository;
@@ -140,5 +169,25 @@ public class GuiceModule extends AbstractModule {
 	@Singleton
 	CommandHandlerInvoker provideCommandHandlerInvoker() {
 		return new CommandHandlerInvoker();
+	}
+
+	@Provides
+	@Singleton
+	CommandHandlerRegistry provideCommandHandlerRegistry() {
+		return new CommandHandlerRegistry()
+				.register(LoginCommand.class, LoginCommandHandler.class)
+				.register(SignupCommand.class, SignupCommandHandler.class)
+				.register(LogoutCommand.class, LogoutCommandHandler.class)
+				.register(WhoAmICommand.class, WhoAmICommandHandler.class)
+				.register(PingCommand.class, PingCommandHandler.class)
+				.register(VaultListCommand.class, VaultListCommandHandler.class)
+				.register(VaultCreateCommand.class, VaultCreateCommandHandler.class)
+				.register(VaultDefaultCommand.class, VaultDefaultCommandHandler.class)
+				.register(EntryListCommand.class, EntryListCommandHandler.class)
+				.register(EntryGetCommand.class, EntryGetCommandHandler.class)
+				.register(EntryCreateCommand.class, EntryCreateCommandHandler.class)
+				.register(EntryUpdateCommand.class, EntryUpdateCommandHandler.class)
+				.register(EntryDeleteCommand.class, EntryDeleteCommandHandler.class)
+				.register(EntrySearchCommand.class, EntrySearchCommandHandler.class);
 	}
 }

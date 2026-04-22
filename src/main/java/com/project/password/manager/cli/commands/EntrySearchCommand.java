@@ -3,12 +3,14 @@ package com.project.password.manager.cli.commands;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.project.password.manager.cli.handlers.EntrySearchCommandHandler;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 @Command(name = "search", mixinStandardHelpOptions = true, description = "Searches entries in a vault.")
-public class EntrySearchCommand extends DelegatingCliCommand<EntrySearchCommand.Request, com.project.password.manager.cli.handlers.EntrySearchCommandHandler> {
+public class EntrySearchCommand extends DelegatingCliCommand<EntrySearchCommand.Request, EntrySearchCommandHandler> {
 
 	@Option(names = "--vault", description = "Vault name or id. Defaults to the user's default vault.")
 	@Nullable

@@ -2,11 +2,13 @@ package com.project.password.manager.cli.commands;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.project.password.manager.cli.handlers.LoginCommandHandler;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
 @Command(name = "login", mixinStandardHelpOptions = true, description = "Authenticates a user and opens a CLI session.")
-public class LoginCommand extends DelegatingCliCommand<LoginCommand.Request, com.project.password.manager.cli.handlers.LoginCommandHandler> {
+public class LoginCommand extends DelegatingCliCommand<LoginCommand.Request, LoginCommandHandler> {
 
 	@Parameters(index = "0", paramLabel = "username", description = "User identifier")
 	private String username;
