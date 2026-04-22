@@ -1,3 +1,6 @@
+.classpath
+.settings/
 target/
 .vscode/
 logs/
+dist/
