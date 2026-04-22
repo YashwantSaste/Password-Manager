@@ -51,8 +51,12 @@ public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> i
 	}
 
 	@Override
-	public void delete(@NotNull T entity) {
-		// TODO Add delete logic
+	public void delete(@NotNull Id id) {
+		File entityDirectory = resolveEntityDirectoryInFileSystem(id.toString());
+		File entityFile = new File(entityDirectory, getEntityFileName());
+		if (entityFile.exists()) {
+			entityFile.delete();
+		}
 	}
 
 	@Override

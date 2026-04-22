@@ -10,7 +10,7 @@ public interface DataRepository<T, Id> {
 	@Nullable
 	T findById(@NotNull Id id);
 
-	void delete(@NotNull T entity);
+	void delete(@NotNull Id id);
 
 	void update(@NotNull Id id, @NotNull T entity);
 }

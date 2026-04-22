@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.configuration.IDatabaseConfiguration;
 import com.project.password.manager.configuration.application.Workspace;
+import com.project.password.manager.database.file.storage.FileEntryRepository;
 import com.project.password.manager.database.file.storage.TokenRepository;
 import com.project.password.manager.database.file.storage.UserRepository;
 import com.project.password.manager.database.file.storage.VaultRepository;
@@ -55,5 +56,19 @@ public class DataRepositoryFactory {
 			return repo;
 		}
 		throw new IllegalArgumentException("No repository available for entity: " + entityClass.getName());
+	}
+
+	@NotNull
+	public EntryDataRepository getEntryRepository() {
+		if (databaseConfiguration.databaseEnabled()) {
+			if (IDatabaseConfiguration.DATABASE_TYPE_SQL.equalsIgnoreCase(databaseConfiguration.type())) {
+				throw new UnsupportedOperationException("SQL entry repository is not implemented yet");
+			}
+			if (IDatabaseConfiguration.DATABASE_TYPE_NO_SQL.equalsIgnoreCase(databaseConfiguration.type())) {
+				throw new UnsupportedOperationException("NoSQL entry repository is not implemented yet");
+			}
+		}
+		log.warn("Database is not enabled hence using local file system as storage");
+		return new FileEntryRepository(Workspace.getInstance().getRoot());
 	}
 }

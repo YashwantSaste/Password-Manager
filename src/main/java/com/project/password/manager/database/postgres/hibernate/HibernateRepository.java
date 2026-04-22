@@ -35,8 +35,13 @@ public class HibernateRepository<T extends IEntity, Id> implements DataRepositor
 	}
 
 	@Override
-	public void delete(@NotNull T entity) {
-		executeTransaction(session -> session.remove(entity));
+	public void delete(@NotNull Id id) {
+		executeTransaction(session -> {
+			T persistedEntity = session.get(entity, (java.io.Serializable) id);
+			if (persistedEntity != null) {
+				session.remove(persistedEntity);
+			}
+		});
 	}
 
 	@Override

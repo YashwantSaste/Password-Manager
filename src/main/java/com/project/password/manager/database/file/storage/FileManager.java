@@ -12,11 +12,9 @@ import org.jetbrains.annotations.Nullable;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.project.password.manager.model.IEntity;
-import com.project.password.manager.model.IVault;
-import com.project.password.manager.model.database.file.storage.Vault;
 import com.project.password.manager.util.Logger;
+import com.project.password.manager.util.ModelObjectMapperFactory;
 
 public class FileManager<T extends IEntity> {
 
@@ -31,10 +29,7 @@ public class FileManager<T extends IEntity> {
 	public FileManager(@NotNull File file, @NotNull Class<T> clazz) {
 		this.file = file;
 		this.clazz = clazz;
-		this.mapper = new ObjectMapper();
-		SimpleModule module = new SimpleModule();
-		module.addAbstractTypeMapping(IVault.class, Vault.class);
-		mapper.registerModule(module);
+		this.mapper = ModelObjectMapperFactory.create();
 	}
 
 	public boolean doFileExist() {
@@ -69,7 +64,7 @@ public class FileManager<T extends IEntity> {
 	private void createOutputStreamSafely(@NotNull Object data) {
 		try {
 			String json = mapper.writeValueAsString(data);
-			log.debug("Writing the data to the file: " + file.getAbsoluteFile() + "with Content: " + json);
+			log.debug("Writing the data to the file: " + file.getAbsoluteFile());
 			OutputStream outputStream = new FileOutputStream(file);
 			outputStream.write(json.getBytes());
 			outputStream.close();
