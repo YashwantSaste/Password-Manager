@@ -2,6 +2,7 @@ package com.project.password.manager.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,7 +45,7 @@ public class EntryService implements IService {
 	private final ObjectMapper objectMapper;
 	@NotNull
 	private final Cache<String, VaultSearchIndex> searchIndexByVault = Caffeine.newBuilder()
-			.expireAfterAccess(20, TimeUnit.MINUTES).maximumSize(200).build();
+	.expireAfterAccess(20, TimeUnit.MINUTES).maximumSize(200).build();
 
 	public EntryService(@NotNull EntryDataRepository entryRepository,
 			@NotNull DataRepository<IVault, String> vaultRepository,
@@ -82,9 +83,36 @@ public class EntryService implements IService {
 	}
 
 	@NotNull
+	public List<EntryView> getEntriesByReference(@NotNull String userId, @NotNull List<String> vaultIds,
+			@NotNull String entryReference) {
+		String normalizedReference = requireText(entryReference, "Entry reference");
+		List<EntryView> matchedEntries = new ArrayList<>();
+		for (String vaultId : vaultIds) {
+			assertOwnedVault(userId, vaultId);
+			EncryptedEntryRecord record = entryRepository.findById(new EntryStorageKey(vaultId, normalizedReference));
+			if (record != null) {
+				matchedEntries.add(decryptRecord(userId, record));
+				continue;
+			}
+			for (EntryView entry : loadIndex(userId, vaultId).orderedEntries()) {
+				if (normalizedReference.equalsIgnoreCase(entry.getLabel())) {
+					matchedEntries.add(entry);
+				}
+			}
+		}
+		if (matchedEntries.isEmpty()) {
+			throw new EntityNotFoundException("The entry with reference " + normalizedReference + " does not exist");
+		}
+		matchedEntries.sort(ENTRY_RECENCY_COMPARATOR);
+		return Collections.unmodifiableList(matchedEntries);
+	}
+
+	@NotNull
 	public List<EntryView> getEntries(@NotNull String userId, @NotNull String vaultId) {
 		assertOwnedVault(userId, vaultId);
-		return Collections.unmodifiableList(loadIndex(userId, vaultId).orderedEntries());
+		List<EntryView> entries = new ArrayList<>(loadIndex(userId, vaultId).orderedEntries());
+		entries.sort(ENTRY_RECENCY_COMPARATOR);
+		return Collections.unmodifiableList(entries);
 	}
 
 	@NotNull
@@ -138,7 +166,17 @@ public class EntryService implements IService {
 				results.add(entry);
 			}
 		}
+		results.sort(ENTRY_RECENCY_COMPARATOR);
 		return results;
+	}
+
+	@NotNull
+	private static String requireText(@NotNull String value, @NotNull String fieldName) {
+		String normalizedValue = value.trim();
+		if (normalizedValue.isEmpty()) {
+			throw new IllegalArgumentException(fieldName + " cannot be blank");
+		}
+		return normalizedValue;
 	}
 
 	private void assertOwnedVault(@NotNull String userId, @NotNull String vaultId) {
@@ -274,6 +312,13 @@ public class EntryService implements IService {
 		}
 		return tokens;
 	}
+
+	@NotNull
+	private static final Comparator<EntryView> ENTRY_RECENCY_COMPARATOR = Comparator
+			.comparingLong(EntryView::getUpdatedAtEpochMs)
+			.reversed()
+			.thenComparing(Comparator.comparingLong(EntryView::getCreatedAtEpochMs).reversed())
+			.thenComparing(EntryView::getId);
 
 	private static final class VaultSearchIndex {
 
