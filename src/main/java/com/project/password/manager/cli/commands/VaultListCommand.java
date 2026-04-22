@@ -4,8 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 import picocli.CommandLine.Command;
 
-@Command(name = "ping", mixinStandardHelpOptions = true, description = "Verifies the active CLI session and prints a health response.")
-public class PingCommand extends DelegatingCliCommand<PingCommand.Request, com.project.password.manager.cli.handlers.PingCommandHandler> {
+@Command(name = "list", mixinStandardHelpOptions = true, description = "Lists vaults for the authenticated user.")
+public class VaultListCommand extends DelegatingCliCommand<VaultListCommand.Request, com.project.password.manager.cli.handlers.VaultListCommandHandler> {
 
 	@Override
 	@NotNull

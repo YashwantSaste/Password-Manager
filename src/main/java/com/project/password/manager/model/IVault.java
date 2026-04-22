@@ -7,6 +7,9 @@ public interface IVault extends IEntity {
 	String getId();
 
 	@NotNull
+	String getName();
+
+	@NotNull
 	String getUserId();
 
 	@NotNull
@@ -16,6 +19,8 @@ public interface IVault extends IEntity {
 	IMetadata metadata();
 
 	void setId(@NotNull String vaultId);
+
+	void setName(@NotNull String vaultName);
 
 	void setUserId(@NotNull String userId);
 

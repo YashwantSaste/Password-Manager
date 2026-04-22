@@ -8,6 +8,7 @@ import com.project.password.manager.model.IVault;
 public class Vault implements IVault, IFileStorableEntity {
 
 	private String id;
+	private String name;
 	private String userId;
 	private String encryptedBlob;
 	private IMetadata metadata;
@@ -17,8 +18,9 @@ public class Vault implements IVault, IFileStorableEntity {
 		// for jackson
 	}
 
-	public Vault(@NotNull String id, @NotNull String userId, @NotNull String encyrptedBlob) {
+	public Vault(@NotNull String id, @NotNull String name, @NotNull String userId, @NotNull String encyrptedBlob) {
 		this.id = id;
+		this.name = name;
 		this.userId = userId;
 		this.encryptedBlob = encyrptedBlob;
 	}
@@ -27,6 +29,12 @@ public class Vault implements IVault, IFileStorableEntity {
 	@NotNull
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	@NotNull
+	public String getName() {
+		return name != null ? name : "";
 	}
 
 	@Override
@@ -58,6 +66,11 @@ public class Vault implements IVault, IFileStorableEntity {
 	@Override
 	public void setId(@NotNull String vaultId) {
 		this.id = vaultId;
+	}
+
+	@Override
+	public void setName(@NotNull String vaultName) {
+		this.name = vaultName;
 	}
 
 	@Override

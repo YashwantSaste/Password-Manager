@@ -4,8 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 import picocli.CommandLine.Command;
 
-@Command(name = "ping", mixinStandardHelpOptions = true, description = "Verifies the active CLI session and prints a health response.")
-public class PingCommand extends DelegatingCliCommand<PingCommand.Request, com.project.password.manager.cli.handlers.PingCommandHandler> {
+@Command(name = "whoami", mixinStandardHelpOptions = true, description = "Prints the currently authenticated user.")
+public class WhoAmICommand extends DelegatingCliCommand<WhoAmICommand.Request, com.project.password.manager.cli.handlers.WhoAmICommandHandler> {
 
 	@Override
 	@NotNull
