@@ -1,8 +1,11 @@
 package com.project.password.manager.guice;
 
+import java.lang.reflect.Method;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.project.password.manager.cli.commands.EntryCreateCommand;
 import com.project.password.manager.cli.commands.EntryDeleteCommand;
@@ -74,7 +77,7 @@ public class GuiceModule extends AbstractModule {
 		bind(CliSession.class).in(Singleton.class);
 		bind(CliOutput.class).to(ConsoleCliOutput.class).in(Singleton.class);
 		requestInjection(authorizationInterceptor);
-		bindInterceptor(Matchers.any(), Matchers.annotatedWith(RequireAuthorization.class), authorizationInterceptor);
+		bindInterceptor(Matchers.any(), authorizationMethodMatcher(), authorizationInterceptor);
 		if (!configuration.databaseConfiguration().databaseEnabled()) {
 			bind(IUser.class).to(User.class);
 			bind(IVault.class).to(Vault.class);
@@ -93,6 +96,15 @@ public class GuiceModule extends AbstractModule {
 			}
 		}
 
+	}
+
+	private AbstractMatcher<Method> authorizationMethodMatcher() {
+		return new AbstractMatcher<Method>() {
+			@Override
+			public boolean matches(Method method) {
+				return !method.isSynthetic() && method.isAnnotationPresent(RequireAuthorization.class);
+			}
+		};
 	}
 
 	@Provides

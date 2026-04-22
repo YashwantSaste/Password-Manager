@@ -466,17 +466,116 @@ mvn -DskipTests compile
 mvn -DskipTests package
 ```
 
+This now produces a self-contained jar with dependencies under `target/`.
+
+Example artifact:
+
+```text
+target/password.manager-0.0.1-SNAPSHOT-standalone.jar
+```
+
 ### Run
 
-The most reliable current approach is to run `Application.java` from your IDE after the workspace and properties file are present.
+The application now bootstraps its own workspace on startup, so the first run will create:
+
+```text
+<user-home>/password-manager/
+<user-home>/password-manager/password-manager.properties
+```
+
+If the user has Java installed, run the shaded jar directly:
+
+```bash
+java -jar target/password.manager-1.0.0-beta-standalone.jar
+```
+
+If the end user does not have Java installed, distribute a platform package with an embedded runtime instead of the jar.
+
+Build a portable package on the release machine with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\package-app.ps1
+```
+
+That script uses `jpackage` to create a portable app-image under `dist/` for the current OS.
+
+Default outputs by platform:
+
+```text
+Windows:
+dist/password-manager-cli/
+dist/password-manager-cli/password-manager-cli.exe
+
+Linux:
+dist/password-manager-cli/
+dist/password-manager-cli.sh
+
+macOS:
+dist/password-manager-cli.app
+dist/password-manager-cli.command
+```
+
+These launchers already include a bundled Java runtime, so the user does not need Java installed.
+
+- Windows: run `password-manager-cli.exe`
+- Linux: run `./password-manager-cli.sh`
+- macOS: run `./password-manager-cli.command`
+
+If you specifically want a single installer `.exe`, install WiX Toolset on the build machine and then run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\package-windows.ps1 -Type exe
+```
+
+Installer output:
+
+```text
+dist/password-manager-cli-1.0.0.exe
+```
+
+Important packaging note:
+
+- The build machine still needs a JDK that includes `jpackage`.
+- The build machine also needs WiX Toolset if you want an installer `.exe` or `.msi`.
+- The end user does not need Java once you ship the packaged Windows app.
+
+## Automated Build Pipeline
+
+The repository now includes a GitHub Actions workflow at `.github/workflows/build-windows-cli.yml`.
+
+Pipeline behavior:
+
+- It runs automatically on every push to `master`.
+- It also supports manual runs through `workflow_dispatch`.
+- It builds portable packages for Windows, Linux, and macOS.
+- It uses `scripts/package-app.ps1` on each runner OS.
+- It uploads one artifact per OS.
+
+What you get from the pipeline:
+
+- a downloadable artifact that is directly usable after extraction
+- a packaged launcher for the target OS
+- the bundled Java runtime inside the package
+- the full build logs in the GitHub Actions run
+
+How to use the pipeline output:
+
+1. Open the GitHub Actions run for the `master` commit.
+2. Download the artifact for the OS you want.
+3. Extract the archive.
+4. Run the packaged launcher for that OS.
+
+Runtime logs:
+
+- The Windows EXE remains a console application, so application logs are visible directly in the terminal window.
+- The Linux and macOS wrappers start the packaged CLI from a terminal-friendly launcher.
+- File logs continue to be written to `logs/app.log`.
 
 Main class:
 
 ```text
 com.project.password.manager.Application
 ```
-
-If you prefer Maven-based launching, you can add an exec plugin or run the class using your IDE's Java launcher configuration.
 
 ## Testing
 

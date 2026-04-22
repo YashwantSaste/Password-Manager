@@ -1,0 +1,54 @@
+name: Build CLI Packages
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-cli-packages:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: password-manager-cli-windows-portable
+            archive_path: dist/password-manager-cli-windows-portable.zip
+            archive_command: Compress-Archive -Path dist/password-manager-cli/* -DestinationPath dist/password-manager-cli-windows-portable.zip -Force
+          - os: ubuntu-latest
+            artifact_name: password-manager-cli-linux-portable
+            archive_path: dist/password-manager-cli-linux-portable.tar.gz
+            archive_command: tar -C dist -czf dist/password-manager-cli-linux-portable.tar.gz password-manager-cli password-manager-cli.sh
+          - os: macos-latest
+            artifact_name: password-manager-cli-macos-portable
+            archive_path: dist/password-manager-cli-macos-portable.tar.gz
+            archive_command: tar -C dist -czf dist/password-manager-cli-macos-portable.tar.gz password-manager-cli.app password-manager-cli.command
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build portable CLI package
+        shell: pwsh
+        run: ./scripts/package-app.ps1
+
+      - name: Archive portable CLI package
+        shell: pwsh
+        run: ${{ matrix.archive_command }}
+
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.archive_path }}
+          if-no-files-found: error
