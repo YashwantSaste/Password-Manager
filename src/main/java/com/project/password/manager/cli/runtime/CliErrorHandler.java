@@ -18,9 +18,12 @@ public class CliErrorHandler implements CommandLine.IExecutionExceptionHandler {
 			message = error.getClass().getSimpleName();
 		}
 		if (error instanceof UnauthorizedSessionException) {
-			commandLine.getErr().println("Authorization error: " + message);
+			commandLine.getErr().println(CliTheme.errorPanel("Authorization Error",
+					CliTheme.key("message") + CliTheme.muted(" : ") + CliTheme.secondary(message),
+					CliTheme.key("action") + CliTheme.muted(" : ") + CliTheme.accent("login <username> <password>")));
 		} else {
-			commandLine.getErr().println("Error: " + message);
+			commandLine.getErr().println(CliTheme.errorPanel("Command Failed",
+					CliTheme.key("message") + CliTheme.muted(" : ") + CliTheme.secondary(message)));
 		}
 		return commandLine.getCommandSpec().exitCodeOnExecutionException();
 	}

@@ -27,6 +27,7 @@ public class EntrySearchCommandHandler extends AbstractVaultScopedCommandHandler
 	@RequireAuthorization
 	public void handle(@NotNull EntrySearchCommand.Request request) {
 		output.info(CliViewPrinter.formatEntries(
-				entryService.searchEntries(currentUserId(), resolveVaultId(request.getVaultReference()), request.getQuery())));
+				entryService.searchEntries(currentUserId(), resolveVaultId(request.getVaultReference()), request.getQuery()),
+				request.isShowIds()));
 	}
 }

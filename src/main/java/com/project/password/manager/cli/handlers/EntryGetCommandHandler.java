@@ -28,6 +28,7 @@ public class EntryGetCommandHandler extends AbstractVaultScopedCommandHandler<En
 	public void handle(@NotNull EntryGetCommand.Request request) {
 		output.info(CliViewPrinter.formatEntries(
 				entryService.getEntriesByReference(currentUserId(), resolveVaultIds(request.getVaultReference()),
-						request.getEntryReference())));
+						request.getEntryReference()),
+				request.isShowIds()));
 	}
 }

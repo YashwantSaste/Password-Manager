@@ -1,7 +1,6 @@
 package com.project.password.manager.configuration.application;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -64,6 +63,12 @@ public class Workspace {
 			}
 		} else {
 			log.info("Workspace already exists at: " + workspace.getAbsolutePath());
+			try {
+				createPropertiesFile();
+			} catch (IOException e) {
+				log.error("Failed to reconcile application properties file", e);
+				throw new RuntimeException("Error while reconciling application properties file", e);
+			}
 		}
 	}
 
@@ -89,22 +94,70 @@ public class Workspace {
 	}
 
 	private static void createPropertiesFile() throws IOException {
-		File propertiesFile = new File(workspace, PropertiesReader.PROPERTY_FILE_PATH);
-		log.info("Creating application properties file at: " + propertiesFile.getAbsolutePath());
-		Properties properties = new Properties();
-		properties.setProperty(ApplicationProperties.PROPERTY_APP_VERSION, "1.0.0");
-		properties.setProperty(ApplicationProperties.PROPERTY_APP_NAME, "password-manager-cli");
-		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_ENABLED, "false");
-		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_TYPE, "sql");
-		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_USERNAME, "username");
-		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_PASSWORD, "password");
-		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_PORT, "5432");
-		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_VENDOR, "postgres");
-		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_NAME, "name");
-		properties.setProperty(ApplicationProperties.PROPERTY_DATABASE_HOST, "host");
-		try (FileOutputStream fos = new FileOutputStream(propertiesFile)) {
-			properties.store(fos, "Application properties created during workspace initialization");
+		File propertiesFile = PropertiesReader.resolvePropertiesFile();
+		Properties properties = PropertiesReader.loadProperties();
+		if (propertiesFile.exists()) {
+			log.info("Reconciling application properties file at: " + propertiesFile.getAbsolutePath());
+		} else {
+			log.info("Creating application properties file at: " + propertiesFile.getAbsolutePath());
 		}
-		log.info("Application properties file created successfully");
+
+		boolean changed = applyDefaultProperties(properties);
+		if (!propertiesFile.exists() || changed) {
+			PropertiesReader.storeProperties(properties, "Application properties created during workspace initialization");
+			PropertiesReader.refreshIfInitialized();
+			log.info("Application properties file created successfully");
+		} else {
+			log.info("Application properties file already contains all required defaults");
+		}
+	}
+
+	private static boolean applyDefaultProperties(@NotNull Properties properties) {
+		boolean changed = false;
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_APP_VERSION, "1.0.0");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_APP_NAME, "password-manager-cli");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_APP_CLI_THEME, "warm-retro");
+
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_DATABASE_ENABLED, "false");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_DATABASE_TYPE, "sql");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_DATABASE_USERNAME, "username");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_DATABASE_PASSWORD, "password");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_DATABASE_PORT, "5432");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_DATABASE_VENDOR, "postgres");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_DATABASE_NAME, "password_manager");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_DATABASE_HOST, "localhost");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_DATABASE_DDL_MODE, "update");
+
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_ARGON2_MEMORY_SIZE, "65536");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_ARGON2_ITERATIONS, "3");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_ARGON2_PARALLELISM, "1");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_ARGON2_SALT_LENGTH, "16");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_ARGON2_HASH_LENGTH, "32");
+
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_JWT_ALGORITHM, "HS256");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_JWT_ISSUER, "password-manager-cli");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_JWT_REFRESH_EXPIRATION, "604800000");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_JWT_ACCESS_EXPIRATION, "900000");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_JWT_SECRET,
+				"change-this-demo-secret-before-sharing-builds");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_JWT_PRIVATE_KEY_PATH, "private.key");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_JWT_PUBLIC_KEY_PATH, "public.key");
+
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_AES_TRANSFORMATION, "AES/GCM/NoPadding");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_AES_KEY_SIZE, "128");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_AES_TAG_LENGTH, "128");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_AES_IV_LENGTH, "12");
+
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_SALT_KEY_ITERATIONS, "65536");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_SALT_KEY_LENGTH, "256");
+		return changed;
+	}
+
+	private static boolean putIfAbsent(@NotNull Properties properties, @NotNull String key, @NotNull String value) {
+		if (properties.getProperty(key) != null) {
+			return false;
+		}
+		properties.setProperty(key, value);
+		return true;
 	}
 }

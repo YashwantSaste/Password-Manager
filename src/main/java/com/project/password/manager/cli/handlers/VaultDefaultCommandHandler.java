@@ -25,6 +25,6 @@ public class VaultDefaultCommandHandler extends AbstractAuthorizedCommandHandler
 	@Override
 	@RequireAuthorization
 	public void handle(@NotNull VaultDefaultCommand.Request request) {
-		output.info(CliViewPrinter.formatVault(vaultService.getDefaultVault(currentUserId())));
+		output.info(CliViewPrinter.formatVault(vaultService.getDefaultVault(currentUserId()), request.isShowIds()));
 	}
 }

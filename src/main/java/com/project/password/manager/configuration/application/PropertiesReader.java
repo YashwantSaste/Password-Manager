@@ -2,6 +2,8 @@ package com.project.password.manager.configuration.application;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
@@ -18,9 +20,11 @@ public class PropertiesReader {
 
 	public static final String PROPERTY_FILE_PATH = "password-manager.properties";
 	private static final Map<String, Object> propertiesMap = new ConcurrentHashMap<>();
+	private static volatile boolean initialized;
 
 	private PropertiesReader() {
 		log.info("Initializing PropertiesReader");
+		initialized = true;
 		extractProperties();
 	}
 
@@ -36,9 +40,41 @@ public class PropertiesReader {
 
 	@NotNull
 	private File getPropertiesFile() {
+		return resolvePropertiesFile();
+	}
+
+	@NotNull
+	public static File resolvePropertiesFile() {
 		File file = new File(Workspace.getInstance().getRoot(), PROPERTY_FILE_PATH);
 		log.debug("Resolved properties file path: " + file.getAbsolutePath());
 		return file;
+	}
+
+	@NotNull
+	public static Properties loadProperties() throws IOException {
+		Properties properties = new Properties();
+		File propertiesFile = resolvePropertiesFile();
+		if (!propertiesFile.exists()) {
+			return properties;
+		}
+
+		try (InputStream propertiesFileStream = new FileInputStream(propertiesFile)) {
+			properties.load(propertiesFileStream);
+		}
+		return properties;
+	}
+
+	public static void storeProperties(@NotNull Properties properties, @NotNull String comments) throws IOException {
+		File propertiesFile = resolvePropertiesFile();
+		try (FileOutputStream fos = new FileOutputStream(propertiesFile)) {
+			properties.store(fos, comments);
+		}
+	}
+
+	public static void refreshIfInitialized() {
+		if (initialized) {
+			getInstance().reload();
+		}
 	}
 
 	@Nullable
@@ -86,9 +122,8 @@ public class PropertiesReader {
 			throw new RuntimeException(msg);
 		}
 
-		try (InputStream propertiesFileStream = new FileInputStream(getPropertiesFile())) {
-			Properties properties = new Properties();
-			properties.load(propertiesFileStream);
+		try {
+			Properties properties = loadProperties();
 			properties.entrySet().forEach(entry -> {
 				propertiesMap.put(entry.getKey().toString(), entry.getValue());
 				log.debug("Loaded property: " + entry.getKey() + "=" + entry.getValue());
@@ -99,6 +134,11 @@ public class PropertiesReader {
 			log.error("Error reading the properties file", ex);
 			throw new RuntimeException("Error reading the properties file", ex);
 		}
+	}
+
+	private void reload() {
+		propertiesMap.clear();
+		extractProperties();
 	}
 
 	private boolean propertyFileExist() {

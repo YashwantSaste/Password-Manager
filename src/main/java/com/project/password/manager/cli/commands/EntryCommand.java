@@ -1,5 +1,7 @@
 package com.project.password.manager.cli.commands;
 
+import com.project.password.manager.cli.runtime.CliTheme;
+
 import picocli.CommandLine.Command;
 
 @Command(name = "entry", mixinStandardHelpOptions = true, description = "Entry operations.", subcommands = {
@@ -14,6 +16,7 @@ public class EntryCommand implements Runnable {
 
 	@Override
 	public void run() {
-		System.out.println("Use an entry subcommand like list, get, create, update, delete, or search.");
+		System.out.println(CliTheme.hintPanel("Entry Commands",
+				CliTheme.key("use") + CliTheme.muted(" : ") + CliTheme.secondary("list, get, create, update, delete, or search")));
 	}
 }

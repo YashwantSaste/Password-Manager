@@ -5,6 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.project.password.manager.cli.runtime.CliTheme;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.entry.EntryView;
@@ -13,61 +14,103 @@ import com.project.password.manager.model.entry.TagValue;
 
 public final class CliViewPrinter {
 
+	private static final int KEY_WIDTH = 12;
+
 	private CliViewPrinter() {
 	}
 
 	@NotNull
 	public static String formatUser(@NotNull IUser user) {
-		return "userId=" + user.getId() + System.lineSeparator()
-				+ "name=" + user.getName() + System.lineSeparator()
-				+ "defaultVaultId=" + user.getDefaultVaultId() + System.lineSeparator()
-				+ "vaultCount=" + user.getVaults().size();
+		return section(
+				CliTheme.badge("user") + "  " + CliTheme.title(user.getName()),
+				field("user", user.getName()),
+				field("vaults", String.valueOf(user.getVaults().size())),
+				field("default vault", valueOrDash(user.getDefaultVaultId())));
 	}
 
 	@NotNull
 	public static String formatVault(@NotNull IVault vault) {
-		return "vaultName=" + vault.getName() + System.lineSeparator()
-				+ "vaultId=" + vault.getId() + System.lineSeparator()
-				+ "userId=" + vault.getUserId();
+		return formatVault(vault, false);
+	}
+
+	@NotNull
+	public static String formatVault(@NotNull IVault vault, boolean showIds) {
+		String content = section(
+				CliTheme.badge("vault") + "  " + CliTheme.title(vault.getName()),
+				field("owner", vault.getUserId()));
+		if (showIds) {
+			content = section(
+					CliTheme.badge("vault") + "  " + CliTheme.title(vault.getName()),
+					field("owner", vault.getUserId()),
+					field("internal id", vault.getId()));
+		}
+		return content;
 	}
 
 	@NotNull
 	public static String formatVaults(@NotNull List<IVault> vaults) {
+		return formatVaults(vaults, false);
+	}
+
+	@NotNull
+	public static String formatVaults(@NotNull List<IVault> vaults, boolean showIds) {
 		if (vaults.isEmpty()) {
-			return "No vaults found.";
+			return CliTheme.muted("No vaults found.");
 		}
 		StringBuilder builder = new StringBuilder();
 		for (IVault vault : vaults) {
-			appendSection(builder, formatVault(vault));
+			appendSection(builder, formatVault(vault, showIds));
 		}
 		return builder.toString();
 	}
 
 	@NotNull
 	public static String formatEntry(@NotNull EntryView entry) {
-		StringBuilder builder = new StringBuilder();
-		builder.append("entryId=").append(entry.getId()).append(System.lineSeparator());
-		builder.append("vaultId=").append(entry.getVaultId()).append(System.lineSeparator());
-		builder.append("label=").append(entry.getLabel()).append(System.lineSeparator());
-		builder.append("password=").append(entry.getPassword()).append(System.lineSeparator());
-		builder.append("username=").append(valueOrDash(entry.getUsername())).append(System.lineSeparator());
-		builder.append("loginName=").append(valueOrDash(entry.getLoginName())).append(System.lineSeparator());
-		builder.append("url=").append(valueOrDash(entry.getUrl())).append(System.lineSeparator());
-		builder.append("tags=").append(joinTags(entry.getTags())).append(System.lineSeparator());
-		builder.append("notes=").append(joinNotes(entry.getNotes())).append(System.lineSeparator());
-		builder.append("createdAtEpochMs=").append(entry.getCreatedAtEpochMs()).append(System.lineSeparator());
-		builder.append("updatedAtEpochMs=").append(entry.getUpdatedAtEpochMs());
+		return formatEntry(entry, false);
+	}
+
+	@NotNull
+	public static String formatEntry(@NotNull EntryView entry, boolean showIds) {
+		StringBuilder builder = new StringBuilder(section(
+				CliTheme.badge("entry") + "  " + CliTheme.title(entry.getLabel()),
+				field("password", entry.getPassword()),
+				field("username", valueOrDash(entry.getUsername())),
+				field("login", valueOrDash(entry.getLoginName())),
+				field("url", valueOrDash(entry.getUrl())),
+				field("tags", joinTags(entry.getTags())),
+				field("notes", joinNotes(entry.getNotes())),
+				field("created", String.valueOf(entry.getCreatedAtEpochMs())),
+				field("updated", String.valueOf(entry.getUpdatedAtEpochMs()))));
+		if (showIds) {
+			builder.setLength(0);
+			builder.append(section(
+					CliTheme.badge("entry") + "  " + CliTheme.title(entry.getLabel()),
+					field("password", entry.getPassword()),
+					field("username", valueOrDash(entry.getUsername())),
+					field("login", valueOrDash(entry.getLoginName())),
+					field("url", valueOrDash(entry.getUrl())),
+					field("tags", joinTags(entry.getTags())),
+					field("notes", joinNotes(entry.getNotes())),
+					field("created", String.valueOf(entry.getCreatedAtEpochMs())),
+					field("updated", String.valueOf(entry.getUpdatedAtEpochMs())),
+					field("entry id", entry.getId())));
+		}
 		return builder.toString();
 	}
 
 	@NotNull
 	public static String formatEntries(@NotNull List<EntryView> entries) {
+		return formatEntries(entries, false);
+	}
+
+	@NotNull
+	public static String formatEntries(@NotNull List<EntryView> entries, boolean showIds) {
 		if (entries.isEmpty()) {
-			return "No entries found.";
+			return CliTheme.muted("No entries found.");
 		}
 		StringBuilder builder = new StringBuilder();
 		for (EntryView entry : entries) {
-			appendSection(builder, formatEntry(entry));
+			appendSection(builder, formatEntry(entry, showIds));
 		}
 		return builder.toString();
 	}
@@ -77,6 +120,24 @@ public final class CliViewPrinter {
 			builder.append(System.lineSeparator()).append(System.lineSeparator());
 		}
 		builder.append(section);
+	}
+
+	@NotNull
+	private static String section(@NotNull String title, @NotNull String... lines) {
+		return CliTheme.panel(title, lines);
+	}
+
+	@NotNull
+	private static String field(@NotNull String key, @NotNull String value) {
+		return CliTheme.key(padRight(key, KEY_WIDTH)) + CliTheme.muted(" : ") + CliTheme.secondary(value);
+	}
+
+	@NotNull
+	private static String padRight(@NotNull String value, int width) {
+		if (value.length() >= width) {
+			return value;
+		}
+		return value + " ".repeat(width - value.length());
 	}
 
 	@NotNull

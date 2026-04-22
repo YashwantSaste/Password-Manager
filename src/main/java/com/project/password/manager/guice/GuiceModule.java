@@ -17,6 +17,9 @@ import com.project.password.manager.cli.commands.LoginCommand;
 import com.project.password.manager.cli.commands.LogoutCommand;
 import com.project.password.manager.cli.commands.PingCommand;
 import com.project.password.manager.cli.commands.SignupCommand;
+import com.project.password.manager.cli.commands.ThemeListCommand;
+import com.project.password.manager.cli.commands.ThemePreviewCommand;
+import com.project.password.manager.cli.commands.ThemeSetCommand;
 import com.project.password.manager.cli.commands.VaultCreateCommand;
 import com.project.password.manager.cli.commands.VaultDefaultCommand;
 import com.project.password.manager.cli.commands.VaultListCommand;
@@ -31,6 +34,9 @@ import com.project.password.manager.cli.handlers.LoginCommandHandler;
 import com.project.password.manager.cli.handlers.LogoutCommandHandler;
 import com.project.password.manager.cli.handlers.PingCommandHandler;
 import com.project.password.manager.cli.handlers.SignupCommandHandler;
+import com.project.password.manager.cli.handlers.ThemeListCommandHandler;
+import com.project.password.manager.cli.handlers.ThemePreviewCommandHandler;
+import com.project.password.manager.cli.handlers.ThemeSetCommandHandler;
 import com.project.password.manager.cli.handlers.VaultCreateCommandHandler;
 import com.project.password.manager.cli.handlers.VaultDefaultCommandHandler;
 import com.project.password.manager.cli.handlers.VaultListCommandHandler;
@@ -192,6 +198,9 @@ public class GuiceModule extends AbstractModule {
 				.register(LogoutCommand.class, LogoutCommandHandler.class)
 				.register(WhoAmICommand.class, WhoAmICommandHandler.class)
 				.register(PingCommand.class, PingCommandHandler.class)
+				.register(ThemeListCommand.class, ThemeListCommandHandler.class)
+				.register(ThemePreviewCommand.class, ThemePreviewCommandHandler.class)
+				.register(ThemeSetCommand.class, ThemeSetCommandHandler.class)
 				.register(VaultListCommand.class, VaultListCommandHandler.class)
 				.register(VaultCreateCommand.class, VaultCreateCommandHandler.class)
 				.register(VaultDefaultCommand.class, VaultDefaultCommandHandler.class)
