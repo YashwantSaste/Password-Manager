@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -41,8 +42,14 @@ public class TokenService implements IService {
 	@NotNull
 	public String createToken(@NotNull IUser user) {
 		String tokenIfAlreadyExists = getToken(user);
-		if ((tokenIfAlreadyExists) != null && verify(tokenIfAlreadyExists, user) != null) {
-			return tokenIfAlreadyExists;
+		if (tokenIfAlreadyExists != null) {
+			try {
+				if (verify(tokenIfAlreadyExists, user) != null) {
+					return tokenIfAlreadyExists;
+				}
+			} catch (JWTVerificationException ex) {
+				tokenCacheFor.invalidate(user.getId());
+			}
 		}
 		String token = JWT.create()
 				.withIssuer(jwtConfiguration.issuer())
@@ -89,6 +96,14 @@ public class TokenService implements IService {
 			return;
 		}
 		tokenRepo.update(userId, token);
+	}
+
+	public void revokeToken(@NotNull IUser user) {
+		String userId = user.getId();
+		tokenCacheFor.invalidate(userId);
+		if (tokenRepo.findById(userId) != null) {
+			tokenRepo.delete(userId);
+		}
 	}
 
 }
