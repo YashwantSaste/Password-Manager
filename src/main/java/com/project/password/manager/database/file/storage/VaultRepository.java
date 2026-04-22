@@ -3,6 +3,7 @@ package com.project.password.manager.database.file.storage;
 import java.io.File;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.model.database.file.storage.Vault;
 
@@ -27,10 +28,21 @@ public class VaultRepository extends FileStorageRepository<Vault, String> {
 	}
 
 	@Override
+	@Nullable
+	public Vault findById(@NotNull String id) {
+		File entityDir = resolveEntityDirectoryInFileSystem(id);
+		if (!entityDir.exists()) {
+			return null;
+		}
+		File entityFile = new File(entityDir, id + ".json");
+		fileManager = new FileManager<>(entityFile, getEntityClass());
+		return fileManager.readFromFile();
+	}
+
+	@Override
 	@NotNull
 	protected String getEntityFileName() {
-		// vault has no specific file naming standard
-		return "";
+		return "vault.json";
 	}
 
 }

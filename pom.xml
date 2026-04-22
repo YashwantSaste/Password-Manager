@@ -49,6 +49,21 @@
 		    <version>4.0.0-M1</version>
 		    <scope>compile</scope>
 		</dependency>
+		<dependency>
+		    <groupId>jakarta.validation</groupId>
+		    <artifactId>jakarta.validation-api</artifactId>
+		    <version>3.1.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.hibernate.validator</groupId>
+		    <artifactId>hibernate-validator</artifactId>
+		    <version>8.0.1.Final</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.glassfish</groupId>
+		    <artifactId>jakarta.el</artifactId>
+		    <version>4.0.2</version>
+		</dependency>
 		<!-- Hibernate ORM (JPA implementation) -->
 	    <dependency>
 	        <groupId>org.hibernate.orm</groupId>
@@ -92,6 +107,24 @@
 		    <artifactId>caffeine</artifactId>
 		    <version>3.2.3</version>
 		    <scope>compile</scope>
+		</dependency>
+		
+		<dependency>
+	        <groupId>info.picocli</groupId>
+	        <artifactId>picocli</artifactId>
+	        <version>4.7.5</version>
+   		</dependency>
+
+	    <dependency>
+	        <groupId>org.jline</groupId>
+	        <artifactId>jline</artifactId>
+	        <version>3.25.1</version>
+	    </dependency>
+	    
+	    <dependency>
+		    <groupId>info.picocli</groupId>
+		    <artifactId>picocli-shell-jline3</artifactId>
+		    <version>4.7.5</version>
 		</dependency>
 	</dependencies>
 </project>

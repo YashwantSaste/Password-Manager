@@ -57,9 +57,9 @@ public class AuthService {
 		String keySalt = Base64.getEncoder().encodeToString(saltBytes);
 		newUser.setKeySalt(keySalt);
 		newUser.setVaults(new ArrayList<>());
+		userService.saveUser(newUser);
 		IVault defaultVault = vaultService.createDefaultVault(newUser);
 		newUser.setDefaultVaultId(defaultVault.getId());
-		userService.saveUser(newUser);
 		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
 		tokenEntity.setUserId(newUser.getId());
 		tokenEntity.setToken(tokenService.createToken(newUser));
