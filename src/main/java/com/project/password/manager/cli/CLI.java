@@ -105,7 +105,7 @@ public class CLI {
 	}
 
 	private static CommandLine createCommandLine() {
-		CommandHandlerRegistry handlerRegistry = GuicePlatform.getInjector().getInstance(CommandHandlerRegistry.class);
+		CommandHandlerRegistry handlerRegistry = GuicePlatform.getInstance(CommandHandlerRegistry.class);
 		CommandLine commandLine = new CommandLine(new BaseCommand(),
 				new CliCommandFactory(GuicePlatform.getInjector(), handlerRegistry));
 		commandLine.setExecutionExceptionHandler(new CliErrorHandler());

@@ -5,6 +5,9 @@ import org.jetbrains.annotations.NotNull;
 public interface IConfiguration {
 
 	@NotNull
+	IAppConfiguration appConfiguration();
+
+	@NotNull
 	IDatabaseConfiguration databaseConfiguration();
 
 	@NotNull

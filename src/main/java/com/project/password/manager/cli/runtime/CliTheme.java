@@ -3,13 +3,14 @@ package com.project.password.manager.cli.runtime;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import com.project.password.manager.configuration.application.Configuration;
 
 public final class CliTheme {
 
@@ -45,11 +46,14 @@ public final class CliTheme {
 	private CliTheme() {
 	}
 
-	public static void initialize(@Nullable String themeName) {
+	public static void initialize() {
+		String themeName = Configuration.getInstance().appConfiguration().cliConfiguration().theme();
+		if (themeName == null || themeName.isBlank()) {
+			themeName = "warm-retro";
+		}
 		activeThemeName = normalizeThemeName(themeName);
 		activePalette = ThemePalette.resolve(activeThemeName);
 	}
-
 	@NotNull
 	public static String getActiveThemeName() {
 		return activeThemeName;
@@ -153,7 +157,7 @@ public final class CliTheme {
 	public static String preview(@NotNull String themeName) {
 		String previousThemeName = activeThemeName;
 		ThemePalette previousPalette = activePalette;
-		initialize(themeName);
+		initialize();
 		String rendered = String.join(System.lineSeparator(),
 				banner(),
 				successPanel("Theme Sample",
@@ -163,10 +167,10 @@ public final class CliTheme {
 						key("surface") + muted(" : ") + secondary("badges, framed panels, retro contrast")),
 				hintPanel("Commands",
 						accent("theme list") + muted("  ·  ") + accent("theme preview paper-retro") + muted("  ·  ")
-								+ accent("theme set copper-dusk")));
-			activeThemeName = previousThemeName;
-			activePalette = previousPalette;
-			return rendered;
+						+ accent("theme set copper-dusk")));
+		activeThemeName = previousThemeName;
+		activePalette = previousPalette;
+		return rendered;
 	}
 
 	@NotNull
@@ -253,7 +257,7 @@ public final class CliTheme {
 				secondary(activePalette.bannerSubtitle),
 				muted(activePalette.bannerTagline),
 				key("hints") + muted(" : ") + accent("help") + muted(symbols().separator)
-						+ accent("vault list") + muted(symbols().separator) + accent("entry search \"github\""))
+				+ accent("vault list") + muted(symbols().separator) + accent("entry search \"github\""))
 				.split(System.lineSeparator()));
 	}
 

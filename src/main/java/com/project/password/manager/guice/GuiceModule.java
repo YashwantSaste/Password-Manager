@@ -2,11 +2,14 @@ package com.project.password.manager.guice;
 
 import java.lang.reflect.Method;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.matcher.AbstractMatcher;
+import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
+import com.project.password.manager.argon.Argon2Encoder;
 import com.project.password.manager.cli.commands.EntryCreateCommand;
 import com.project.password.manager.cli.commands.EntryDeleteCommand;
 import com.project.password.manager.cli.commands.EntryGetCommand;
@@ -41,15 +44,14 @@ import com.project.password.manager.cli.handlers.VaultCreateCommandHandler;
 import com.project.password.manager.cli.handlers.VaultDefaultCommandHandler;
 import com.project.password.manager.cli.handlers.VaultListCommandHandler;
 import com.project.password.manager.cli.handlers.WhoAmICommandHandler;
+import com.project.password.manager.cli.runtime.CliOutput;
+import com.project.password.manager.cli.runtime.CliSession;
+import com.project.password.manager.cli.runtime.CommandHandlerInvoker;
+import com.project.password.manager.cli.runtime.CommandHandlerRegistry;
+import com.project.password.manager.cli.runtime.ConsoleCliOutput;
 import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
 import com.project.password.manager.configuration.application.Configuration;
-import com.project.password.manager.argon.Argon2Encoder;
-import com.project.password.manager.cli.runtime.CliOutput;
-import com.project.password.manager.cli.runtime.CliSession;
-import com.project.password.manager.cli.runtime.CommandHandlerRegistry;
-import com.project.password.manager.cli.runtime.CommandHandlerInvoker;
-import com.project.password.manager.cli.runtime.ConsoleCliOutput;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.database.DataRepositoryFactory;
 import com.project.password.manager.database.EntryDataRepository;
@@ -61,17 +63,18 @@ import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
-import com.project.password.manager.service.AuthService;
-import com.project.password.manager.service.EntryService;
-import com.project.password.manager.service.TokenService;
-import com.project.password.manager.service.UserService;
-import com.project.password.manager.service.VaultService;
 import com.project.password.manager.model.database.file.storage.Metadata;
 import com.project.password.manager.model.database.file.storage.Token;
 import com.project.password.manager.model.database.file.storage.User;
 import com.project.password.manager.model.database.file.storage.Vault;
 import com.project.password.manager.model.database.nosql.UserDocument;
 import com.project.password.manager.model.database.sql.JpaUser;
+import com.project.password.manager.service.AuthService;
+import com.project.password.manager.service.EntryService;
+import com.project.password.manager.service.TokenService;
+import com.project.password.manager.service.UserService;
+import com.project.password.manager.service.VaultService;
+import com.project.password.manager.util.ModelObjectMapperFactory;
 
 public class GuiceModule extends AbstractModule {
 
@@ -104,8 +107,9 @@ public class GuiceModule extends AbstractModule {
 
 	}
 
-	private AbstractMatcher<Method> authorizationMethodMatcher() {
-		return new AbstractMatcher<Method>() {
+	@NotNull
+	private Matcher<Method> authorizationMethodMatcher() {
+		return new Matcher<Method>() {
 			@Override
 			public boolean matches(Method method) {
 				return !method.isSynthetic() && method.isAnnotationPresent(RequireAuthorization.class);
@@ -165,8 +169,7 @@ public class GuiceModule extends AbstractModule {
 	@Singleton
 	VaultService provideVaultService(DataRepository<IUser, String> userRepository,
 			DataRepository<IVault, String> vaultRepository, IEncryptionService encryptionService) {
-		return new VaultService(userRepository, vaultRepository, encryptionService,
-				com.project.password.manager.util.ModelObjectMapperFactory.create());
+		return new VaultService(userRepository, vaultRepository, encryptionService, ModelObjectMapperFactory.create());
 	}
 
 	@Provides

@@ -6,6 +6,9 @@ public class ApplicationProperties {
 	public static final String PROPERTY_APP_NAME = "app.name";
 	public static final String PROPERTY_APP_VERSION = "app.version";
 	public static final String PROPERTY_APP_CLI_THEME = "app.cli.theme";
+	public static final String PROPERTY_APP_CLI_ENABLED = "app.cli.enabled";
+	public static final String PROPERTY_APP_CLI_DISPLAY_PROMPT = "app.cli.prompt";
+
 	/** Database Configurations **/
 	public static final String PROPERTY_DATABASE_ENABLED = "app.database.enabled";
 	public static final String PROPERTY_DATABASE_TYPE = "app.database.type";

@@ -34,7 +34,7 @@ public class ThemeSetCommandHandler implements CommandHandler<ThemeSetCommand.Re
 			properties.setProperty(ApplicationProperties.PROPERTY_APP_CLI_THEME, themeName);
 			PropertiesReader.storeProperties(properties, "Updated CLI theme");
 			PropertiesReader.refreshIfInitialized();
-			CliTheme.initialize(themeName);
+			CliTheme.initialize();
 		} catch (IOException ioException) {
 			throw new RuntimeException("Failed to persist theme setting", ioException);
 		}
