@@ -47,7 +47,7 @@ public final class CliTheme {
 	}
 
 	public static void initialize() {
-		String themeName = Configuration.getInstance().appConfiguration().cliConfiguration().theme();
+		String themeName = Configuration.getInstance().cliConfiguration().theme();
 		if (themeName == null || themeName.isBlank()) {
 			themeName = "warm-retro";
 		}

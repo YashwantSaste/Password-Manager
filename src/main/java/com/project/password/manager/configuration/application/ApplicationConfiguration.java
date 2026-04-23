@@ -3,7 +3,6 @@ package com.project.password.manager.configuration.application;
 import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.configuration.IAppConfiguration;
-import com.project.password.manager.configuration.ICLIConfiguration;
 
 public class ApplicationConfiguration implements IAppConfiguration {
 
@@ -26,11 +25,4 @@ public class ApplicationConfiguration implements IAppConfiguration {
 		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_APP_CLI_DISPLAY_PROMPT);
 
 	}
-
-	@Override
-	@NotNull
-	public ICLIConfiguration cliConfiguration() {
-		return new CLIConfiguration(reader);
-	}
-
 }

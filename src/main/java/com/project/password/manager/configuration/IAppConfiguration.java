@@ -10,6 +10,4 @@ public interface IAppConfiguration {
 	@NotNull
 	String version();
 
-	@NotNull
-	ICLIConfiguration cliConfiguration();
 }

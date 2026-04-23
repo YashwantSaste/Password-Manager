@@ -8,6 +8,9 @@ public interface IConfiguration {
 	IAppConfiguration appConfiguration();
 
 	@NotNull
+	ICLIConfiguration cliConfiguration();
+
+	@NotNull
 	IDatabaseConfiguration databaseConfiguration();
 
 	@NotNull
