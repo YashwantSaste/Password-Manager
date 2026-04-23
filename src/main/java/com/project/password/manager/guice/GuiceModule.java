@@ -10,6 +10,9 @@ import com.google.inject.Singleton;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.project.password.manager.argon.Argon2Encoder;
+import com.project.password.manager.cli.commands.ConfigGetCommand;
+import com.project.password.manager.cli.commands.ConfigListCommand;
+import com.project.password.manager.cli.commands.ConfigSetCommand;
 import com.project.password.manager.cli.commands.EntryCreateCommand;
 import com.project.password.manager.cli.commands.EntryDeleteCommand;
 import com.project.password.manager.cli.commands.EntryGetCommand;
@@ -28,6 +31,9 @@ import com.project.password.manager.cli.commands.VaultDefaultCommand;
 import com.project.password.manager.cli.commands.VaultListCommand;
 import com.project.password.manager.cli.commands.WhoAmICommand;
 import com.project.password.manager.cli.handlers.EntryCreateCommandHandler;
+import com.project.password.manager.cli.handlers.ConfigGetCommandHandler;
+import com.project.password.manager.cli.handlers.ConfigListCommandHandler;
+import com.project.password.manager.cli.handlers.ConfigSetCommandHandler;
 import com.project.password.manager.cli.handlers.EntryDeleteCommandHandler;
 import com.project.password.manager.cli.handlers.EntryGetCommandHandler;
 import com.project.password.manager.cli.handlers.EntryListCommandHandler;
@@ -196,6 +202,9 @@ public class GuiceModule extends AbstractModule {
 	@Singleton
 	CommandHandlerRegistry provideCommandHandlerRegistry() {
 		return new CommandHandlerRegistry()
+				.register(ConfigListCommand.class, ConfigListCommandHandler.class)
+				.register(ConfigGetCommand.class, ConfigGetCommandHandler.class)
+				.register(ConfigSetCommand.class, ConfigSetCommandHandler.class)
 				.register(LoginCommand.class, LoginCommandHandler.class)
 				.register(SignupCommand.class, SignupCommandHandler.class)
 				.register(LogoutCommand.class, LogoutCommandHandler.class)

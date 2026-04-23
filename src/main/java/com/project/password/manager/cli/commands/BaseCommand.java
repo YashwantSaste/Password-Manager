@@ -11,6 +11,7 @@ import picocli.CommandLine.Command;
 				LogoutCommand.class,
 				WhoAmICommand.class,
 				PingCommand.class,
+				ConfigCommand.class,
 				ThemeCommand.class,
 				VaultCommand.class,
 				EntryCommand.class,
@@ -22,6 +23,6 @@ public class BaseCommand implements Runnable {
 		System.out.println(CliTheme.hintPanel("Password Manager CLI",
 				CliTheme.key("theme") + CliTheme.muted(" : ") + CliTheme.secondary(CliTheme.getActiveThemeName()),
 				CliTheme.key("next") + CliTheme.muted(" : ") + CliTheme.accent("help") + CliTheme.muted("  ·  ")
-						+ CliTheme.accent("theme preview") + CliTheme.muted("  ·  ") + CliTheme.accent("vault list")));
+						+ CliTheme.accent("config list") + CliTheme.muted("  ·  ") + CliTheme.accent("vault list")));
 	}
 }

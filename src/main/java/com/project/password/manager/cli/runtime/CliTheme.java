@@ -122,7 +122,6 @@ public final class CliTheme {
 		StringBuilder builder = new StringBuilder();
 		builder.append(panelBorder(symbols().panelTopLeft, symbols().panelTopRight, width)).append(newline);
 		builder.append(panelRow(heading, width)).append(newline);
-		builder.append(panelDivider(width)).append(newline);
 		for (int index = 0; index < lines.length; index++) {
 			builder.append(panelRow(lines[index], width));
 			if (index < lines.length - 1) {
@@ -264,12 +263,6 @@ public final class CliTheme {
 	@NotNull
 	private static String normalizeThemeName(@Nullable String themeName) {
 		return themeName == null || themeName.isBlank() ? "warm-retro" : themeName.trim().toLowerCase();
-	}
-
-	@NotNull
-	private static String panelDivider(int width) {
-		return color(activePalette.mutedColor, false, false,
-				symbols().panelVertical + repeat(symbols().lineUnit(), width + 2) + symbols().panelVertical);
 	}
 
 	@NotNull
@@ -468,11 +461,6 @@ public final class CliTheme {
 		private String sample() {
 			return line + doubleLine + panelTopLeft + panelTopRight + panelBottomLeft + panelBottomRight + panelVertical
 					+ promptCursor;
-		}
-
-		@NotNull
-		private String lineUnit() {
-			return line.substring(0, 1);
 		}
 
 		@NotNull
