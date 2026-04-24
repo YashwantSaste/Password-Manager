@@ -16,13 +16,12 @@ public class ApplicationConfiguration implements IAppConfiguration {
 	@Override
 	@NotNull
 	public String name() {
-		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_APP_CLI_DISPLAY_PROMPT);
+		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_APP_NAME);
 	}
 
 	@Override
 	@NotNull
 	public String version() {
-		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_APP_CLI_DISPLAY_PROMPT);
-
+		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_APP_VERSION);
 	}
 }
