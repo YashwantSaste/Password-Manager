@@ -1,6 +1,8 @@
 package com.project.password.manager.database.file.storage;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -48,6 +50,31 @@ public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> i
 		File entityFile = new File(entityDir, getEntityFileName());
 		fileManager = new FileManager<T>(entityFile, getEntityClass());
 		return fileManager.readFromFile();
+	}
+
+	@Override
+	@NotNull
+	public List<T> findAll() {
+		List<T> entities = new ArrayList<>();
+		if (!workspace.exists()) {
+			return entities;
+		}
+		File[] entityDirectories = workspace.listFiles(File::isDirectory);
+		if (entityDirectories == null) {
+			return entities;
+		}
+		for (File entityDirectory : entityDirectories) {
+			File entityFile = new File(entityDirectory, getEntityFileName());
+			if (!entityFile.exists()) {
+				continue;
+			}
+			FileManager<T> currentFileManager = new FileManager<>(entityFile, getEntityClass());
+			T entity = currentFileManager.readFromFile();
+			if (entity != null) {
+				entities.add(entity);
+			}
+		}
+		return entities;
 	}
 
 	@Override

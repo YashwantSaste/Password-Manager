@@ -10,46 +10,52 @@ import com.google.inject.Singleton;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.project.password.manager.argon.Argon2Encoder;
-import com.project.password.manager.cli.commands.ConfigGetCommand;
-import com.project.password.manager.cli.commands.ConfigListCommand;
-import com.project.password.manager.cli.commands.ConfigSetCommand;
-import com.project.password.manager.cli.commands.EntryCreateCommand;
-import com.project.password.manager.cli.commands.EntryDeleteCommand;
-import com.project.password.manager.cli.commands.EntryGetCommand;
-import com.project.password.manager.cli.commands.EntryListCommand;
-import com.project.password.manager.cli.commands.EntrySearchCommand;
-import com.project.password.manager.cli.commands.EntryUpdateCommand;
-import com.project.password.manager.cli.commands.LoginCommand;
-import com.project.password.manager.cli.commands.LogoutCommand;
-import com.project.password.manager.cli.commands.PingCommand;
-import com.project.password.manager.cli.commands.SignupCommand;
-import com.project.password.manager.cli.commands.ThemeListCommand;
-import com.project.password.manager.cli.commands.ThemePreviewCommand;
-import com.project.password.manager.cli.commands.ThemeSetCommand;
-import com.project.password.manager.cli.commands.VaultCreateCommand;
-import com.project.password.manager.cli.commands.VaultDefaultCommand;
-import com.project.password.manager.cli.commands.VaultListCommand;
-import com.project.password.manager.cli.commands.WhoAmICommand;
-import com.project.password.manager.cli.handlers.EntryCreateCommandHandler;
-import com.project.password.manager.cli.handlers.ConfigGetCommandHandler;
-import com.project.password.manager.cli.handlers.ConfigListCommandHandler;
-import com.project.password.manager.cli.handlers.ConfigSetCommandHandler;
-import com.project.password.manager.cli.handlers.EntryDeleteCommandHandler;
-import com.project.password.manager.cli.handlers.EntryGetCommandHandler;
-import com.project.password.manager.cli.handlers.EntryListCommandHandler;
-import com.project.password.manager.cli.handlers.EntrySearchCommandHandler;
-import com.project.password.manager.cli.handlers.EntryUpdateCommandHandler;
-import com.project.password.manager.cli.handlers.LoginCommandHandler;
-import com.project.password.manager.cli.handlers.LogoutCommandHandler;
-import com.project.password.manager.cli.handlers.PingCommandHandler;
-import com.project.password.manager.cli.handlers.SignupCommandHandler;
-import com.project.password.manager.cli.handlers.ThemeListCommandHandler;
-import com.project.password.manager.cli.handlers.ThemePreviewCommandHandler;
-import com.project.password.manager.cli.handlers.ThemeSetCommandHandler;
-import com.project.password.manager.cli.handlers.VaultCreateCommandHandler;
-import com.project.password.manager.cli.handlers.VaultDefaultCommandHandler;
-import com.project.password.manager.cli.handlers.VaultListCommandHandler;
-import com.project.password.manager.cli.handlers.WhoAmICommandHandler;
+import com.project.password.manager.cli.commands.auth.LoginCommand;
+import com.project.password.manager.cli.commands.auth.LogoutCommand;
+import com.project.password.manager.cli.commands.auth.PingCommand;
+import com.project.password.manager.cli.commands.auth.SignupCommand;
+import com.project.password.manager.cli.commands.auth.WhoAmICommand;
+import com.project.password.manager.cli.commands.config.ConfigGetCommand;
+import com.project.password.manager.cli.commands.config.ConfigListCommand;
+import com.project.password.manager.cli.commands.config.ConfigSetCommand;
+import com.project.password.manager.cli.commands.entry.EntryCreateCommand;
+import com.project.password.manager.cli.commands.entry.EntryDeleteCommand;
+import com.project.password.manager.cli.commands.entry.EntryGetCommand;
+import com.project.password.manager.cli.commands.entry.EntryListCommand;
+import com.project.password.manager.cli.commands.entry.EntrySearchCommand;
+import com.project.password.manager.cli.commands.entry.EntryUpdateCommand;
+import com.project.password.manager.cli.commands.theme.ThemeListCommand;
+import com.project.password.manager.cli.commands.theme.ThemePreviewCommand;
+import com.project.password.manager.cli.commands.theme.ThemeSetCommand;
+import com.project.password.manager.cli.commands.user.UserRoleGrantCommand;
+import com.project.password.manager.cli.commands.user.UserRoleListCommand;
+import com.project.password.manager.cli.commands.user.UserRoleRevokeCommand;
+import com.project.password.manager.cli.commands.vault.VaultCreateCommand;
+import com.project.password.manager.cli.commands.vault.VaultDefaultCommand;
+import com.project.password.manager.cli.commands.vault.VaultListCommand;
+import com.project.password.manager.cli.handlers.auth.LoginCommandHandler;
+import com.project.password.manager.cli.handlers.auth.LogoutCommandHandler;
+import com.project.password.manager.cli.handlers.auth.PingCommandHandler;
+import com.project.password.manager.cli.handlers.auth.SignupCommandHandler;
+import com.project.password.manager.cli.handlers.auth.WhoAmICommandHandler;
+import com.project.password.manager.cli.handlers.config.ConfigGetCommandHandler;
+import com.project.password.manager.cli.handlers.config.ConfigListCommandHandler;
+import com.project.password.manager.cli.handlers.config.ConfigSetCommandHandler;
+import com.project.password.manager.cli.handlers.entry.EntryCreateCommandHandler;
+import com.project.password.manager.cli.handlers.entry.EntryDeleteCommandHandler;
+import com.project.password.manager.cli.handlers.entry.EntryGetCommandHandler;
+import com.project.password.manager.cli.handlers.entry.EntryListCommandHandler;
+import com.project.password.manager.cli.handlers.entry.EntrySearchCommandHandler;
+import com.project.password.manager.cli.handlers.entry.EntryUpdateCommandHandler;
+import com.project.password.manager.cli.handlers.theme.ThemeListCommandHandler;
+import com.project.password.manager.cli.handlers.theme.ThemePreviewCommandHandler;
+import com.project.password.manager.cli.handlers.theme.ThemeSetCommandHandler;
+import com.project.password.manager.cli.handlers.user.UserRoleGrantCommandHandler;
+import com.project.password.manager.cli.handlers.user.UserRoleListCommandHandler;
+import com.project.password.manager.cli.handlers.user.UserRoleRevokeCommandHandler;
+import com.project.password.manager.cli.handlers.vault.VaultCreateCommandHandler;
+import com.project.password.manager.cli.handlers.vault.VaultDefaultCommandHandler;
+import com.project.password.manager.cli.handlers.vault.VaultListCommandHandler;
 import com.project.password.manager.cli.runtime.CliOutput;
 import com.project.password.manager.cli.runtime.CliSession;
 import com.project.password.manager.cli.runtime.CommandHandlerInvoker;
@@ -155,8 +161,8 @@ public class GuiceModule extends AbstractModule {
 
 	@Provides
 	@Singleton
-	UserService provideUserService(DataRepository<IUser, String> userRepository) {
-		return new UserService(userRepository);
+	UserService provideUserService(DataRepository<IUser, String> userRepository, TokenService tokenService) {
+		return new UserService(userRepository, tokenService);
 	}
 
 	@Provides
@@ -210,6 +216,9 @@ public class GuiceModule extends AbstractModule {
 				.register(LogoutCommand.class, LogoutCommandHandler.class)
 				.register(WhoAmICommand.class, WhoAmICommandHandler.class)
 				.register(PingCommand.class, PingCommandHandler.class)
+				.register(UserRoleListCommand.class, UserRoleListCommandHandler.class)
+				.register(UserRoleGrantCommand.class, UserRoleGrantCommandHandler.class)
+				.register(UserRoleRevokeCommand.class, UserRoleRevokeCommandHandler.class)
 				.register(ThemeListCommand.class, ThemeListCommandHandler.class)
 				.register(ThemePreviewCommand.class, ThemePreviewCommandHandler.class)
 				.register(ThemeSetCommand.class, ThemeSetCommandHandler.class)
