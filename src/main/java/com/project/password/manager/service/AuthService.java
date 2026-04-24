@@ -1,7 +1,9 @@
 package com.project.password.manager.service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -9,7 +11,9 @@ import com.project.password.manager.argon.Argon2Encoder;
 import com.project.password.manager.guice.PlatformEntityProvider;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
+import com.project.password.manager.model.UserRole;
 import com.project.password.manager.model.IVault;
+import com.project.password.manager.configuration.application.Workspace;
 import com.project.password.manager.util.KeyGenerator;
 
 public class AuthService {
@@ -57,6 +61,7 @@ public class AuthService {
 		String keySalt = Base64.getEncoder().encodeToString(saltBytes);
 		newUser.setKeySalt(keySalt);
 		newUser.setVaults(new ArrayList<>());
+		newUser.setRoles(determineInitialRoles());
 		userService.saveUser(newUser);
 		IVault defaultVault = vaultService.createDefaultVault(newUser);
 		newUser.setDefaultVaultId(defaultVault.getId());
@@ -64,5 +69,15 @@ public class AuthService {
 		tokenEntity.setUserId(newUser.getId());
 		tokenEntity.setToken(tokenService.createToken(newUser));
 		tokenService.saveToken(newUser, tokenEntity);
+	}
+
+	@NotNull
+	private List<UserRole> determineInitialRoles() {
+		File usersDirectory = new File(Workspace.getInstance().getRoot(), "users");
+		String[] existingUsers = usersDirectory.list();
+		if (!usersDirectory.exists() || existingUsers == null || existingUsers.length == 0) {
+			return List.of(UserRole.ADMIN, UserRole.USER);
+		}
+		return List.of(UserRole.USER);
 	}
 }

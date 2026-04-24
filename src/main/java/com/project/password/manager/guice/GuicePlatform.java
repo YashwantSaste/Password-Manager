@@ -7,26 +7,30 @@ import com.google.inject.Injector;
 
 public class GuicePlatform {
 
+	private GuicePlatform() {
+	}
+
 	private static class HOLDER {
 		private static final Injector INJECTOR = Guice.createInjector(new GuiceModule());
-		private static final GuicePlatform INSTANCE = new GuicePlatform();
 	}
 
 	@NotNull
-	public static GuicePlatform getInstance() {
-		return HOLDER.INSTANCE;
+	private static Injector injector() {
+		return HOLDER.INJECTOR;
 	}
 
 	@NotNull
 	public static Injector getInjector() {
-		return HOLDER.INJECTOR;
+		return injector();
 	}
 
-	public static void tryInjectMembers(@NotNull Object object) {
-		Injector injector = getInjector();
-		if (injector != null) {
-			injector.injectMembers(object);
-		}
+	@NotNull
+	public static <T> T getInstance(@NotNull Class<T> type) {
+		return injector().getInstance(type);
+	}
+
+	public static void injectMembers(@NotNull Object object) {
+		injector().injectMembers(object);
 	}
 
 }

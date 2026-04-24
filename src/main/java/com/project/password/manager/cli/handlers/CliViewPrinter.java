@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.cli.runtime.CliTheme;
 import com.project.password.manager.model.IUser;
+import com.project.password.manager.model.UserRole;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.entry.EntryView;
 import com.project.password.manager.model.entry.NoteValue;
@@ -24,6 +25,7 @@ public final class CliViewPrinter {
 		return section(
 				CliTheme.badge("user") + "  " + CliTheme.title(user.getName()),
 				field("user", user.getName()),
+				field("roles", joinRoles(user.getRoles())),
 				field("vaults", String.valueOf(user.getVaults().size())),
 				field("default vault", valueOrDash(user.getDefaultVaultId())));
 	}
@@ -171,6 +173,21 @@ public final class CliViewPrinter {
 				builder.append(" | ");
 			}
 			builder.append(note.getDescription());
+		}
+		return builder.toString();
+	}
+
+	@NotNull
+	private static String joinRoles(@NotNull List<UserRole> roles) {
+		if (roles.isEmpty()) {
+			return UserRole.USER.name();
+		}
+		StringBuilder builder = new StringBuilder();
+		for (UserRole role : roles) {
+			if (builder.length() > 0) {
+				builder.append(", ");
+			}
+			builder.append(role.name());
 		}
 		return builder.toString();
 	}

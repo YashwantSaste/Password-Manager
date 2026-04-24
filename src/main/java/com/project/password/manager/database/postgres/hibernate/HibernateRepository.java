@@ -1,5 +1,7 @@
 package com.project.password.manager.database.postgres.hibernate;
 
+import java.util.List;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -31,6 +33,14 @@ public class HibernateRepository<T extends IEntity, Id> implements DataRepositor
 	public T findById(@NotNull Id id) {
 		try (Session session = sessionFactory.openSession()) {
 			return session.get(entity, (java.io.Serializable) id);
+		}
+	}
+
+	@Override
+	@NotNull
+	public List<T> findAll() {
+		try (Session session = sessionFactory.openSession()) {
+			return session.createQuery("from " + entity.getSimpleName(), entity).getResultList();
 		}
 	}
 

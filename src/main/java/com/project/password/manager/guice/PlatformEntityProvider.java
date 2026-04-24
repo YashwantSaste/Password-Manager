@@ -48,12 +48,12 @@ public class PlatformEntityProvider {
 
 	@NotNull
 	public <T> T getInstance(@NotNull Class<T> clazz) {
-		return GuicePlatform.getInjector().getInstance(clazz);
+		return GuicePlatform.getInstance(clazz);
 	}
 
 	@NotNull
 	private <T extends IEntity> T getEntityInstance(@NotNull Class<T> clazz) {
-		return GuicePlatform.getInjector().getInstance(clazz);
+		return GuicePlatform.getInstance(clazz);
 	}
 
 }

@@ -1,11 +1,13 @@
 package com.project.password.manager.model.database.nosql;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IUser;
+import com.project.password.manager.model.UserRole;
 import com.project.password.manager.model.IVault;
 
 public class UserDocument implements IUser {
@@ -42,6 +44,11 @@ public class UserDocument implements IUser {
 	public @NotNull List<IVault> getVaults() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public @NotNull List<UserRole> getRoles() {
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -94,6 +101,12 @@ public class UserDocument implements IUser {
 
 	@Override
 	public void setVaults(@NotNull List<IVault> vaults) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setRoles(@NotNull List<UserRole> roles) {
 		// TODO Auto-generated method stub
 
 	}

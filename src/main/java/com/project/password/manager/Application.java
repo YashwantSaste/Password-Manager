@@ -4,26 +4,19 @@ import java.io.IOException;
 
 import com.project.password.manager.cli.CLI;
 import com.project.password.manager.cli.runtime.CliTheme;
-import com.project.password.manager.configuration.application.ApplicationProperties;
-import com.project.password.manager.configuration.application.PropertiesReader;
+import com.project.password.manager.configuration.application.Configuration;
 import com.project.password.manager.configuration.application.Workspace;
+import com.project.password.manager.exceptions.InvalidAppModeException;
 
 public class Application {
 
 	public static void main(String[] args) throws IOException {
 		Workspace.configureWorkSpace();
-		CliTheme.initialize(resolveCliTheme());
-		CLI.initCLI(args);
-	}
-
-	private static String resolveCliTheme() {
-		String environmentTheme = System.getenv("PM_CLI_THEME");
-		if (environmentTheme != null && !environmentTheme.isBlank()) {
-			return environmentTheme;
+		if (Configuration.getInstance().cliConfiguration().isEnabled()) {
+			CliTheme.initialize();
+			CLI.initCLI(args);
+		} else {
+			throw new InvalidAppModeException("CLI is not enabled for this instance.");
 		}
-
-		String propertyTheme = PropertiesReader.getInstance()
-				.readPropertyAsString(ApplicationProperties.PROPERTY_APP_CLI_THEME);
-		return propertyTheme == null || propertyTheme.isBlank() ? "warm-retro" : propertyTheme;
 	}
 }
