@@ -1,5 +1,6 @@
 package com.project.password.manager.model.database.sql;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -7,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IUser;
+import com.project.password.manager.model.UserRole;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.database.file.storage.User;
 
@@ -85,6 +87,11 @@ public class JpaUser implements IUser {
 	}
 
 	@Override
+	public @NotNull List<UserRole> getRoles() {
+		return new ArrayList<>();
+	}
+
+	@Override
 	public @NotNull IMetadata metadata() {
 		// TODO Auto-generated method stub
 		return null;
@@ -134,6 +141,12 @@ public class JpaUser implements IUser {
 
 	@Override
 	public void setVaults(@NotNull List<IVault> vaults) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setRoles(@NotNull List<UserRole> roles) {
 		// TODO Auto-generated method stub
 
 	}

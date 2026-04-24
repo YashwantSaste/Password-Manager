@@ -24,6 +24,9 @@ public interface IUser extends IEntity {
 	List<IVault> getVaults();
 
 	@NotNull
+	List<UserRole> getRoles();
+
+	@NotNull
 	IMetadata metadata();
 
 	void setId(@NotNull String id);
@@ -37,6 +40,8 @@ public interface IUser extends IEntity {
 	void setDefaultVaultId(@NotNull String defaultVaultId);
 
 	void setVaults(@NotNull List<IVault> vaults);
+
+	void setRoles(@NotNull List<UserRole> roles);
 
 	void setMetadata(@NotNull IMetadata metadata);
 }

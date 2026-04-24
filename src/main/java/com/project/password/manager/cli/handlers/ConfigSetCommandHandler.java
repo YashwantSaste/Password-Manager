@@ -12,6 +12,7 @@ import com.project.password.manager.cli.runtime.CliTheme;
 import com.project.password.manager.configuration.application.ApplicationProperties;
 import com.project.password.manager.configuration.application.PropertiesReader;
 import com.project.password.manager.middleware.RequireAuthorization;
+import com.project.password.manager.model.UserRole;
 
 public class ConfigSetCommandHandler implements CommandHandler<ConfigSetCommand.Request> {
 
@@ -24,7 +25,7 @@ public class ConfigSetCommandHandler implements CommandHandler<ConfigSetCommand.
 	}
 
 	@Override
-	@RequireAuthorization
+	@RequireAuthorization(roles = { UserRole.ADMIN })
 	public void handle(@NotNull ConfigSetCommand.Request request) {
 		String key = request.getKey();
 		String value = request.getValue();

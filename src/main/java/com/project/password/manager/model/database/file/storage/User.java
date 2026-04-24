@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IUser;
+import com.project.password.manager.model.UserRole;
 import com.project.password.manager.model.IVault;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,6 +20,7 @@ public class User implements IUser, IFileStorableEntity {
 	private String keySalt;
 	private String defaultVaultId;
 	private List<IVault> vaults;
+	private List<UserRole> roles;
 	private IMetadata metadata;
 
 	public User() {
@@ -26,13 +28,14 @@ public class User implements IUser, IFileStorableEntity {
 	}
 
 	public User(String id, String name, String authVerifier, String keySalt, String defaultVaultId,
-			List<IVault> vaults, IMetadata metadata) {
+			List<IVault> vaults, List<UserRole> roles, IMetadata metadata) {
 		this.id = id;
 		this.name = name;
 		this.authVerifier = authVerifier;
 		this.keySalt = keySalt;
 		this.defaultVaultId = defaultVaultId;
 		this.vaults = vaults;
+		this.roles = roles;
 		this.metadata = metadata;
 	}
 
@@ -67,6 +70,15 @@ public class User implements IUser, IFileStorableEntity {
 			vaults = new ArrayList<>();
 		}
 		return vaults;
+	}
+
+	@Override
+	@NotNull
+	public List<UserRole> getRoles() {
+		if (roles == null) {
+			roles = new ArrayList<>();
+		}
+		return roles;
 	}
 
 	@Override
@@ -115,6 +127,11 @@ public class User implements IUser, IFileStorableEntity {
 	@Override
 	public void setVaults(@NotNull List<IVault> vaults) {
 		this.vaults = vaults;
+	}
+
+	@Override
+	public void setRoles(@NotNull List<UserRole> roles) {
+		this.roles = roles;
 	}
 
 	@Override

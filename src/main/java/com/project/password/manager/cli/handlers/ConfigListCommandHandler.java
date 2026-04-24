@@ -12,6 +12,7 @@ import com.project.password.manager.cli.runtime.CliTheme;
 import com.project.password.manager.configuration.application.ApplicationProperties;
 import com.project.password.manager.configuration.application.PropertiesReader;
 import com.project.password.manager.middleware.RequireAuthorization;
+import com.project.password.manager.model.UserRole;
 
 public class ConfigListCommandHandler implements CommandHandler<ConfigListCommand.Request> {
 
@@ -24,7 +25,7 @@ public class ConfigListCommandHandler implements CommandHandler<ConfigListComman
 	}
 
 	@Override
-	@RequireAuthorization
+	@RequireAuthorization(roles = { UserRole.ADMIN })
 	public void handle(@NotNull ConfigListCommand.Request request) {
 		Properties properties;
 		try {
