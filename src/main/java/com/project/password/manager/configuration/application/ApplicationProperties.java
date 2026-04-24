@@ -1,11 +1,17 @@
 package com.project.password.manager.configuration.application;
 
+import java.util.List;
+import java.util.Set;
+
 public class ApplicationProperties {
 
 	/** Application Configurations **/
 	public static final String PROPERTY_APP_NAME = "app.name";
 	public static final String PROPERTY_APP_VERSION = "app.version";
 	public static final String PROPERTY_APP_CLI_THEME = "app.cli.theme";
+	public static final String PROPERTY_APP_CLI_ENABLED = "app.cli.enabled";
+	public static final String PROPERTY_APP_CLI_DISPLAY_PROMPT = "app.cli.prompt";
+
 	/** Database Configurations **/
 	public static final String PROPERTY_DATABASE_ENABLED = "app.database.enabled";
 	public static final String PROPERTY_DATABASE_TYPE = "app.database.type";
@@ -38,4 +44,57 @@ public class ApplicationProperties {
 	/** Salt key generation Configurations */
 	public static final String PROPERTY_SALT_KEY_ITERATIONS= "app.salt.iterations";
 	public static final String PROPERTY_SALT_KEY_LENGTH = "app.salt.key.size";
+
+	private static final List<String> SUPPORTED_KEYS = List.of(
+			PROPERTY_APP_NAME,
+			PROPERTY_APP_VERSION,
+			PROPERTY_APP_CLI_THEME,
+			PROPERTY_APP_CLI_ENABLED,
+			PROPERTY_APP_CLI_DISPLAY_PROMPT,
+			PROPERTY_DATABASE_ENABLED,
+			PROPERTY_DATABASE_TYPE,
+			PROPERTY_DATABASE_USERNAME,
+			PROPERTY_DATABASE_PASSWORD,
+			PROPERTY_DATABASE_PORT,
+			PROPERTY_DATABASE_VENDOR,
+			PROPERTY_DATABASE_NAME,
+			PROPERTY_DATABASE_HOST,
+			PROPERTY_DATABASE_DDL_MODE,
+			PROPERTY_ARGON2_MEMORY_SIZE,
+			PROPERTY_ARGON2_ITERATIONS,
+			PROPERTY_ARGON2_PARALLELISM,
+			PROPERTY_ARGON2_SALT_LENGTH,
+			PROPERTY_ARGON2_HASH_LENGTH,
+			PROPERTY_JWT_ALGORITHM,
+			PROPERTY_JWT_ISSUER,
+			PROPERTY_JWT_REFRESH_EXPIRATION,
+			PROPERTY_JWT_ACCESS_EXPIRATION,
+			PROPERTY_JWT_SECRET,
+			PROPERTY_JWT_PRIVATE_KEY_PATH,
+			PROPERTY_JWT_PUBLIC_KEY_PATH,
+			PROPERTY_AES_TRANSFORMATION,
+			PROPERTY_AES_KEY_SIZE,
+			PROPERTY_AES_TAG_LENGTH,
+			PROPERTY_AES_IV_LENGTH,
+			PROPERTY_SALT_KEY_ITERATIONS,
+			PROPERTY_SALT_KEY_LENGTH);
+
+	private static final Set<String> SENSITIVE_KEYS = Set.of(
+			PROPERTY_DATABASE_PASSWORD,
+			PROPERTY_JWT_SECRET);
+
+	private ApplicationProperties() {
+	}
+
+	public static List<String> supportedKeys() {
+		return SUPPORTED_KEYS;
+	}
+
+	public static boolean isSupportedKey(String key) {
+		return SUPPORTED_KEYS.contains(key);
+	}
+
+	public static boolean isSensitiveKey(String key) {
+		return SENSITIVE_KEYS.contains(key);
+	}
 }

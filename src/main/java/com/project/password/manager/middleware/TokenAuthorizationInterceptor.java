@@ -1,5 +1,7 @@
 package com.project.password.manager.middleware;
 
+import java.lang.reflect.Method;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +25,10 @@ public class TokenAuthorizationInterceptor implements MethodInterceptor {
 
 	@Override
 	public Object invoke(@NotNull MethodInvocation invocation) throws Throwable {
-		tokenVerifier.validateCurrentSession();
+		Method method = invocation.getMethod();
+		RequireAuthorization authorization = method.getAnnotation(RequireAuthorization.class);
+		tokenVerifier.validateCurrentSession(authorization == null ? new com.project.password.manager.model.UserRole[0]
+				: authorization.roles());
 		return invocation.proceed();
 	}
 }

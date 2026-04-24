@@ -1,6 +1,16 @@
 package com.project.password.manager.cli.commands;
 
+import com.project.password.manager.cli.commands.auth.LoginCommand;
+import com.project.password.manager.cli.commands.auth.LogoutCommand;
+import com.project.password.manager.cli.commands.auth.PingCommand;
+import com.project.password.manager.cli.commands.auth.SignupCommand;
+import com.project.password.manager.cli.commands.auth.WhoAmICommand;
+import com.project.password.manager.cli.commands.config.ConfigCommand;
+import com.project.password.manager.cli.commands.entry.EntryCommand;
 import com.project.password.manager.cli.runtime.CliTheme;
+import com.project.password.manager.cli.commands.theme.ThemeCommand;
+import com.project.password.manager.cli.commands.user.UserCommand;
+import com.project.password.manager.cli.commands.vault.VaultCommand;
 
 import picocli.CommandLine.Command;
 
@@ -11,6 +21,8 @@ import picocli.CommandLine.Command;
 				LogoutCommand.class,
 				WhoAmICommand.class,
 				PingCommand.class,
+				UserCommand.class,
+				ConfigCommand.class,
 				ThemeCommand.class,
 				VaultCommand.class,
 				EntryCommand.class,
@@ -22,6 +34,7 @@ public class BaseCommand implements Runnable {
 		System.out.println(CliTheme.hintPanel("Password Manager CLI",
 				CliTheme.key("theme") + CliTheme.muted(" : ") + CliTheme.secondary(CliTheme.getActiveThemeName()),
 				CliTheme.key("next") + CliTheme.muted(" : ") + CliTheme.accent("help") + CliTheme.muted("  ·  ")
-						+ CliTheme.accent("theme preview") + CliTheme.muted("  ·  ") + CliTheme.accent("vault list")));
+						+ CliTheme.accent("config list") + CliTheme.muted("  ·  ") + CliTheme.accent("user role list admin")
+						+ CliTheme.muted("  ·  ") + CliTheme.accent("vault list")));
 	}
 }

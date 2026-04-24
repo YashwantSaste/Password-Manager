@@ -66,7 +66,7 @@ public class Workspace {
 			try {
 				createPropertiesFile();
 			} catch (IOException e) {
-				log.error("Failed to reconcile application properties file", e);
+				log.error("Failed to validate application properties file", e);
 				throw new RuntimeException("Error while reconciling application properties file", e);
 			}
 		}
@@ -97,7 +97,7 @@ public class Workspace {
 		File propertiesFile = PropertiesReader.resolvePropertiesFile();
 		Properties properties = PropertiesReader.loadProperties();
 		if (propertiesFile.exists()) {
-			log.info("Reconciling application properties file at: " + propertiesFile.getAbsolutePath());
+			log.info("Ensuring application properties file is initialized at: " + propertiesFile.getAbsolutePath());
 		} else {
 			log.info("Creating application properties file at: " + propertiesFile.getAbsolutePath());
 		}
@@ -117,6 +117,8 @@ public class Workspace {
 		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_APP_VERSION, "1.0.0");
 		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_APP_NAME, "password-manager-cli");
 		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_APP_CLI_THEME, "warm-retro");
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_APP_CLI_ENABLED, String.valueOf(true));
+		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_APP_CLI_DISPLAY_PROMPT, "password-manager-> ");
 
 		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_DATABASE_ENABLED, "false");
 		changed |= putIfAbsent(properties, ApplicationProperties.PROPERTY_DATABASE_TYPE, "sql");

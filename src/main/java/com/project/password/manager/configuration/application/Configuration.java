@@ -3,7 +3,9 @@ package com.project.password.manager.configuration.application;
 import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.configuration.IAESConfiguration;
+import com.project.password.manager.configuration.IAppConfiguration;
 import com.project.password.manager.configuration.IArgon2Configuration;
+import com.project.password.manager.configuration.ICLIConfiguration;
 import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
 import com.project.password.manager.configuration.IJwtConfiguration;
@@ -27,6 +29,18 @@ public class Configuration implements IConfiguration {
 
 	private Configuration() {
 		//
+	}
+
+	@Override
+	@NotNull
+	public IAppConfiguration appConfiguration() {
+		return new ApplicationConfiguration(propertiesReader);
+	}
+
+	@Override
+	@NotNull
+	public ICLIConfiguration cliConfiguration() {
+		return new CLIConfiguration(propertiesReader);
 	}
 
 	@Override
@@ -58,5 +72,4 @@ public class Configuration implements IConfiguration {
 	public  ISaltKeyConfiguration saltKeyConfiguration() {
 		return new SaltKeyConfigurations(propertiesReader);
 	}
-
 }
