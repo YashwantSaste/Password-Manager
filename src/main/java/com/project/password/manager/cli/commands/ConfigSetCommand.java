@@ -1,6 +1,7 @@
 package com.project.password.manager.cli.commands;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.cli.handlers.ConfigSetCommandHandler;
 
@@ -16,19 +17,26 @@ public class ConfigSetCommand extends DelegatingCliCommand<ConfigSetCommand.Requ
 	@Parameters(index = "1", description = "New property value.")
 	private String value;
 
+	@Parameters(index = "2", description = "Comment for the configuration update.")
+	private String comment;
+
 	@Override
 	@NotNull
 	protected Request buildRequest() {
-		return new Request(key, value);
+		return new Request(key, value, comment);
 	}
 
 	public static final class Request {
 		private final String key;
 		private final String value;
+		private String comment = "Updated CLI configuration property. ";
 
-		public Request(@NotNull String key, @NotNull String value) {
+		public Request(@NotNull String key, @NotNull String value, @Nullable String comment) {
 			this.key = key;
 			this.value = value;
+			if (comment != null) {
+				this.comment = comment;
+			}
 		}
 
 		@NotNull
@@ -39,6 +47,11 @@ public class ConfigSetCommand extends DelegatingCliCommand<ConfigSetCommand.Requ
 		@NotNull
 		public String getValue() {
 			return value;
+		}
+
+		@Nullable
+		public String getComment() {
+			return comment;
 		}
 	}
 }

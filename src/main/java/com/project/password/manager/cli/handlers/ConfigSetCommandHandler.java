@@ -1,6 +1,8 @@
 package com.project.password.manager.cli.handlers;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 import org.jetbrains.annotations.NotNull;
@@ -8,20 +10,20 @@ import org.jetbrains.annotations.NotNull;
 import com.google.inject.Inject;
 import com.project.password.manager.cli.commands.ConfigSetCommand;
 import com.project.password.manager.cli.runtime.CliOutput;
+import com.project.password.manager.cli.runtime.CliSession;
 import com.project.password.manager.cli.runtime.CliTheme;
 import com.project.password.manager.configuration.application.ApplicationProperties;
 import com.project.password.manager.configuration.application.PropertiesReader;
 import com.project.password.manager.middleware.RequireAuthorization;
 import com.project.password.manager.model.UserRole;
+import com.project.password.manager.service.UserService;
 
-public class ConfigSetCommandHandler implements CommandHandler<ConfigSetCommand.Request> {
-
-	@NotNull
-	private final CliOutput output;
+public class ConfigSetCommandHandler extends AbstractAuthorizedCommandHandler<ConfigSetCommand.Request> {
 
 	@Inject
-	public ConfigSetCommandHandler(@NotNull CliOutput output) {
-		this.output = output;
+	public ConfigSetCommandHandler(@NotNull CliSession session, @NotNull UserService userService,
+			@NotNull CliOutput output) {
+		super(session, userService, output);
 	}
 
 	@Override
@@ -29,6 +31,7 @@ public class ConfigSetCommandHandler implements CommandHandler<ConfigSetCommand.
 	public void handle(@NotNull ConfigSetCommand.Request request) {
 		String key = request.getKey();
 		String value = request.getValue();
+		String comment = request.getComment();
 		if (!ApplicationProperties.isSupportedKey(key)) {
 			throw new IllegalArgumentException("Unsupported configuration key: " + key);
 		}
@@ -40,7 +43,12 @@ public class ConfigSetCommandHandler implements CommandHandler<ConfigSetCommand.
 		try {
 			Properties properties = PropertiesReader.loadProperties();
 			properties.setProperty(key, value);
-			PropertiesReader.storeProperties(properties, "Updated CLI configuration property");
+			LocalDateTime now = LocalDateTime.now();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+			String formattedDayDateTime = now.format(formatter);
+			String updatedBy = currentUser().getName();
+			PropertiesReader.storeProperties(properties,
+					comment + " Updated by user: [" + updatedBy + "] at " + formattedDayDateTime);
 			PropertiesReader.refreshIfInitialized();
 			if (ApplicationProperties.PROPERTY_APP_CLI_THEME.equals(key)) {
 				CliTheme.initialize();
