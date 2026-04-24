@@ -40,6 +40,29 @@ public class FileEntryRepository implements EntryDataRepository {
 
 	@Override
 	@NotNull
+	public List<EncryptedEntryRecord> findAll() {
+		List<EncryptedEntryRecord> entries = new ArrayList<>();
+		File[] vaultDirectories = workspace.listFiles(File::isDirectory);
+		if (vaultDirectories == null) {
+			return entries;
+		}
+		for (File vaultDirectory : vaultDirectories) {
+			File[] entryFiles = vaultDirectory.listFiles((dir, name) -> name.endsWith(".json"));
+			if (entryFiles == null) {
+				continue;
+			}
+			for (File entryFile : entryFiles) {
+				EncryptedEntryRecord entry = new FileManager<>(entryFile, EncryptedEntryRecord.class).readFromFile();
+				if (entry != null) {
+					entries.add(entry);
+				}
+			}
+		}
+		return entries;
+	}
+
+	@Override
+	@NotNull
 	public List<EncryptedEntryRecord> findByVaultId(@NotNull String vaultId) {
 		List<EncryptedEntryRecord> entries = new ArrayList<>();
 		File vaultDirectory = new File(workspace, vaultId);
