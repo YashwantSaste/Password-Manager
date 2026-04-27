@@ -13,10 +13,10 @@ public interface ITeam extends HasMetadata {
 	String name();
 
 	@NotNull
-	List<IUser> owners();
+	List<String> owners();
 
 	@NotNull
-	List<IUser> memebers();
+	List<String> memebers();
 
 	@NotNull
 	String getDefaultVaultId();
@@ -28,9 +28,9 @@ public interface ITeam extends HasMetadata {
 
 	void setName(@NotNull String name);
 
-	void setOwners(@NotNull List<IUser> owners);
+	void setOwners(@NotNull List<String> owners);
 
-	void setMembers(@NotNull List<IUser> members);
+	void setMembers(@NotNull List<String> members);
 
 	void setDefaultVaultId(@NotNull String defaultVaultId);
 
