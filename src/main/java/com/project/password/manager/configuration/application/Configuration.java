@@ -10,6 +10,7 @@ import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
 import com.project.password.manager.configuration.IJwtConfiguration;
 import com.project.password.manager.configuration.ISaltKeyConfiguration;
+import com.project.password.manager.configuration.ITeamConfiguration;
 
 public class Configuration implements IConfiguration {
 
@@ -71,5 +72,11 @@ public class Configuration implements IConfiguration {
 	@NotNull
 	public  ISaltKeyConfiguration saltKeyConfiguration() {
 		return new SaltKeyConfigurations(propertiesReader);
+	}
+
+	@Override
+	@NotNull
+	public ITeamConfiguration teamConfiguration() {
+		return new TeamConfiguration(propertiesReader);
 	}
 }

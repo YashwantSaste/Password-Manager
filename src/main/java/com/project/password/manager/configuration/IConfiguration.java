@@ -24,4 +24,7 @@ public interface IConfiguration {
 
 	@NotNull
 	ISaltKeyConfiguration saltKeyConfiguration();
+
+	@NotNull
+	ITeamConfiguration teamConfiguration();
 }

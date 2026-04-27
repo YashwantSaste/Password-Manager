@@ -1,5 +1,6 @@
 package com.project.password.manager.model.database.file.storage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
@@ -55,12 +56,18 @@ public class Team implements ITeam, IFileStorableEntity {
 	@Override
 	@NotNull
 	public List<IUser> owners() {
+		if (owners == null) {
+			owners = new ArrayList<>();
+		}
 		return owners;
 	}
 
 	@Override
 	@NotNull
 	public List<IUser> memebers() {
+		if (members == null) {
+			members = new ArrayList<>();
+		}
 		return members;
 	}
 
@@ -73,6 +80,9 @@ public class Team implements ITeam, IFileStorableEntity {
 	@Override
 	@NotNull
 	public List<IVault> allVaults() {
+		if (allVaults == null) {
+			owners = new ArrayList<>();
+		}
 		return allVaults;
 	}
 
