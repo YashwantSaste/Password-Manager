@@ -11,7 +11,7 @@ public class Vault implements IVault, IFileStorableEntity {
 	private String name;
 	private String userId;
 	private String encryptedBlob;
-	private IMetadata metadata;
+	private IMetadata metadata = new Metadata();
 	private String fileName;
 
 	public Vault() {
@@ -52,6 +52,9 @@ public class Vault implements IVault, IFileStorableEntity {
 	@Override
 	@NotNull
 	public IMetadata metadata() {
+		if (metadata == null) {
+			metadata = new Metadata();
+		}
 		return metadata;
 	}
 
@@ -85,7 +88,7 @@ public class Vault implements IVault, IFileStorableEntity {
 
 	@Override
 	public void setMetadata(@NotNull IMetadata metadata) {
-		this.metadata = metadata;
+		this.metadata = metadata != null ? metadata : new Metadata();
 	}
 
 }
