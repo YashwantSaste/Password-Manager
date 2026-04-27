@@ -1,28 +1,49 @@
-package com.project.password.manager.model.database.file.storage;
+package com.project.password.manager.model.database.sql;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IVault;
+import com.project.password.manager.model.database.file.storage.Metadata;
 
-public class Vault implements IVault, IFileStorableEntity {
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
+@Entity
+@Table(name = "Vaults")
+public class JpaVault implements IVault {
+
+	@Id
+	@Column(nullable = false, updatable = false)
 	private String id;
+	@Column(nullable = false)
 	private String name;
+	@Column(nullable = false)
 	private String userId;
+	@Column(nullable = false, length = 8192)
 	private String encryptedBlob;
+	@Transient
 	private IMetadata metadata = new Metadata();
-	private String fileName;
 
-	public Vault() {
-		// for jackson
+	protected JpaVault() {
+		// for hibernate
 	}
 
-	public Vault(@NotNull String id, @NotNull String name, @NotNull String userId, @NotNull String encyrptedBlob) {
-		this.id = id;
-		this.name = name;
-		this.userId = userId;
-		this.encryptedBlob = encyrptedBlob;
+	@NotNull
+	public static JpaVault from(@NotNull IVault vault) {
+		if (vault instanceof JpaVault jpaVault) {
+			return jpaVault;
+		}
+		JpaVault entity = new JpaVault();
+		entity.id = vault.getId();
+		entity.name = vault.getName();
+		entity.userId = vault.getUserId();
+		entity.encryptedBlob = vault.getEncryptedBlob();
+		entity.metadata = vault.metadata();
+		return entity;
 	}
 
 	@Override
@@ -40,7 +61,7 @@ public class Vault implements IVault, IFileStorableEntity {
 	@Override
 	@NotNull
 	public String getUserId() {
-		return userId;
+		return userId != null ? userId : "";
 	}
 
 	@Override
@@ -56,14 +77,6 @@ public class Vault implements IVault, IFileStorableEntity {
 			metadata = new Metadata();
 		}
 		return metadata;
-	}
-
-	@Override
-	public @NotNull String getFileName() {
-		// getId() --> Jackson reads the id via a public function as it does not have
-		// access to core values
-		this.fileName = getId() + ".json";
-		return fileName;
 	}
 
 	@Override
@@ -88,7 +101,6 @@ public class Vault implements IVault, IFileStorableEntity {
 
 	@Override
 	public void setMetadata(@NotNull IMetadata metadata) {
-		this.metadata = metadata != null ? metadata : new Metadata();
+		this.metadata = metadata;
 	}
-
 }
