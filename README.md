@@ -1,21 +1,23 @@
 # Password Manager CLI
 
-This project is a Java-based interactive password manager CLI. It supports user signup and login, vault management, encrypted entry storage, JWT-backed CLI sessions, and a command architecture built with Picocli, JLine, and Guice.
+This project is a Java-based interactive password manager CLI. It supports user signup and login, JWT-backed CLI sessions, user and team vault management, encrypted entry storage, configuration inspection, and a command architecture built with Picocli, JLine, and Guice.
 
-The current implementation is centered around an interactive shell started from `Application.main(...)`, with command handlers resolved at runtime through Guice.
+The application starts an interactive shell from `Application.main(...)`, with command handlers resolved at runtime through Guice.
 
 ## What The Application Does
 
-The CLI currently supports:
+The current implementation supports:
 
-- User signup and login
-- JWT-backed authenticated CLI sessions
+- User signup, login, logout, session inspection, and session validation
 - Automatic default vault creation on signup
-- Creation and listing of named vaults
-- Creation, listing, retrieval, update, deletion, and search of vault entries
-- Exact label lookup across one vault or all vaults
-- Duplicate-label resolution ordered by latest update first
-- File-based persistence by default, with partial SQL-oriented infrastructure present
+- User role inspection and administration
+- Team creation, inspection, and listing
+- Team vault creation and listing
+- Personal vault creation, listing, and default vault inspection
+- Entry creation, listing, retrieval, update, deletion, and search
+- Exact label lookup across one vault or all vaults accessible to the authenticated user
+- Configuration property listing, lookup, and override from the CLI
+- File-backed persistence by default, with SQL and NoSQL infrastructure present but not complete for all repository types
 
 ## Tech Stack
 
@@ -23,32 +25,34 @@ The CLI currently supports:
 - Maven
 - Picocli for command parsing
 - JLine for the interactive shell
-- Guice for dependency injection and method interception
+- Guice for dependency injection and authorization interception
 - Auth0 Java JWT for token creation and validation
 - Argon2 for password hashing
-- AES encryption for vault and entry payloads
+- AES/GCM for vault and entry payload encryption
 - Jackson for payload serialization
-- Caffeine for short-lived in-memory caches
+- Caffeine for short-lived in-memory search index caching
 - Log4j2 for logging
 
 ## Project Entry Point
 
-The application starts in `src/main/java/com/project/password/manager/Application.java` and launches the interactive CLI:
+The application starts in `src/main/java/com/project/password/manager/Application.java`:
 
 ```java
 public static void main(String[] args) throws IOException {
-  Workspace.configureWorkSpace();
-  CliTheme.initialize(resolveCliTheme());
-  CLI.initCLI(args);
+    Workspace.configureWorkSpace();
+    if (Configuration.getInstance().cliConfiguration().isEnabled()) {
+        CliTheme.initialize();
+        CLI.initCLI(args);
+    } else {
+        throw new InvalidAppModeException("CLI is not enabled for this instance.");
+    }
 }
 ```
 
-The interactive prompt now uses the active CLI theme and a badge-style shell prompt. In plain mode it falls back to a simpler text prompt.
-
-Typical prompt shape:
+The interactive shell uses the active CLI theme and renders a themed startup panel. A typical prompt looks like this:
 
 ```text
-[ VAULT ] pm::workspace ❯
+pm::vault >
 ```
 
 Type `exit` to leave the shell.
@@ -62,6 +66,9 @@ Top-level commands:
 - `logout`
 - `whoami`
 - `ping`
+- `user ...`
+- `team ...`
+- `config ...`
 - `theme ...`
 - `vault ...`
 - `entry ...`
@@ -99,6 +106,82 @@ Validate the current session:
 ping
 ```
 
+### User Role Commands
+
+Inspect roles for a user:
+
+```bash
+user role list <username>
+```
+
+Grant a role:
+
+```bash
+user role grant <username> ADMIN
+```
+
+Revoke a role:
+
+```bash
+user role revoke <username> ADMIN
+```
+
+### Team Commands
+
+List teams accessible to the authenticated user:
+
+```bash
+team list
+```
+
+Show one team:
+
+```bash
+team get <teamName>
+```
+
+Create a team:
+
+```bash
+team create <teamName>
+```
+
+By default, team creation can be restricted to admins through the team configuration.
+
+### Team Vault Commands
+
+List vaults for a team accessible to the authenticated user:
+
+```bash
+team vault list <teamName>
+```
+
+Create a vault for a team owned by the authenticated user:
+
+```bash
+team vault create <teamName> <vaultName>
+```
+
+### Config Commands
+
+List configuration properties:
+
+```bash
+config list
+```
+
+Show one property:
+
+```bash
+config get app.cli.theme
+```
+
+Override one property:
+
+```bash
+config set app.cli.theme ocean
+```
+
 ### Theme Commands
 
 List supported themes:
@@ -122,13 +205,14 @@ theme set paper-retro
 
 ### Vault Commands
 
-List all vaults for the authenticated user:
+List all vaults accessible to the authenticated user:
 
 ```bash
 vault list
+vault list --show-ids
 ```
 
-Create a named vault:
+Create a personal vault:
 
 ```bash
 vault create <vaultName>
@@ -138,6 +222,7 @@ Show the default vault:
 
 ```bash
 vault default
+vault default --show-ids
 ```
 
 ### Entry Commands
@@ -164,13 +249,6 @@ entry get --vault "Work" "github"
 entry get --vault "Work" "<entry-id>"
 ```
 
-Behavior of `entry get`:
-
-- If the reference matches an entry id in the selected vault, that exact entry is returned.
-- If the reference matches one or more labels exactly, all matches are returned.
-- If `--vault` is omitted, lookup spans all vaults owned by the authenticated user.
-- When multiple entries share the same label, results are ordered by newest `updatedAtEpochMs` first.
-
 Update an entry:
 
 ```bash
@@ -190,13 +268,6 @@ entry search "github"
 entry search --vault "Work" "alice github"
 ```
 
-Search behavior:
-
-- Search is vault-scoped.
-- If `--vault` is omitted, the default vault is used.
-- Search tokenizes labels, usernames, login names, URLs, tags, and notes.
-- Results are ordered by latest update first.
-
 ## Authentication And Session Model
 
 Authentication uses two layers:
@@ -207,12 +278,11 @@ Authentication uses two layers:
 Current flow:
 
 1. `signup` creates a new user.
-2. A default vault named `Default` is created automatically.
+2. A default personal vault named `Default` is created automatically.
 3. A JWT is issued and persisted.
 4. The CLI session stores the authenticated `userId` and raw token in memory.
 
-Protected command handlers are annotated with `@RequireAuthorization`.
-Guice applies `TokenAuthorizationInterceptor`, which delegates to `TokenVerifier`.
+Protected handlers are annotated with `@RequireAuthorization`. Guice applies `TokenAuthorizationInterceptor`, which delegates to `TokenVerifier`.
 
 `TokenVerifier` checks:
 
@@ -223,22 +293,23 @@ Guice applies `TokenAuthorizationInterceptor`, which delegates to `TokenVerifier
 
 If verification fails, the CLI session is cleared and the command fails with an unauthorized session error.
 
-## Security Model
+## Security And Access Model
 
-The current codebase uses the following security approach:
+The current security model uses:
 
-- User passwords are hashed using Argon2
-- Entry payloads are encrypted before persistence
-- Vault payloads are encrypted before persistence
-- JWT tokens are used to authenticate CLI sessions
-- Handler-level authorization is enforced with Guice interception rather than manual checks in each command path
+- Argon2 password hashing for users
+- AES/GCM encryption for vault and entry payloads
+- JWT-backed CLI sessions for authentication
+- Handler-level authorization through Guice interception
+- Access checks for both personal vaults and team-scoped vaults
 
-Important implementation details:
+Important behavior:
 
 - Expired JWTs invalidate the active CLI session
 - Re-login after token expiry is supported by token re-issuance logic in `TokenService`
-- Vault ownership is checked before entry operations
-- Vault references can be either vault id or vault name
+- Vault references can be either internal ids or vault names
+- Entry operations are allowed only against vaults accessible to the current user
+- Team vault creation is restricted to team owners
 
 ## Storage Model
 
@@ -258,7 +329,18 @@ Current file-backed repositories include:
 - users
 - tokens
 - vaults
+- teams
 - entries
+
+### Current File Shapes
+
+- Users are stored under `users/<userId>/user.json`
+- Tokens are stored with the user workspace data
+- Vaults are stored under `vaults/<vaultId>/<vaultId>.json`
+- Teams are stored under `teams/<teamId>/team.json`
+- Entries are stored per vault
+
+Team files store owner and member user ids rather than embedding full user objects. The file-backed team model also keeps compatibility for older team files that may still contain embedded user objects and normalizes them to ids when reading.
 
 ### SQL And NoSQL Status
 
@@ -268,6 +350,7 @@ Current state:
 
 - User entity wiring exists for SQL and NoSQL paths
 - General repository factory support exists
+- Team and vault abstractions are wired into the service layer
 - Entry repository support for SQL and NoSQL currently throws `UnsupportedOperationException`
 
 For practical use today, assume file-backed storage is the supported path.
@@ -294,7 +377,7 @@ C:\Users\<your-user>\password-manager\password-manager.properties
 
 ### Important Current Behavior
 
-The application now calls `Workspace.configureWorkSpace()` on startup.
+The application calls `Workspace.configureWorkSpace()` on startup.
 
 That means the first run will automatically:
 
@@ -342,9 +425,9 @@ app.salt.iterations=65536
 app.salt.key.size=256
 ```
 
-### CLI Theme Customization
+## CLI Theme Customization
 
-The CLI theme can now be customized without code changes.
+The CLI theme can be customized without code changes.
 
 Supported themes:
 
@@ -376,7 +459,7 @@ theme preview paper-retro
 theme set copper-dusk
 ```
 
-### JWT Algorithm Configuration
+## JWT Algorithm Configuration
 
 Supported algorithms include:
 
@@ -408,11 +491,13 @@ and the following properties must point to the file names inside that folder:
 
 The CLI prints structured terminal views.
 
-Examples of current output fields include:
+Current output fields include:
 
 - user id
 - vault id
 - vault name
+- team name
+- team owners and members
 - entry id
 - label
 - username
@@ -426,9 +511,9 @@ Examples of current output fields include:
 Current output behavior:
 
 - the interactive shell starts with a themed startup panel
-- users, vaults, and entries render as framed panels rather than flat key-value text
+- users, teams, vaults, and entries render as framed panels rather than flat key-value text
 - status, hints, and command failures use themed cards for consistency
-- when listing multiple vaults or entries, each item is printed as a separate panel block
+- when listing multiple teams, vaults, or entries, each item is printed as a separate panel block
 
 ## Architecture Overview
 
@@ -444,7 +529,7 @@ Handlers live under `src/main/java/com/project/password/manager/cli/handlers`.
 
 Each command delegates to a corresponding handler. This keeps parsing and business behavior separate.
 
-Key patterns in the current implementation:
+Key patterns:
 
 - `DelegatingCliCommand<TRequest, THandler>` builds a request object from CLI input
 - handlers implement `CommandHandler<TRequest>`
@@ -474,7 +559,7 @@ Current Guice responsibilities:
 - CLI session and output singletons
 - handler registry provisioning
 
-Command-handler registration is currently provided through Guice as a singleton `CommandHandlerRegistry`.
+Command-handler registration is provided through Guice as a singleton `CommandHandlerRegistry`.
 
 ### Service Layer
 
@@ -483,25 +568,30 @@ The primary business services are:
 - `AuthService`
 - `UserService`
 - `TokenService`
+- `TeamService`
+- `VaultAccessService`
 - `VaultService`
 - `EntryService`
+- `ConfigService`
 
 Responsibilities:
 
 - `AuthService`: signup and login orchestration
+- `UserService`: user lookup and role administration
 - `TokenService`: JWT issue, verify, cache, persist, revoke
-- `VaultService`: vault creation, default vault resolution, vault ownership checks
+- `TeamService`: team creation, lookup, access checks, and persistence
+- `VaultAccessService`: personal and team vault access checks
+- `VaultService`: personal vault creation, team vault creation, default vault resolution, accessible vault resolution
 - `EntryService`: entry CRUD, exact reference lookup, vault-scoped search, in-memory search index maintenance
+- `ConfigService`: property lookup, override, validation, masking, and persistence support for config handlers
 
 ## Entry Retrieval Semantics
-
-This is one of the more important current behaviors.
 
 `entry get` supports both id-based and label-based retrieval:
 
 - If the argument is an existing entry id in the selected vault, it returns that entry.
 - Otherwise it looks for exact label matches.
-- If `--vault` is omitted, lookup spans all vaults owned by the current user.
+- If `--vault` is omitted, lookup spans all vaults accessible to the current user.
 - When multiple entries share a label, they are sorted by `updatedAtEpochMs` descending, then by `createdAtEpochMs`, then by id.
 
 This makes retrieval practical even when the user remembers a label but not the vault.
@@ -536,7 +626,7 @@ mvn -DskipTests compile
 mvn -DskipTests package
 ```
 
-This now produces a self-contained jar with dependencies under `target/`.
+This produces a self-contained jar with dependencies under `target/`.
 
 Example artifact:
 
@@ -546,7 +636,7 @@ target/password.manager-1.0.0-beta-standalone.jar
 
 ### Run
 
-The application now bootstraps its own workspace on startup, so the first run will create:
+The application bootstraps its own workspace on startup, so the first run will create:
 
 ```text
 <user-home>/password-manager/
@@ -611,49 +701,25 @@ Important packaging note:
 
 ## Automated Build Pipeline
 
-The repository now includes a GitHub Actions workflow at `.github/workflows/build-windows-cli.yml`.
+The repository includes a GitHub Actions workflow at `.github/workflows/build-windows-cli.yml`.
 
 Pipeline behavior:
 
-- It runs automatically on every push to `master`.
+- It runs automatically on pushes to `master`.
 - It also supports manual runs through `workflow_dispatch`.
 - It builds portable packages for Windows, Linux, and macOS.
 - It uses `scripts/package-app.ps1` on each runner OS.
 - It uploads one artifact per OS.
 
-What you get from the pipeline:
-
-- a downloadable artifact that is directly usable after extraction
-- a packaged launcher for the target OS
-- the bundled Java runtime inside the package
-- the full build logs in the GitHub Actions run
-
-How to use the pipeline output:
-
-1. Open the GitHub Actions run for the `master` commit.
-2. Download the artifact for the OS you want.
-3. Extract the archive.
-4. Run the packaged launcher for that OS.
-
-Runtime logs:
-
-- The Windows EXE remains a console application, so application logs are visible directly in the terminal window.
-- The Linux and macOS wrappers start the packaged CLI from a terminal-friendly launcher.
-- File logs continue to be written to `logs/app.log`.
-
-Main class:
-
-```text
-com.project.password.manager.Application
-```
-
 ## Testing
 
-Current automated test coverage is minimal.
+Current automated test coverage is still limited, but the repository now contains more than a smoke test.
 
-At the moment the repository only contains:
+Current test classes:
 
-- a basic `AppTest` smoke test using JUnit 3 style scaffolding
+- `AppTest`
+- `MetadataListenerTest`
+- `ModelObjectMapperFactoryTest`
 
 Run tests with:
 
@@ -661,7 +727,7 @@ Run tests with:
 mvn test
 ```
 
-For real validation today, manual CLI testing is important.
+Manual CLI validation is still important for end-to-end behavior.
 
 ### Suggested Manual Test Flow
 
@@ -670,7 +736,12 @@ signup demo-user Demo@123
 whoami
 vault list
 vault create Work
-vault list
+vault list --show-ids
+
+team create demo-team
+team list
+team vault create demo-team Shared
+team vault list demo-team
 
 entry create "gmail" "Secret123!"
 entry create --vault "Work" "github" "WorkSecret123!" --username "alice" --login-name "alice.dev" --url "https://github.com" --tag "dev,code" --note "primary work account"
@@ -699,7 +770,7 @@ Expected behavior:
 
 - The root CLI uses an interactive shell; non-interactive automation is not the primary path right now.
 - SQL and NoSQL entry repositories are not implemented yet.
-- Automated test coverage is still very thin.
+- Automated test coverage is still thin compared to the service surface.
 - The project relies on a user-home workspace and external property file rather than a resource-bundled config.
 
 ## Repository Layout
@@ -730,11 +801,13 @@ src/main/resources/
 
 src/test/java/com/project/password/manager/
   AppTest.java
+  MetadataListenerTest.java
+  ModelObjectMapperFactoryTest.java
 ```
 
 ## Recommended Next Improvements
 
-- Add a Maven plugin or script for straightforward CLI launching outside the IDE.
-- Add integration tests for signup, login, vault creation, and entry CRUD flows.
+- Add integration tests for signup, login, team creation, vault creation, team vault flows, and entry CRUD.
 - Add dedicated SQL and NoSQL entry repository implementations.
 - Add a non-interactive mode for scripting and CI use.
+- Add CLI support for more team membership lifecycle operations.
