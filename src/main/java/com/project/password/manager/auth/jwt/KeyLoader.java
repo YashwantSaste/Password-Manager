@@ -20,7 +20,7 @@ import com.project.password.manager.configuration.application.Workspace;
 public class KeyLoader {
 
 	private static final String AUTHENTICATION_FOLDER = "authentication";
-	private static final File AUTHENTICATION_DIR = new File(Workspace.getInstance().getRoot(), AUTHENTICATION_FOLDER);;
+
 	private KeyLoader() {
 		//
 	}
@@ -38,13 +38,13 @@ public class KeyLoader {
 	}
 
 	@NotNull
-	public static ECPublicKey loadEcPublicKey(String path) throws Exception {
+	public static ECPublicKey loadEcPublicKey(@NotNull String path) throws Exception {
 		byte[] decoded = Base64.getDecoder().decode(readKey(path));
 		return (ECPublicKey) KeyFactory.getInstance("EC").generatePublic(new X509EncodedKeySpec(decoded));
 	}
 
 	@NotNull
-	public static ECPrivateKey loadEcPrivateKey(String path) throws Exception {
+	public static ECPrivateKey loadEcPrivateKey(@NotNull String path) throws Exception {
 		byte[] decoded = Base64.getDecoder().decode(readKey(path));
 		return (ECPrivateKey) KeyFactory.getInstance("EC").generatePrivate(new PKCS8EncodedKeySpec(decoded));
 	}

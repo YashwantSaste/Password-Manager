@@ -42,7 +42,7 @@ public class PlatformEntityProvider {
 	}
 
 	@NotNull
-	public IMetadata metadata() {
+	public IMetadata getMetadata() {
 		return getInstance(IMetadata.class);
 	}
 

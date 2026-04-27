@@ -1,7 +1,6 @@
 package com.project.password.manager.cli.handlers.config;
 
-import java.io.IOException;
-import java.util.Properties;
+import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -14,26 +13,25 @@ import com.project.password.manager.configuration.application.ApplicationPropert
 import com.project.password.manager.configuration.application.PropertiesReader;
 import com.project.password.manager.middleware.RequireAuthorization;
 import com.project.password.manager.model.UserRole;
+import com.project.password.manager.service.ConfigService;
 
 public class ConfigListCommandHandler implements CommandHandler<ConfigListCommand.Request> {
 
 	@NotNull
 	private final CliOutput output;
+	@NotNull
+	private final ConfigService configService;
 
 	@Inject
-	public ConfigListCommandHandler(@NotNull CliOutput output) {
+	public ConfigListCommandHandler(@NotNull CliOutput output, @NotNull ConfigService configService) {
 		this.output = output;
+		this.configService = configService;
 	}
 
 	@Override
 	@RequireAuthorization(roles = { UserRole.ADMIN })
 	public void handle(@NotNull ConfigListCommand.Request request) {
-		Properties properties;
-		try {
-			properties = PropertiesReader.loadProperties();
-		} catch (IOException ioException) {
-			throw new RuntimeException("Failed to read configuration properties", ioException);
-		}
+		Map<String, String> properties = configService.getProperties(request.isShowSensitive());
 
 		StringBuilder builder = new StringBuilder();
 		builder.append(CliTheme.infoPanel("Configuration Properties",
@@ -47,8 +45,7 @@ public class ConfigListCommandHandler implements CommandHandler<ConfigListComman
 			builder.append(System.lineSeparator())
 			.append(CliTheme.key(key))
 			.append(CliTheme.muted(" = "))
-			.append(CliTheme.secondary(ConfigPropertyFormatter.displayValue(key, properties.getProperty(key),
-					request.isShowSensitive())));
+			.append(CliTheme.secondary(properties.get(key)));
 		}
 		output.info(builder.toString());
 	}

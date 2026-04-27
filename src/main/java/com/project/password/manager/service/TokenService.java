@@ -6,9 +6,9 @@ import java.util.concurrent.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -21,9 +21,9 @@ import com.project.password.manager.database.DataRepositoryFactory;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 
-public class TokenService implements IService {
+public class TokenService {
 
-	private final Cache<String, String> tokenCacheFor = Caffeine.newBuilder()
+	private final Cache<String, String> tokenCache = Caffeine.newBuilder()
 			.expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
 	@NotNull
 	private final IJwtConfiguration jwtConfiguration;
@@ -48,7 +48,7 @@ public class TokenService implements IService {
 					return tokenIfAlreadyExists;
 				}
 			} catch (JWTVerificationException ex) {
-				tokenCacheFor.invalidate(user.getId());
+				tokenCache.invalidate(user.getId());
 			}
 		}
 		String token = JWT.create()
@@ -57,7 +57,7 @@ public class TokenService implements IService {
 				.withIssuedAt(new Date())
 				.withExpiresAt(new Date(System.currentTimeMillis() + jwtConfiguration.accessExpirationMs()))
 				.sign(algorithm);
-		tokenCacheFor.put(user.getId(), token);
+		tokenCache.put(user.getId(), token);
 		return token;
 	}
 
@@ -73,7 +73,7 @@ public class TokenService implements IService {
 	@Nullable
 	public String getToken(@NotNull IUser user) {
 		String userId = user.getId();
-		String cachedToken = tokenCacheFor.getIfPresent(userId);
+		String cachedToken = tokenCache.getIfPresent(userId);
 		if (cachedToken != null) {
 			return cachedToken;
 		}
@@ -83,14 +83,14 @@ public class TokenService implements IService {
 		}
 		String token = persistedToken.getToken();
 		if (token != null) {
-			tokenCacheFor.put(userId, token);
+			tokenCache.put(userId, token);
 		}
 		return token;
 	}
 
 	public void saveToken(@NotNull IUser user, @NotNull IToken token) {
 		String userId = user.getId();
-		tokenCacheFor.put(userId, token.getToken());
+		tokenCache.put(userId, token.getToken());
 		if (tokenRepo.findById(userId) == null) {
 			tokenRepo.save(token);
 			return;
@@ -100,7 +100,7 @@ public class TokenService implements IService {
 
 	public void revokeToken(@NotNull IUser user) {
 		String userId = user.getId();
-		tokenCacheFor.invalidate(userId);
+		tokenCache.invalidate(userId);
 		if (tokenRepo.findById(userId) != null) {
 			tokenRepo.delete(userId);
 		}

@@ -1,5 +1,6 @@
 package com.project.password.manager.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import com.project.password.manager.exceptions.UserNotFoundException;
 import com.project.password.manager.guice.PlatformEntityProvider;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
+import com.project.password.manager.model.Status;
 import com.project.password.manager.model.VaultPayload;
 import com.project.password.manager.util.ModelObjectMapperFactory;
 
@@ -139,6 +141,11 @@ public class VaultService {
 		vault.setId(vaultId);
 		vault.setName(requireText(vaultName, "Vault name"));
 		vault.setUserId(user.getId());
+		vault.metadata().setStatus(Status.ACTIVE);
+		LocalDateTime currentTime = LocalDateTime.now();
+		vault.metadata().setCreatedAt(currentTime);
+		vault.metadata().setUpdatedAt(currentTime);
+		vault.metadata().setLastAccessedAt(currentTime);
 		vault.setEncryptedBlob(encryptPayload(new VaultPayload(), user.getId()));
 		vaultRepository.save(vault);
 		vaults.add(vault);

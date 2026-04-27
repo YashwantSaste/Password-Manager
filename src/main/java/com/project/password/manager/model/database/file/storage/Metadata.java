@@ -1,10 +1,12 @@
 package com.project.password.manager.model.database.file.storage;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.model.IMetadata;
+import com.project.password.manager.model.Status;
 
 public class Metadata implements IMetadata {
 
@@ -13,7 +15,12 @@ public class Metadata implements IMetadata {
 	private LocalDateTime updatedAt;
 	private LocalDateTime lastAccessedAt;
 	private String version;
-	private String status;
+	private Status status;
+
+	public Metadata() {
+		this.id = UUID.randomUUID().toString();
+		this.version = "1.0";
+	}
 
 	@NotNull
 	public String id() {
@@ -45,7 +52,7 @@ public class Metadata implements IMetadata {
 
 	@Override
 	@NotNull
-	public String status() {
+	public Status status() {
 		return status;
 	}
 
@@ -64,7 +71,7 @@ public class Metadata implements IMetadata {
 	}
 
 	@Override
-	public void lastAccessedAt(@NotNull LocalDateTime lastAccessedAt) {
+	public void setLastAccessedAt(@NotNull LocalDateTime lastAccessedAt) {
 		this.lastAccessedAt = lastAccessedAt;
 	}
 
@@ -74,7 +81,7 @@ public class Metadata implements IMetadata {
 	}
 
 	@Override
-	public void setStatus(@NotNull String status) {
+	public void setStatus(@NotNull Status status) {
 		this.status = status;
 	}
 }
