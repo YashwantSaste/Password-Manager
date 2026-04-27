@@ -72,10 +72,12 @@ import com.project.password.manager.encryption.IEncryptionService;
 import com.project.password.manager.middleware.RequireAuthorization;
 import com.project.password.manager.middleware.TokenAuthorizationInterceptor;
 import com.project.password.manager.model.IMetadata;
+import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.database.file.storage.Metadata;
+import com.project.password.manager.model.database.file.storage.Team;
 import com.project.password.manager.model.database.file.storage.Token;
 import com.project.password.manager.model.database.file.storage.User;
 import com.project.password.manager.model.database.file.storage.Vault;
@@ -106,6 +108,7 @@ public class GuiceModule extends AbstractModule {
 			bind(IVault.class).to(Vault.class);
 			bind(IMetadata.class).to(Metadata.class);
 			bind(IToken.class).to(Token.class);
+			bind(ITeam.class).to(Team.class);
 		} else {
 			switch (configuration.databaseConfiguration().type()) {
 			case IDatabaseConfiguration.DATABASE_TYPE_SQL: {

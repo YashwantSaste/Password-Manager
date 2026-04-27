@@ -17,8 +17,7 @@ public class TeamRepository extends FileStorageRepository<Team, String> {
 	@Override
 	@NotNull
 	protected File resolveEntityDirectoryInFileSystem(@NotNull String id) {
-		// TODO Auto-generated method stub
-		return null;
+		return new File(workspace, id);
 	}
 
 	@Override

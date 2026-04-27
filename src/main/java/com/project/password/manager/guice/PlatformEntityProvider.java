@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.model.IEntity;
 import com.project.password.manager.model.IMetadata;
+import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
@@ -44,6 +45,11 @@ public class PlatformEntityProvider {
 	@NotNull
 	public IMetadata getMetadata() {
 		return getInstance(IMetadata.class);
+	}
+
+	@NotNull
+	public ITeam getTeam() {
+		return getInstance(ITeam.class);
 	}
 
 	@NotNull

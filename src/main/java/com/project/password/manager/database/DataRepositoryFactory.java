@@ -8,14 +8,16 @@ import org.jetbrains.annotations.NotNull;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
 import com.project.password.manager.configuration.application.Workspace;
 import com.project.password.manager.database.file.storage.FileEntryRepository;
+import com.project.password.manager.database.file.storage.TeamRepository;
 import com.project.password.manager.database.file.storage.TokenRepository;
 import com.project.password.manager.database.file.storage.UserRepository;
 import com.project.password.manager.database.file.storage.VaultRepository;
 import com.project.password.manager.database.postgres.hibernate.HibernateBootStrap;
-import com.project.password.manager.database.postgres.hibernate.HibernateEntryRepository;
 import com.project.password.manager.database.postgres.hibernate.HibernateEntityProvider;
+import com.project.password.manager.database.postgres.hibernate.HibernateEntryRepository;
 import com.project.password.manager.database.postgres.hibernate.HibernateRepository;
 import com.project.password.manager.model.IEntity;
+import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
@@ -57,6 +59,11 @@ public class DataRepositoryFactory {
 		if (entityClass.equals(IVault.class)) {
 			@SuppressWarnings("unchecked")
 			DataRepository<T, Id> repo = (DataRepository<T, Id>) new VaultRepository(workspace);
+			return repo;
+		}
+		if (entityClass.equals(ITeam.class)) {
+			@SuppressWarnings("unchecked")
+			DataRepository<T, Id> repo = (DataRepository<T, Id>) new TeamRepository(workspace);
 			return repo;
 		}
 		throw new IllegalArgumentException("No repository available for entity: " + entityClass.getName());
