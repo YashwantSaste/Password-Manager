@@ -1,17 +1,19 @@
 package com.project.password.manager.service;
 
+import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.configuration.application.Configuration;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.exceptions.EntityNotFoundException;
 import com.project.password.manager.exceptions.IlleagalAccessException;
+import com.project.password.manager.exceptions.UnauthorizedSessionException;
 import com.project.password.manager.guice.PlatformEntityProvider;
 import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IUser;
@@ -55,22 +57,49 @@ public class TeamService {
 
 	@NotNull
 	public ITeam getTeam(@NotNull String teamId) {
-		ITeam team = teamRepository.findById(teamId);
+		String normalizedTeamId = normalizeTeamLookupValue(teamId);
+		ITeam team = teamRepository.findById(normalizedTeamId);
 		if (team == null) {
-			throw new EntityNotFoundException("Team not found: " + teamId);
+			for (ITeam candidate : teamRepository.findAll()) {
+				if (normalizedTeamId.equals(normalizeTeamLookupValue(candidate.getId()))
+						|| normalizedTeamId.equals(normalizeTeamLookupValue(candidate.name()))) {
+					team = candidate;
+					break;
+				}
+			}
+		}
+		if (team == null) {
+			throw new EntityNotFoundException(buildTeamNotFoundMessage(normalizedTeamId));
+		}
+		return team;
+	}
+
+	@NotNull
+	public List<ITeam> getTeamsForUser(@NotNull String userId) {
+		List<ITeam> teams = new ArrayList<>();
+		for (ITeam team : teamRepository.findAll()) {
+			if (isUserMemberOfTeam(team, userId)) {
+				teams.add(team);
+			}
+		}
+		return teams;
+	}
+
+	@NotNull
+	public ITeam requireTeamAccessibleToUser(@NotNull String teamId, @NotNull String userId) {
+		ITeam team = getTeam(teamId);
+		if (!isUserMemberOfTeam(team, userId)) {
+			throw new UnauthorizedSessionException("The team with id " + teamId + " is not accessible to user " + userId);
 		}
 		return team;
 	}
 
 	public boolean isUserMemberOfTeam(@NotNull String teamId, @NotNull String userId) {
-		ITeam team = getTeam(teamId);
-		return team.owners().stream().anyMatch(user -> userId.equals(user.getId()))
-				|| team.memebers().stream().anyMatch(user -> userId.equals(user.getId()));
+		return isUserMemberOfTeam(getTeam(teamId), userId);
 	}
 
 	public boolean isUserOwnerOfTeam(@NotNull String teamId, @NotNull String userId) {
-		ITeam team = getTeam(teamId);
-		return team.owners().stream().anyMatch(user -> userId.equals(user.getId()));
+		return isUserOwnerOfTeam(getTeam(teamId), userId);
 	}
 
 	public void saveOrUpdateTeam(@NotNull ITeam team) {
@@ -95,5 +124,38 @@ public class TeamService {
 	private String generateTeamSharedKeySalt() {
 		byte[] keyBytes = KeyGenerator.generateKeyFromPassword(UUID.randomUUID().toString()).getEncoded();
 		return Base64.getEncoder().encodeToString(keyBytes);
+	}
+
+	private boolean isUserMemberOfTeam(@NotNull ITeam team, @NotNull String userId) {
+		return isUserOwnerOfTeam(team, userId)
+				|| team.memebers().stream().anyMatch(user -> userId.equals(user.getId()));
+	}
+
+	private boolean isUserOwnerOfTeam(@NotNull ITeam team, @NotNull String userId) {
+		return team.owners().stream().anyMatch(user -> userId.equals(user.getId()));
+	}
+
+	@NotNull
+	private String buildTeamNotFoundMessage(@NotNull String teamId) {
+		List<String> availableTeamIds = teamRepository.findAll().stream()
+				.map(ITeam::getId)
+				.sorted(String.CASE_INSENSITIVE_ORDER)
+				.collect(Collectors.toList());
+		if (availableTeamIds.isEmpty()) {
+			return "Team not found: " + teamId;
+		}
+		return "Team not found: " + teamId + ". Available teams: " + String.join(", ", availableTeamIds);
+	}
+
+	@NotNull
+	private String normalizeTeamLookupValue(@NotNull String value) {
+		StringBuilder builder = new StringBuilder(value.length());
+		for (int index = 0; index < value.length(); index++) {
+			char currentChar = value.charAt(index);
+			if (!Character.isISOControl(currentChar)) {
+				builder.append(currentChar);
+			}
+		}
+		return builder.toString().trim().toLowerCase();
 	}
 }

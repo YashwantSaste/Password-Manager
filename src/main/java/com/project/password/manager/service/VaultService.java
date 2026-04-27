@@ -92,6 +92,19 @@ public class VaultService {
 	}
 
 	@NotNull
+	public List<IVault> getTeamVaults(@NotNull String userId, @NotNull String teamId) {
+		ITeam team = teamService.requireTeamAccessibleToUser(teamId, userId);
+		String normalizedTeamId = team.getId().trim();
+		List<IVault> teamVaults = new ArrayList<>();
+		for (IVault vault : vaultRepository.findAll()) {
+			if (vault.getScope() == VaultScope.TEAM && normalizedTeamId.equals(vault.getScopeId().trim())) {
+				teamVaults.add(vault);
+			}
+		}
+		return teamVaults;
+	}
+
+	@NotNull
 	public IVault resolveVaultAccessibleToUser(@NotNull String userId, @Nullable String vaultReference) {
 		if (vaultReference == null || vaultReference.trim().isEmpty()) {
 			return getDefaultVault(userId);
@@ -124,7 +137,6 @@ public class VaultService {
 
 		return vault;
 	}
-
 
 	@NotNull
 	private IVault getVault(@NotNull String vaultId) {

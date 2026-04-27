@@ -13,8 +13,12 @@ import com.project.password.manager.model.ILogin;
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.INote;
 import com.project.password.manager.model.ITag;
+import com.project.password.manager.model.ITeam;
+import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.database.file.storage.Metadata;
+import com.project.password.manager.model.database.file.storage.Team;
+import com.project.password.manager.model.database.file.storage.User;
 import com.project.password.manager.model.database.file.storage.Vault;
 import com.project.password.manager.model.payload.Entry;
 import com.project.password.manager.model.payload.Login;
@@ -33,12 +37,14 @@ public final class ModelObjectMapperFactory {
 		mapper.registerModule(new JavaTimeModule());
 		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		SimpleModule module = new SimpleModule();
+		module.addAbstractTypeMapping(IUser.class, User.class);
 		module.addAbstractTypeMapping(IVault.class, Vault.class);
 		module.addAbstractTypeMapping(IEntry.class, Entry.class);
 		module.addAbstractTypeMapping(ILogin.class, Login.class);
 		module.addAbstractTypeMapping(INote.class, Note.class);
 		module.addAbstractTypeMapping(ITag.class, Tag.class);
 		module.addAbstractTypeMapping(IMetadata.class, Metadata.class);
+		module.addAbstractTypeMapping(ITeam.class, Team.class);
 		mapper.registerModule(module);
 		return mapper;
 	}

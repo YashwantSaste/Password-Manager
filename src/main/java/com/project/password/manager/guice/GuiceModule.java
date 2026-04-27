@@ -24,6 +24,11 @@ import com.project.password.manager.cli.commands.entry.EntryGetCommand;
 import com.project.password.manager.cli.commands.entry.EntryListCommand;
 import com.project.password.manager.cli.commands.entry.EntrySearchCommand;
 import com.project.password.manager.cli.commands.entry.EntryUpdateCommand;
+import com.project.password.manager.cli.commands.team.CreateTeamCommand;
+import com.project.password.manager.cli.commands.team.GetTeamCommand;
+import com.project.password.manager.cli.commands.team.ListTeamCommand;
+import com.project.password.manager.cli.commands.team.TeamVaultCreateCommand;
+import com.project.password.manager.cli.commands.team.TeamVaultListCommand;
 import com.project.password.manager.cli.commands.theme.ThemeListCommand;
 import com.project.password.manager.cli.commands.theme.ThemePreviewCommand;
 import com.project.password.manager.cli.commands.theme.ThemeSetCommand;
@@ -47,6 +52,11 @@ import com.project.password.manager.cli.handlers.entry.EntryGetCommandHandler;
 import com.project.password.manager.cli.handlers.entry.EntryListCommandHandler;
 import com.project.password.manager.cli.handlers.entry.EntrySearchCommandHandler;
 import com.project.password.manager.cli.handlers.entry.EntryUpdateCommandHandler;
+import com.project.password.manager.cli.handlers.team.CreateTeamCommandHandler;
+import com.project.password.manager.cli.handlers.team.GetTeamCommandHandler;
+import com.project.password.manager.cli.handlers.team.ListTeamCommandHandler;
+import com.project.password.manager.cli.handlers.team.TeamVaultCreateCommandHandler;
+import com.project.password.manager.cli.handlers.team.TeamVaultListCommandHandler;
 import com.project.password.manager.cli.handlers.theme.ThemeListCommandHandler;
 import com.project.password.manager.cli.handlers.theme.ThemePreviewCommandHandler;
 import com.project.password.manager.cli.handlers.theme.ThemeSetCommandHandler;
@@ -258,6 +268,11 @@ public class GuiceModule extends AbstractModule {
 				.register(VaultListCommand.class, VaultListCommandHandler.class)
 				.register(VaultCreateCommand.class, VaultCreateCommandHandler.class)
 				.register(VaultDefaultCommand.class, VaultDefaultCommandHandler.class)
+				.register(ListTeamCommand.class, ListTeamCommandHandler.class)
+				.register(GetTeamCommand.class, GetTeamCommandHandler.class)
+				.register(CreateTeamCommand.class, CreateTeamCommandHandler.class)
+				.register(TeamVaultListCommand.class, TeamVaultListCommandHandler.class)
+				.register(TeamVaultCreateCommand.class, TeamVaultCreateCommandHandler.class)
 				.register(EntryListCommand.class, EntryListCommandHandler.class)
 				.register(EntryGetCommand.class, EntryGetCommandHandler.class)
 				.register(EntryCreateCommand.class, EntryCreateCommandHandler.class)
