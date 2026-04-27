@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 public interface ITeam extends HasMetadata {
 
 	@NotNull
-	String id();
+	String getId();
 
 	@NotNull
 	String name();

@@ -9,7 +9,7 @@ import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 
-public class Team implements ITeam {
+public class Team implements ITeam, IFileStorableEntity {
 
 	private String id;
 	private String name;
@@ -42,7 +42,7 @@ public class Team implements ITeam {
 
 	@Override
 	@NotNull
-	public String id() {
+	public String getId() {
 		return id;
 	}
 
@@ -104,5 +104,12 @@ public class Team implements ITeam {
 	@Override
 	public void setAllVaults(@NotNull List<IVault> allVaults) {
 		this.allVaults = allVaults;
+	}
+
+
+	@Override
+	@NotNull
+	public String getFileName() {
+		return "team.json";
 	}
 }
