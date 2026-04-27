@@ -6,9 +6,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.cli.runtime.CliTheme;
+import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.UserRole;
 import com.project.password.manager.model.IVault;
+import com.project.password.manager.model.VaultScope;
 import com.project.password.manager.model.entry.EntryView;
 import com.project.password.manager.model.entry.NoteValue;
 import com.project.password.manager.model.entry.TagValue;
@@ -39,11 +41,11 @@ public final class CliViewPrinter {
 	public static String formatVault(@NotNull IVault vault, boolean showIds) {
 		String content = section(
 				CliTheme.badge("vault") + "  " + CliTheme.title(vault.getName()),
-				field("owner", vault.getUserId()));
+				field(vault.getScope() == VaultScope.TEAM ? "team" : "owner", vault.getScopeId()));
 		if (showIds) {
 			content = section(
 					CliTheme.badge("vault") + "  " + CliTheme.title(vault.getName()),
-					field("owner", vault.getUserId()),
+					field(vault.getScope() == VaultScope.TEAM ? "team" : "owner", vault.getScopeId()),
 					field("internal id", vault.getId()));
 		}
 		return content;
@@ -62,6 +64,28 @@ public final class CliViewPrinter {
 		StringBuilder builder = new StringBuilder();
 		for (IVault vault : vaults) {
 			appendSection(builder, formatVault(vault, showIds));
+		}
+		return builder.toString();
+	}
+
+	@NotNull
+	public static String formatTeam(@NotNull ITeam team) {
+		return section(
+				CliTheme.badge("team") + "  " + CliTheme.title(team.name()),
+				field("team", team.name()),
+				field("owners", joinUsers(team.owners())),
+				field("members", joinUsers(team.memebers())),
+				field("default vault", valueOrDash(team.getDefaultVaultId())));
+	}
+
+	@NotNull
+	public static String formatTeams(@NotNull List<ITeam> teams) {
+		if (teams.isEmpty()) {
+			return CliTheme.muted("No teams found.");
+		}
+		StringBuilder builder = new StringBuilder();
+		for (ITeam team : teams) {
+			appendSection(builder, formatTeam(team));
 		}
 		return builder.toString();
 	}
@@ -188,6 +212,21 @@ public final class CliViewPrinter {
 				builder.append(", ");
 			}
 			builder.append(role.name());
+		}
+		return builder.toString();
+	}
+
+	@NotNull
+	private static String joinUsers(@NotNull List<IUser> users) {
+		if (users.isEmpty()) {
+			return "-";
+		}
+		StringBuilder builder = new StringBuilder();
+		for (IUser user : users) {
+			if (builder.length() > 0) {
+				builder.append(", ");
+			}
+			builder.append(user.getName());
 		}
 		return builder.toString();
 	}

@@ -22,7 +22,6 @@ import com.project.password.manager.database.EntryDataRepository;
 import com.project.password.manager.database.EntryStorageKey;
 import com.project.password.manager.encryption.IEncryptionService;
 import com.project.password.manager.exceptions.EntityNotFoundException;
-import com.project.password.manager.exceptions.UnauthorizedSessionException;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.entry.EncryptedEntryRecord;
 import com.project.password.manager.model.entry.EntrySecretPayload;
@@ -33,7 +32,7 @@ import com.project.password.manager.model.entry.TagValue;
 import com.project.password.manager.util.ModelObjectMapperFactory;
 import com.project.password.manager.util.ValidationUtils;
 
-public class EntryService implements IService {
+public class EntryService {
 
 	@NotNull
 	private final EntryDataRepository entryRepository;
@@ -44,23 +43,26 @@ public class EntryService implements IService {
 	@NotNull
 	private final ObjectMapper objectMapper;
 	@NotNull
+	private final VaultAccessService vaultAccessService;
+	@NotNull
 	private final Cache<String, VaultSearchIndex> searchIndexByVault = Caffeine.newBuilder()
 	.expireAfterAccess(20, TimeUnit.MINUTES).maximumSize(200).build();
 
 	public EntryService(@NotNull EntryDataRepository entryRepository,
 			@NotNull DataRepository<IVault, String> vaultRepository,
-			@NotNull IEncryptionService encryptionService) {
+			@NotNull IEncryptionService encryptionService, @NotNull VaultAccessService vaultAccessService) {
 		this.entryRepository = entryRepository;
 		this.vaultRepository = vaultRepository;
 		this.encryptionService = encryptionService;
 		this.objectMapper = ModelObjectMapperFactory.create();
+		this.vaultAccessService = vaultAccessService;
 	}
 
 	@NotNull
 	public EntryView createEntry(@NotNull String userId, @NotNull String vaultId,
 			@NotNull EntryUpsertRequest request) {
 		ValidationUtils.validate(request);
-		assertOwnedVault(userId, vaultId);
+		IVault vault = requireVaultAccessibleToUser(userId, vaultId);
 		String entryId = UUID.randomUUID().toString();
 		long now = System.currentTimeMillis();
 		EncryptedEntryRecord record = new EncryptedEntryRecord();
@@ -68,7 +70,7 @@ public class EntryService implements IService {
 		record.setVaultId(vaultId);
 		record.setCreatedAtEpochMs(now);
 		record.setUpdatedAtEpochMs(now);
-		record.setEncryptedPayload(encryptPayload(userId, toSecretPayload(request)));
+		record.setEncryptedPayload(encryptPayload(vault, toSecretPayload(request)));
 		entryRepository.save(record);
 		EntryView view = toView(record, request);
 		upsertIndex(view);
@@ -77,9 +79,9 @@ public class EntryService implements IService {
 
 	@NotNull
 	public EntryView getEntry(@NotNull String userId, @NotNull String vaultId, @NotNull String entryId) {
-		assertOwnedVault(userId, vaultId);
+		IVault vault = requireVaultAccessibleToUser(userId, vaultId);
 		EncryptedEntryRecord record = requireRecord(vaultId, entryId);
-		return decryptRecord(userId, record);
+		return decryptRecord(vault, record);
 	}
 
 	@NotNull
@@ -88,13 +90,13 @@ public class EntryService implements IService {
 		String normalizedReference = requireText(entryReference, "Entry reference");
 		List<EntryView> matchedEntries = new ArrayList<>();
 		for (String vaultId : vaultIds) {
-			assertOwnedVault(userId, vaultId);
+			IVault vault = requireVaultAccessibleToUser(userId, vaultId);
 			EncryptedEntryRecord record = entryRepository.findById(new EntryStorageKey(vaultId, normalizedReference));
 			if (record != null) {
-				matchedEntries.add(decryptRecord(userId, record));
+				matchedEntries.add(decryptRecord(vault, record));
 				continue;
 			}
-			for (EntryView entry : loadIndex(userId, vaultId).orderedEntries()) {
+			for (EntryView entry : loadIndex(vault, vaultId).orderedEntries()) {
 				if (normalizedReference.equalsIgnoreCase(entry.getLabel())) {
 					matchedEntries.add(entry);
 				}
@@ -109,8 +111,8 @@ public class EntryService implements IService {
 
 	@NotNull
 	public List<EntryView> getEntries(@NotNull String userId, @NotNull String vaultId) {
-		assertOwnedVault(userId, vaultId);
-		List<EntryView> entries = new ArrayList<>(loadIndex(userId, vaultId).orderedEntries());
+		IVault vault = requireVaultAccessibleToUser(userId, vaultId);
+		List<EntryView> entries = new ArrayList<>(loadIndex(vault, vaultId).orderedEntries());
 		entries.sort(ENTRY_RECENCY_COMPARATOR);
 		return Collections.unmodifiableList(entries);
 	}
@@ -119,10 +121,10 @@ public class EntryService implements IService {
 	public EntryView updateEntry(@NotNull String userId, @NotNull String vaultId, @NotNull String entryId,
 			@NotNull EntryUpsertRequest request) {
 		ValidationUtils.validate(request);
-		assertOwnedVault(userId, vaultId);
+		IVault vault = requireVaultAccessibleToUser(userId, vaultId);
 		EncryptedEntryRecord record = requireRecord(vaultId, entryId);
 		record.setUpdatedAtEpochMs(System.currentTimeMillis());
-		record.setEncryptedPayload(encryptPayload(userId, toSecretPayload(request)));
+		record.setEncryptedPayload(encryptPayload(vault, toSecretPayload(request)));
 		entryRepository.update(new EntryStorageKey(vaultId, entryId), record);
 		EntryView view = toView(record, request);
 		upsertIndex(view);
@@ -130,7 +132,7 @@ public class EntryService implements IService {
 	}
 
 	public void deleteEntry(@NotNull String userId, @NotNull String vaultId, @NotNull String entryId) {
-		assertOwnedVault(userId, vaultId);
+		requireVaultAccessibleToUser(userId, vaultId);
 		requireRecord(vaultId, entryId);
 		entryRepository.delete(new EntryStorageKey(vaultId, entryId));
 		removeFromIndex(vaultId, entryId);
@@ -138,12 +140,12 @@ public class EntryService implements IService {
 
 	@NotNull
 	public List<EntryView> searchEntries(@NotNull String userId, @NotNull String vaultId, @NotNull String query) {
-		assertOwnedVault(userId, vaultId);
+		IVault vault = requireVaultAccessibleToUser(userId, vaultId);
 		String normalizedQuery = normalize(query);
 		if (normalizedQuery.isEmpty()) {
 			return Collections.emptyList();
 		}
-		VaultSearchIndex index = loadIndex(userId, vaultId);
+		VaultSearchIndex index = loadIndex(vault, vaultId);
 		List<String> queryTokens = tokenize(normalizedQuery);
 		Set<String> matchedIds = new HashSet<>();
 		for (String token : queryTokens) {
@@ -179,14 +181,9 @@ public class EntryService implements IService {
 		return normalizedValue;
 	}
 
-	private void assertOwnedVault(@NotNull String userId, @NotNull String vaultId) {
-		IVault vault = vaultRepository.findById(vaultId);
-		if (vault == null) {
-			throw new EntityNotFoundException("The vault with id " + vaultId + " does not exist");
-		}
-		if (!userId.equals(vault.getUserId())) {
-			throw new UnauthorizedSessionException("The vault with id " + vaultId + " does not belong to user " + userId);
-		}
+	@NotNull
+	private IVault requireVaultAccessibleToUser(@NotNull String userId, @NotNull String vaultId) {
+		return vaultAccessService.requireUserAccessibleVault(userId, vaultId);
 	}
 
 	@NotNull
@@ -199,18 +196,18 @@ public class EntryService implements IService {
 	}
 
 	@NotNull
-	private String encryptPayload(@NotNull String userId, @NotNull EntrySecretPayload payload) {
+	private String encryptPayload(@NotNull IVault vault, @NotNull EntrySecretPayload payload) {
 		try {
-			return encryptionService.encrypt(objectMapper.writeValueAsString(payload), userId);
+			return encryptionService.encrypt(objectMapper.writeValueAsString(payload), vault);
 		} catch (Exception ex) {
-			throw new IllegalStateException("Unable to encrypt entry payload for user " + userId, ex);
+			throw new IllegalStateException("Unable to encrypt entry payload for vault " + vault.getId(), ex);
 		}
 	}
 
 	@NotNull
-	private EntryView decryptRecord(@NotNull String userId, @NotNull EncryptedEntryRecord record) {
+	private EntryView decryptRecord(@NotNull IVault vault, @NotNull EncryptedEntryRecord record) {
 		try {
-			String rawPayload = encryptionService.decrypt(record.getEncryptedPayload(), userId);
+			String rawPayload = encryptionService.decrypt(record.getEncryptedPayload(), vault);
 			EntrySecretPayload payload = objectMapper.readValue(rawPayload, EntrySecretPayload.class);
 			EntryView view = new EntryView();
 			view.setId(record.getId());
@@ -261,15 +258,15 @@ public class EntryService implements IService {
 	}
 
 	@NotNull
-	private VaultSearchIndex loadIndex(@NotNull String userId, @NotNull String vaultId) {
-		return searchIndexByVault.get(vaultId, ignored -> buildIndex(userId, vaultId));
+	private VaultSearchIndex loadIndex(@NotNull IVault vault, @NotNull String vaultId) {
+		return searchIndexByVault.get(vaultId, ignored -> buildIndex(vault, vaultId));
 	}
 
 	@NotNull
-	private VaultSearchIndex buildIndex(@NotNull String userId, @NotNull String vaultId) {
+	private VaultSearchIndex buildIndex(@NotNull IVault vault, @NotNull String vaultId) {
 		VaultSearchIndex index = new VaultSearchIndex();
 		for (EncryptedEntryRecord record : entryRepository.findByVaultId(vaultId)) {
-			EntryView view = decryptRecord(userId, record);
+			EntryView view = decryptRecord(vault, record);
 			index.add(view);
 		}
 		return index;
@@ -315,10 +312,10 @@ public class EntryService implements IService {
 
 	@NotNull
 	private static final Comparator<EntryView> ENTRY_RECENCY_COMPARATOR = Comparator
-			.comparingLong(EntryView::getUpdatedAtEpochMs)
-			.reversed()
-			.thenComparing(Comparator.comparingLong(EntryView::getCreatedAtEpochMs).reversed())
-			.thenComparing(EntryView::getId);
+	.comparingLong(EntryView::getUpdatedAtEpochMs)
+	.reversed()
+	.thenComparing(Comparator.comparingLong(EntryView::getCreatedAtEpochMs).reversed())
+	.thenComparing(EntryView::getId);
 
 	private static final class VaultSearchIndex {
 

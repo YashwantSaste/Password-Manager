@@ -2,7 +2,7 @@ package com.project.password.manager.model;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface IVault extends IEntity {
+public interface IVault extends HasMetadata {
 	@NotNull
 	String getId();
 
@@ -10,22 +10,22 @@ public interface IVault extends IEntity {
 	String getName();
 
 	@NotNull
-	String getUserId();
+	VaultScope getScope();
+
+	@NotNull
+	String getScopeId();
 
 	@NotNull
 	String getEncryptedBlob();
-
-	@NotNull
-	IMetadata metadata();
 
 	void setId(@NotNull String vaultId);
 
 	void setName(@NotNull String vaultName);
 
-	void setUserId(@NotNull String userId);
+	void setScope(@NotNull VaultScope scope);
+
+	void setScopeId(@NotNull String scopeId);
 
 	void setEncryptedBlob(@NotNull String encryptedBlob);
-
-	void setMetadata(@NotNull IMetadata metadata);
 
 }

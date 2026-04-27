@@ -44,6 +44,8 @@ public class ApplicationProperties {
 	/** Salt key generation Configurations */
 	public static final String PROPERTY_SALT_KEY_ITERATIONS= "app.salt.iterations";
 	public static final String PROPERTY_SALT_KEY_LENGTH = "app.salt.key.size";
+	/** Team Configurations **/
+	public static final String PROPERTY_ALLOW_ONLY_ADMIN_TO_CREATE_TEAM = "app.team.create.allow.admin.only";
 
 	private static final List<String> SUPPORTED_KEYS = List.of(
 			PROPERTY_APP_NAME,
@@ -77,7 +79,7 @@ public class ApplicationProperties {
 			PROPERTY_AES_TAG_LENGTH,
 			PROPERTY_AES_IV_LENGTH,
 			PROPERTY_SALT_KEY_ITERATIONS,
-			PROPERTY_SALT_KEY_LENGTH);
+			PROPERTY_SALT_KEY_LENGTH, PROPERTY_ALLOW_ONLY_ADMIN_TO_CREATE_TEAM);
 
 	private static final Set<String> SENSITIVE_KEYS = Set.of(
 			PROPERTY_DATABASE_PASSWORD,

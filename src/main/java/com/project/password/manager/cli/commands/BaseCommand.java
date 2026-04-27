@@ -7,6 +7,7 @@ import com.project.password.manager.cli.commands.auth.SignupCommand;
 import com.project.password.manager.cli.commands.auth.WhoAmICommand;
 import com.project.password.manager.cli.commands.config.ConfigCommand;
 import com.project.password.manager.cli.commands.entry.EntryCommand;
+import com.project.password.manager.cli.commands.team.TeamCommand;
 import com.project.password.manager.cli.runtime.CliTheme;
 import com.project.password.manager.cli.commands.theme.ThemeCommand;
 import com.project.password.manager.cli.commands.user.UserCommand;
@@ -22,6 +23,7 @@ import picocli.CommandLine.Command;
 				WhoAmICommand.class,
 				PingCommand.class,
 				UserCommand.class,
+				TeamCommand.class,
 				ConfigCommand.class,
 				ThemeCommand.class,
 				VaultCommand.class,
