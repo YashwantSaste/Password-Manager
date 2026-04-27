@@ -10,17 +10,16 @@ import org.jetbrains.annotations.Nullable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.password.manager.database.DataRepository;
-import com.project.password.manager.encryption.AesGcmEncryptionService;
 import com.project.password.manager.encryption.IEncryptionService;
 import com.project.password.manager.exceptions.EntityNotFoundException;
-import com.project.password.manager.exceptions.UnauthorizedSessionException;
 import com.project.password.manager.exceptions.UserNotFoundException;
 import com.project.password.manager.guice.PlatformEntityProvider;
+import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.Status;
 import com.project.password.manager.model.VaultPayload;
-import com.project.password.manager.util.ModelObjectMapperFactory;
+import com.project.password.manager.model.VaultScope;
 
 public class VaultService {
 	@NotNull
@@ -31,20 +30,21 @@ public class VaultService {
 	private final IEncryptionService encryptionService;
 	@NotNull
 	private final ObjectMapper objectMapper;
-
-	public VaultService(@NotNull DataRepository<IUser, String> userRepository,
-			@NotNull DataRepository<IVault, String> vaultRepository) {
-		this(userRepository, vaultRepository, new AesGcmEncryptionService(new UserService(userRepository)),
-				ModelObjectMapperFactory.create());
-	}
+	@NotNull
+	private final VaultAccessService vaultAccessService;
+	@NotNull
+	private final TeamService teamService;
 
 	public VaultService(@NotNull DataRepository<IUser, String> userRepository,
 			@NotNull DataRepository<IVault, String> vaultRepository, @NotNull IEncryptionService encryptionService,
-			@NotNull ObjectMapper objectMapper) {
+			@NotNull ObjectMapper objectMapper, @NotNull VaultAccessService vaultAccessService,
+			@NotNull TeamService teamService) {
 		this.userRepository = userRepository;
 		this.vaultRepository = vaultRepository;
 		this.encryptionService = encryptionService;
 		this.objectMapper = objectMapper;
+		this.vaultAccessService = vaultAccessService;
+		this.teamService = teamService;
 	}
 
 	@NotNull
@@ -53,7 +53,8 @@ public class VaultService {
 		if (!vaults.isEmpty() || hasDefaultVault(user)) {
 			throw new UnsupportedOperationException("A user can have only one default vault.");
 		}
-		IVault vault = createVault(user, vaults, "Default");
+		IVault vault = createScopedVault(VaultScope.USER, user.getId(), "Default");
+		vaults.add(vault);
 		user.setDefaultVaultId(vault.getId());
 		persistUserIfPresent(user);
 		return vault;
@@ -61,13 +62,14 @@ public class VaultService {
 
 	@NotNull
 	public List<IVault> getAllVaults(@NotNull String userId) {
-		return ensureVaultsInitialized(getUser(userId));
+		return vaultAccessService.findVaultsAccessibleToUser(userId);
 	}
 
 	@NotNull
 	public String createVaultForUser(@NotNull String userId, @NotNull String vaultName) {
 		IUser user = getUser(userId);
-		IVault vault = createVault(user, ensureVaultsInitialized(user), vaultName);
+		IVault vault = createScopedVault(VaultScope.USER, user.getId(), vaultName);
+		ensureVaultsInitialized(user).add(vault);
 		if (!hasDefaultVault(user)) {
 			user.setDefaultVaultId(vault.getId());
 		}
@@ -76,22 +78,36 @@ public class VaultService {
 	}
 
 	@NotNull
-	public IVault resolveOwnedVault(@NotNull String userId, @Nullable String vaultReference) {
+	public String createTeamVault(@NotNull String actorUserId, @NotNull String teamId, @NotNull String vaultName) {
+		ITeam team = teamService.getTeam(teamId);
+		if (!teamService.isUserOwnerOfTeam(teamId, actorUserId)) {
+			throw new IllegalArgumentException("Only team owners can create team vaults.");
+		}
+		IVault vault = createScopedVault(VaultScope.TEAM, team.getId(), vaultName);
+		if (team.getDefaultVaultId().isBlank()) {
+			team.setDefaultVaultId(vault.getId());
+			teamService.saveOrUpdateTeam(team);
+		}
+		return vault.getId();
+	}
+
+	@NotNull
+	public IVault resolveVaultAccessibleToUser(@NotNull String userId, @Nullable String vaultReference) {
 		if (vaultReference == null || vaultReference.trim().isEmpty()) {
 			return getDefaultVault(userId);
 		}
 		String normalizedReference = requireText(vaultReference, "Vault reference");
 		for (IVault vault : getAllVaults(userId)) {
 			if (normalizedReference.equals(vault.getId()) || normalizedReference.equalsIgnoreCase(vault.getName())) {
-				return getOwnedVault(userId, vault.getId());
+				return vaultAccessService.requireUserAccessibleVault(userId, vault.getId());
 			}
 		}
 		throw new EntityNotFoundException("The vault with reference " + normalizedReference + " does not exist");
 	}
 
 	@NotNull
-	public String resolveOwnedVaultId(@NotNull String userId, @Nullable String vaultReference) {
-		return resolveOwnedVault(userId, vaultReference).getId();
+	public String resolveVaultIdAccessibleToUser(@NotNull String userId, @Nullable String vaultReference) {
+		return resolveVaultAccessibleToUser(userId, vaultReference).getId();
 	}
 
 	@NotNull
@@ -105,19 +121,10 @@ public class VaultService {
 		if (vault == null) {
 			throw new EntityNotFoundException("The default vault with id " + defaultVaultId + " does not exist");
 		}
+
 		return vault;
 	}
 
-	@NotNull
-	private IVault getOwnedVault(@NotNull String userId, @NotNull String vaultId) {
-		requireText(userId, "User id");
-		IVault vault = getVault(vaultId);
-		if (!userId.equals(vault.getUserId())) {
-			throw new UnauthorizedSessionException(
-					"The vault with id " + vaultId + " does not belong to user " + userId);
-		}
-		return vault;
-	}
 
 	@NotNull
 	private IVault getVault(@NotNull String vaultId) {
@@ -131,34 +138,34 @@ public class VaultService {
 
 	@NotNull
 	private IVault createVault(@NotNull IUser user) {
-		return createVault(user, ensureVaultsInitialized(user), "Vault " + (ensureVaultsInitialized(user).size() + 1));
+		return createScopedVault(VaultScope.USER, user.getId(), "Vault " + (ensureVaultsInitialized(user).size() + 1));
 	}
 
 	@NotNull
-	private IVault createVault(@NotNull IUser user, @NotNull List<IVault> vaults, @NotNull String vaultName) {
+	private IVault createScopedVault(@NotNull VaultScope scope, @NotNull String scopeId, @NotNull String vaultName) {
 		String vaultId = UUID.randomUUID().toString();
 		IVault vault = PlatformEntityProvider.getEntityProvider().getVault();
 		vault.setId(vaultId);
 		vault.setName(requireText(vaultName, "Vault name"));
-		vault.setUserId(user.getId());
+		vault.setScope(scope);
+		vault.setScopeId(scopeId);
 		vault.metadata().setStatus(Status.ACTIVE);
 		LocalDateTime currentTime = LocalDateTime.now();
 		vault.metadata().setCreatedAt(currentTime);
 		vault.metadata().setUpdatedAt(currentTime);
 		vault.metadata().setLastAccessedAt(currentTime);
-		vault.setEncryptedBlob(encryptPayload(new VaultPayload(), user.getId()));
+		vault.setEncryptedBlob(encryptPayload(vault, new VaultPayload()));
 		vaultRepository.save(vault);
-		vaults.add(vault);
 		return vault;
 	}
 
 	@NotNull
-	private String encryptPayload(@NotNull VaultPayload payload, @NotNull String userId) {
+	private String encryptPayload(@NotNull IVault vault, @NotNull VaultPayload payload) {
 		try {
 			String rawPayload = objectMapper.writeValueAsString(payload);
-			return encryptionService.encrypt(rawPayload, userId);
+			return encryptionService.encrypt(rawPayload, vault);
 		} catch (Exception ex) {
-			throw new IllegalStateException("Unable to encrypt vault payload for user " + userId, ex);
+			throw new IllegalStateException("Unable to encrypt vault payload for vault " + vault.getId(), ex);
 		}
 	}
 

@@ -10,6 +10,7 @@ import com.project.password.manager.database.file.storage.FileManager;
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.Status;
 import com.project.password.manager.model.UserRole;
+import com.project.password.manager.model.VaultScope;
 import com.project.password.manager.model.database.file.storage.Metadata;
 import com.project.password.manager.model.database.file.storage.User;
 import com.project.password.manager.model.database.file.storage.Vault;
@@ -69,7 +70,7 @@ public class ModelObjectMapperFactoryTest extends TestCase {
 
 	public void testVaultSerializationIncludesDefaultMetadataObject() throws Exception {
 		ObjectMapper mapper = ModelObjectMapperFactory.create();
-		Vault vault = new Vault("vault-1", "Default", "user-1", "encrypted");
+		Vault vault = new Vault("vault-1", "Default", VaultScope.USER, "user-1", "encrypted");
 
 		String json = mapper.writeValueAsString(vault);
 
@@ -88,14 +89,6 @@ public class ModelObjectMapperFactoryTest extends TestCase {
 		metadata.setVersion("1.0");
 		metadata.setStatus(Status.ACTIVE);
 
-		return new User(
-				"user-1",
-				"alice",
-				"verifier",
-				"salt",
-				"vault-1",
-				List.of(),
-				List.of(UserRole.USER),
-				metadata);
+		return new User("user-1", "alice", "verifier", "salt", "vault-1", List.of(), List.of(UserRole.USER), metadata);
 	}
 }

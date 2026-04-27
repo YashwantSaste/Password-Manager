@@ -86,9 +86,12 @@ import com.project.password.manager.model.database.sql.JpaToken;
 import com.project.password.manager.model.database.sql.JpaUser;
 import com.project.password.manager.model.database.sql.JpaVault;
 import com.project.password.manager.service.AuthService;
+import com.project.password.manager.service.ConfigService;
 import com.project.password.manager.service.EntryService;
+import com.project.password.manager.service.TeamService;
 import com.project.password.manager.service.TokenService;
 import com.project.password.manager.service.UserService;
+import com.project.password.manager.service.VaultAccessService;
 import com.project.password.manager.service.VaultService;
 import com.project.password.manager.util.ModelObjectMapperFactory;
 
@@ -171,8 +174,20 @@ public class GuiceModule extends AbstractModule {
 
 	@Provides
 	@Singleton
+	DataRepository<ITeam, String> provideTeamRepository(IConfiguration configuration) {
+		return new DataRepositoryFactory(configuration.databaseConfiguration()).getRepository(ITeam.class, String.class);
+	}
+
+	@Provides
+	@Singleton
 	UserService provideUserService(DataRepository<IUser, String> userRepository, TokenService tokenService) {
 		return new UserService(userRepository, tokenService);
+	}
+
+	@Provides
+	@Singleton
+	TeamService provideTeamService(DataRepository<ITeam, String> teamRepository, UserService userService) {
+		return new TeamService(teamRepository, userService);
 	}
 
 	@Provides
@@ -183,22 +198,30 @@ public class GuiceModule extends AbstractModule {
 
 	@Provides
 	@Singleton
-	IEncryptionService provideEncryptionService(UserService userService) {
-		return new AesGcmEncryptionService(userService);
+	IEncryptionService provideEncryptionService(UserService userService, TeamService teamService) {
+		return new AesGcmEncryptionService(userService, teamService);
+	}
+
+	@Provides
+	@Singleton
+	VaultAccessService provideVaultAccessService(DataRepository<IVault, String> vaultRepository, TeamService teamService) {
+		return new VaultAccessService(vaultRepository, teamService);
 	}
 
 	@Provides
 	@Singleton
 	VaultService provideVaultService(DataRepository<IUser, String> userRepository,
-			DataRepository<IVault, String> vaultRepository, IEncryptionService encryptionService) {
-		return new VaultService(userRepository, vaultRepository, encryptionService, ModelObjectMapperFactory.create());
+			DataRepository<IVault, String> vaultRepository, IEncryptionService encryptionService,
+			VaultAccessService vaultAccessService, TeamService teamService) {
+		return new VaultService(userRepository, vaultRepository, encryptionService, ModelObjectMapperFactory.create(),
+				vaultAccessService, teamService);
 	}
 
 	@Provides
 	@Singleton
 	EntryService provideEntryService(EntryDataRepository entryRepository, DataRepository<IVault, String> vaultRepository,
-			IEncryptionService encryptionService) {
-		return new EntryService(entryRepository, vaultRepository, encryptionService);
+			IEncryptionService encryptionService, VaultAccessService vaultAccessService) {
+		return new EntryService(entryRepository, vaultRepository, encryptionService, vaultAccessService);
 	}
 
 	@Provides

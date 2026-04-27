@@ -24,7 +24,7 @@ public abstract class AbstractVaultScopedCommandHandler<TRequest> extends Abstra
 
 	@NotNull
 	protected final String resolveVaultId(@Nullable String vaultReference) {
-		return vaultService.resolveOwnedVaultId(currentUserId(), vaultReference);
+		return vaultService.resolveVaultIdAccessibleToUser(currentUserId(), vaultReference);
 	}
 
 	@NotNull

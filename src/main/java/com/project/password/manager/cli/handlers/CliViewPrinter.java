@@ -9,6 +9,7 @@ import com.project.password.manager.cli.runtime.CliTheme;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.UserRole;
 import com.project.password.manager.model.IVault;
+import com.project.password.manager.model.VaultScope;
 import com.project.password.manager.model.entry.EntryView;
 import com.project.password.manager.model.entry.NoteValue;
 import com.project.password.manager.model.entry.TagValue;
@@ -39,11 +40,11 @@ public final class CliViewPrinter {
 	public static String formatVault(@NotNull IVault vault, boolean showIds) {
 		String content = section(
 				CliTheme.badge("vault") + "  " + CliTheme.title(vault.getName()),
-				field("owner", vault.getUserId()));
+				field(vault.getScope() == VaultScope.TEAM ? "team" : "owner", vault.getScopeId()));
 		if (showIds) {
 			content = section(
 					CliTheme.badge("vault") + "  " + CliTheme.title(vault.getName()),
-					field("owner", vault.getUserId()),
+					field(vault.getScope() == VaultScope.TEAM ? "team" : "owner", vault.getScopeId()),
 					field("internal id", vault.getId()));
 		}
 		return content;

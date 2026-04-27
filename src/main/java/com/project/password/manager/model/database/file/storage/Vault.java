@@ -4,12 +4,14 @@ import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IVault;
+import com.project.password.manager.model.VaultScope;
 
 public class Vault implements IVault, IFileStorableEntity {
 
 	private String id;
 	private String name;
-	private String userId;
+	private VaultScope scope = VaultScope.USER;
+	private String scopeId;
 	private String encryptedBlob;
 	private IMetadata metadata = new Metadata();
 	private String fileName;
@@ -18,10 +20,12 @@ public class Vault implements IVault, IFileStorableEntity {
 		// for jackson
 	}
 
-	public Vault(@NotNull String id, @NotNull String name, @NotNull String userId, @NotNull String encyrptedBlob) {
+	public Vault(@NotNull String id, @NotNull String name, @NotNull VaultScope scope, @NotNull String scopeId,
+			@NotNull String encyrptedBlob) {
 		this.id = id;
 		this.name = name;
-		this.userId = userId;
+		this.scope = scope;
+		this.scopeId = scopeId;
 		this.encryptedBlob = encyrptedBlob;
 	}
 
@@ -39,8 +43,14 @@ public class Vault implements IVault, IFileStorableEntity {
 
 	@Override
 	@NotNull
-	public String getUserId() {
-		return userId;
+	public VaultScope getScope() {
+		return scope != null ? scope : VaultScope.USER;
+	}
+
+	@Override
+	@NotNull
+	public String getScopeId() {
+		return scopeId != null ? scopeId : "";
 	}
 
 	@Override
@@ -77,8 +87,13 @@ public class Vault implements IVault, IFileStorableEntity {
 	}
 
 	@Override
-	public void setUserId(@NotNull String userId) {
-		this.userId = userId;
+	public void setScope(@NotNull VaultScope scope) {
+		this.scope = scope;
+	}
+
+	@Override
+	public void setScopeId(@NotNull String scopeId) {
+		this.scopeId = scopeId;
 	}
 
 	@Override

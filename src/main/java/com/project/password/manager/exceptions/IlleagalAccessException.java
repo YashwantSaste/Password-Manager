@@ -2,11 +2,11 @@ package com.project.password.manager.exceptions;
 
 import org.jetbrains.annotations.NotNull;
 
-public class InvalidAccessException extends RuntimeException {
+public class IlleagalAccessException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public InvalidAccessException(@NotNull String message) {
+	public IlleagalAccessException(@NotNull String message) {
 		super(message);
 	}
 

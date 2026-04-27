@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IVault;
+import com.project.password.manager.model.VaultScope;
 import com.project.password.manager.model.database.file.storage.Metadata;
 
 import jakarta.persistence.Column;
@@ -11,6 +12,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 @Table(name = "Vaults")
@@ -22,7 +25,10 @@ public class JpaVault implements IVault {
 	@Column(nullable = false)
 	private String name;
 	@Column(nullable = false)
-	private String userId;
+	@Enumerated(EnumType.STRING)
+	private VaultScope scope;
+	@Column(nullable = false)
+	private String scopeId;
 	@Column(nullable = false, length = 8192)
 	private String encryptedBlob;
 	@Transient
@@ -40,7 +46,8 @@ public class JpaVault implements IVault {
 		JpaVault entity = new JpaVault();
 		entity.id = vault.getId();
 		entity.name = vault.getName();
-		entity.userId = vault.getUserId();
+		entity.scope = vault.getScope();
+		entity.scopeId = vault.getScopeId();
 		entity.encryptedBlob = vault.getEncryptedBlob();
 		entity.metadata = vault.metadata();
 		return entity;
@@ -60,8 +67,14 @@ public class JpaVault implements IVault {
 
 	@Override
 	@NotNull
-	public String getUserId() {
-		return userId != null ? userId : "";
+	public VaultScope getScope() {
+		return scope != null ? scope : VaultScope.USER;
+	}
+
+	@Override
+	@NotNull
+	public String getScopeId() {
+		return scopeId != null ? scopeId : "";
 	}
 
 	@Override
@@ -90,8 +103,13 @@ public class JpaVault implements IVault {
 	}
 
 	@Override
-	public void setUserId(@NotNull String userId) {
-		this.userId = userId;
+	public void setScope(@NotNull VaultScope scope) {
+		this.scope = scope;
+	}
+
+	@Override
+	public void setScopeId(@NotNull String scopeId) {
+		this.scopeId = scopeId;
 	}
 
 	@Override

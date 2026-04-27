@@ -19,10 +19,10 @@ public interface ITeam extends HasMetadata {
 	List<IUser> memebers();
 
 	@NotNull
-	IVault defaultVault();
+	String getDefaultVaultId();
 
 	@NotNull
-	List<IVault> allVaults();
+	String getKeySalt();
 
 	void setId(@NotNull String id);
 
@@ -32,7 +32,7 @@ public interface ITeam extends HasMetadata {
 
 	void setMembers(@NotNull List<IUser> members);
 
-	void setDefaultVault(@NotNull IVault defaultVault);
+	void setDefaultVaultId(@NotNull String defaultVaultId);
 
-	void setAllVaults(@NotNull List<IVault> allVaults);
+	void setKeySalt(@NotNull String keySalt);
 }

@@ -5,34 +5,42 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IUser;
-import com.project.password.manager.model.IVault;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Team implements ITeam, IFileStorableEntity {
 
 	private String id;
 	private String name;
 	private List<IUser> owners;
 	private List<IUser> members;
-	private IMetadata metadata;
-	private IVault defaultVault;
-	private List<IVault> allVaults;
+	private IMetadata metadata = new Metadata();
+	private String defaultVaultId;
+	private String keySalt;
 
-	public Team(String id, String name, List<IUser> owners, List<IUser> members, IVault defaultVault,
-			List<IVault> allVaults) {
+	public Team() {
+		// for jackson
+	}
+
+	public Team(String id, String name, List<IUser> owners, List<IUser> members, String defaultVaultId,
+			String keySalt) {
 		this.id = id;
 		this.name = name;
 		this.owners = owners;
 		this.members = members;
-		this.defaultVault = defaultVault;
-		this.allVaults = allVaults;
+		this.defaultVaultId = defaultVaultId;
+		this.keySalt = keySalt;
 	}
 
 	@Override
 	@NotNull
 	public IMetadata metadata() {
+		if (metadata == null) {
+			metadata = new Metadata();
+		}
 		return metadata;
 	}
 
@@ -73,17 +81,14 @@ public class Team implements ITeam, IFileStorableEntity {
 
 	@Override
 	@NotNull
-	public IVault defaultVault() {
-		return defaultVault;
+	public String getDefaultVaultId() {
+		return defaultVaultId != null ? defaultVaultId : "";
 	}
 
 	@Override
 	@NotNull
-	public List<IVault> allVaults() {
-		if (allVaults == null) {
-			owners = new ArrayList<>();
-		}
-		return allVaults;
+	public String getKeySalt() {
+		return keySalt != null ? keySalt : "";
 	}
 
 	@Override
@@ -107,15 +112,14 @@ public class Team implements ITeam, IFileStorableEntity {
 	}
 
 	@Override
-	public void setDefaultVault(@NotNull IVault defaultVault) {
-		this.defaultVault = defaultVault;
+	public void setDefaultVaultId(@NotNull String defaultVaultId) {
+		this.defaultVaultId = defaultVaultId;
 	}
 
 	@Override
-	public void setAllVaults(@NotNull List<IVault> allVaults) {
-		this.allVaults = allVaults;
+	public void setKeySalt(@NotNull String keySalt) {
+		this.keySalt = keySalt;
 	}
-
 
 	@Override
 	@NotNull

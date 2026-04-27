@@ -39,13 +39,18 @@ public class DataRepositoryFactory {
 	@NotNull
 	public <T extends IEntity, Id> DataRepository<T, Id> getRepository(@NotNull Class<T> entityClass,
 			@NotNull Class<Id> idClass) {
+		File workspace = Workspace.getInstance().getRoot();
+		if (entityClass.equals(ITeam.class)) {
+			@SuppressWarnings("unchecked")
+			DataRepository<T, Id> repo = (DataRepository<T, Id>) new TeamRepository(workspace);
+			return repo;
+		}
 		if (databaseConfiguration.databaseEnabled()
 				&& IDatabaseConfiguration.DATABASE_TYPE_SQL.equalsIgnoreCase(databaseConfiguration.type())) {
 			SessionFactory factory = HibernateBootStrap.init(databaseConfiguration, new HibernateEntityProvider());
 			return new HibernateRepository<>(factory, resolveSqlEntityClass(entityClass));
 		}
 		log.warn("Database is not enabled hence using local file system as storage");
-		File workspace = Workspace.getInstance().getRoot();
 		if (entityClass.equals(IUser.class)) {
 			@SuppressWarnings("unchecked")
 			DataRepository<T, Id> repo = (DataRepository<T, Id>) new UserRepository(workspace);
@@ -59,11 +64,6 @@ public class DataRepositoryFactory {
 		if (entityClass.equals(IVault.class)) {
 			@SuppressWarnings("unchecked")
 			DataRepository<T, Id> repo = (DataRepository<T, Id>) new VaultRepository(workspace);
-			return repo;
-		}
-		if (entityClass.equals(ITeam.class)) {
-			@SuppressWarnings("unchecked")
-			DataRepository<T, Id> repo = (DataRepository<T, Id>) new TeamRepository(workspace);
 			return repo;
 		}
 		throw new IllegalArgumentException("No repository available for entity: " + entityClass.getName());
