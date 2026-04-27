@@ -42,8 +42,8 @@ public class TeamService {
 		ITeam team = PlatformEntityProvider.getEntityProvider().getTeam();
 		team.setId(teamName);
 		team.setName(teamName);
-		team.setOwners(List.of(initiatorUser));
-		team.setMembers(List.of(initiatorUser));
+		team.setOwners(List.of(initiatorUser.getId()));
+		team.setMembers(List.of(initiatorUser.getId()));
 		team.setDefaultVaultId("");
 		team.setKeySalt(generateTeamSharedKeySalt());
 		LocalDateTime currentTime = LocalDateTime.now();
@@ -128,11 +128,11 @@ public class TeamService {
 
 	private boolean isUserMemberOfTeam(@NotNull ITeam team, @NotNull String userId) {
 		return isUserOwnerOfTeam(team, userId)
-				|| team.memebers().stream().anyMatch(user -> userId.equals(user.getId()));
+				|| team.memebers().stream().anyMatch(userId::equals);
 	}
 
 	private boolean isUserOwnerOfTeam(@NotNull ITeam team, @NotNull String userId) {
-		return team.owners().stream().anyMatch(user -> userId.equals(user.getId()));
+		return team.owners().stream().anyMatch(userId::equals);
 	}
 
 	@NotNull

@@ -73,8 +73,8 @@ public final class CliViewPrinter {
 		return section(
 				CliTheme.badge("team") + "  " + CliTheme.title(team.name()),
 				field("team", team.name()),
-				field("owners", joinUsers(team.owners())),
-				field("members", joinUsers(team.memebers())),
+				field("owners", joinValues(team.owners())),
+				field("members", joinValues(team.memebers())),
 				field("default vault", valueOrDash(team.getDefaultVaultId())));
 	}
 
@@ -217,16 +217,16 @@ public final class CliViewPrinter {
 	}
 
 	@NotNull
-	private static String joinUsers(@NotNull List<IUser> users) {
-		if (users.isEmpty()) {
+	private static String joinValues(@NotNull List<String> values) {
+		if (values.isEmpty()) {
 			return "-";
 		}
 		StringBuilder builder = new StringBuilder();
-		for (IUser user : users) {
+		for (String value : values) {
 			if (builder.length() > 0) {
 				builder.append(", ");
 			}
-			builder.append(user.getName());
+			builder.append(value);
 		}
 		return builder.toString();
 	}

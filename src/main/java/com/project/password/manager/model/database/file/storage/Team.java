@@ -2,21 +2,25 @@ package com.project.password.manager.model.database.file.storage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.ITeam;
-import com.project.password.manager.model.IUser;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Team implements ITeam, IFileStorableEntity {
 
 	private String id;
 	private String name;
-	private List<IUser> owners;
-	private List<IUser> members;
+	@JsonIgnore
+	private List<String> ownerIds;
+	@JsonIgnore
+	private List<String> memberIds;
 	private IMetadata metadata = new Metadata();
 	private String defaultVaultId;
 	private String keySalt;
@@ -25,12 +29,12 @@ public class Team implements ITeam, IFileStorableEntity {
 		// for jackson
 	}
 
-	public Team(String id, String name, List<IUser> owners, List<IUser> members, String defaultVaultId,
+	public Team(String id, String name, List<String> owners, List<String> members, String defaultVaultId,
 			String keySalt) {
 		this.id = id;
 		this.name = name;
-		this.owners = owners;
-		this.members = members;
+		this.ownerIds = owners;
+		this.memberIds = members;
 		this.defaultVaultId = defaultVaultId;
 		this.keySalt = keySalt;
 	}
@@ -63,20 +67,22 @@ public class Team implements ITeam, IFileStorableEntity {
 
 	@Override
 	@NotNull
-	public List<IUser> owners() {
-		if (owners == null) {
-			owners = new ArrayList<>();
+	@JsonProperty("owners")
+	public List<String> owners() {
+		if (ownerIds == null) {
+			ownerIds = new ArrayList<>();
 		}
-		return owners;
+		return ownerIds;
 	}
 
 	@Override
 	@NotNull
-	public List<IUser> memebers() {
-		if (members == null) {
-			members = new ArrayList<>();
+	@JsonProperty("members")
+	public List<String> memebers() {
+		if (memberIds == null) {
+			memberIds = new ArrayList<>();
 		}
-		return members;
+		return memberIds;
 	}
 
 	@Override
@@ -102,13 +108,23 @@ public class Team implements ITeam, IFileStorableEntity {
 	}
 
 	@Override
-	public void setOwners(@NotNull List<IUser> owners) {
-		this.owners = owners;
+	public void setOwners(@NotNull List<String> owners) {
+		this.ownerIds = new ArrayList<>(owners);
 	}
 
 	@Override
-	public void setMembers(@NotNull List<IUser> members) {
-		this.members = members;
+	public void setMembers(@NotNull List<String> members) {
+		this.memberIds = new ArrayList<>(members);
+	}
+
+	@JsonProperty("owners")
+	private void setOwnersFromJson(@NotNull List<?> owners) {
+		this.ownerIds = normalizeUserIds(owners);
+	}
+
+	@JsonProperty("members")
+	private void setMembersFromJson(@NotNull List<?> members) {
+		this.memberIds = normalizeUserIds(members);
 	}
 
 	@Override
@@ -125,5 +141,23 @@ public class Team implements ITeam, IFileStorableEntity {
 	@NotNull
 	public String getFileName() {
 		return "team.json";
+	}
+
+	@NotNull
+	private List<String> normalizeUserIds(@NotNull List<?> values) {
+		List<String> normalizedIds = new ArrayList<>();
+		for (Object value : values) {
+			if (value instanceof String stringValue) {
+				normalizedIds.add(stringValue);
+				continue;
+			}
+			if (value instanceof Map<?, ?> objectValue) {
+				Object idValue = objectValue.get("id");
+				if (idValue instanceof String stringId && !stringId.isBlank()) {
+					normalizedIds.add(stringId);
+				}
+			}
+		}
+		return normalizedIds;
 	}
 }
