@@ -46,6 +46,9 @@ public class AuthService {
 		if(!encoder.verify(user.getAuthVerifier(),password)) {
 			throw new RuntimeException("Password mismatch. Kindly check your password");
 		}
+		IMetadata metadata = PlatformEntityProvider.getEntityProvider().getMetadata();
+		LocalDateTime currentTime = LocalDateTime.now();
+		metadata.setLastAccessedAt(currentTime);
 		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
 		tokenEntity.setUserId(user.getId());
 		tokenEntity.setToken(tokenService.createToken(user));
