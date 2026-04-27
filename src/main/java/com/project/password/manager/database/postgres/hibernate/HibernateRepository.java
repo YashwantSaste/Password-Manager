@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.model.IEntity;
+import com.project.password.manager.util.MetadataListener;
 
 public class HibernateRepository<T extends IEntity, Id> implements DataRepository<T, Id> {
 
@@ -25,6 +26,7 @@ public class HibernateRepository<T extends IEntity, Id> implements DataRepositor
 
 	@Override
 	public void save(@NotNull T entity) {
+		MetadataListener.beforeCreate(entity);
 		executeTransaction(session -> session.persist(entity));
 	}
 
@@ -56,6 +58,7 @@ public class HibernateRepository<T extends IEntity, Id> implements DataRepositor
 
 	@Override
 	public void update(@NotNull Id id, @NotNull T entity) {
+		MetadataListener.beforeUpdate(entity);
 		executeTransaction(session -> session.merge(entity));
 	}
 

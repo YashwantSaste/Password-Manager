@@ -33,7 +33,7 @@ import com.project.password.manager.model.entry.TagValue;
 import com.project.password.manager.util.ModelObjectMapperFactory;
 import com.project.password.manager.util.ValidationUtils;
 
-public class EntryService implements IService {
+public class EntryService {
 
 	@NotNull
 	private final EntryDataRepository entryRepository;
@@ -315,10 +315,10 @@ public class EntryService implements IService {
 
 	@NotNull
 	private static final Comparator<EntryView> ENTRY_RECENCY_COMPARATOR = Comparator
-			.comparingLong(EntryView::getUpdatedAtEpochMs)
-			.reversed()
-			.thenComparing(Comparator.comparingLong(EntryView::getCreatedAtEpochMs).reversed())
-			.thenComparing(EntryView::getId);
+	.comparingLong(EntryView::getUpdatedAtEpochMs)
+	.reversed()
+	.thenComparing(Comparator.comparingLong(EntryView::getCreatedAtEpochMs).reversed())
+	.thenComparing(EntryView::getId);
 
 	private static final class VaultSearchIndex {
 
