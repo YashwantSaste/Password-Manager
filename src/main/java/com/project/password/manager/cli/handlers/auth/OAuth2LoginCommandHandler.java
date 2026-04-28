@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.google.inject.Inject;
 import com.project.password.manager.auth.oauth2.DeviceCode;
+import com.project.password.manager.auth.oauth2.OAuth2Session;
 import com.project.password.manager.cli.commands.auth.OAuth2LoginCommand;
 import com.project.password.manager.cli.handlers.CommandHandler;
 import com.project.password.manager.cli.runtime.CliOutput;
@@ -31,9 +32,6 @@ public class OAuth2LoginCommandHandler implements CommandHandler<OAuth2LoginComm
 	@Override
 	public void handle(@NotNull OAuth2LoginCommand.Request request) {
 		DeviceCode deviceCode = oauth2LoginService.initiateLogin();
-		if (deviceCode == null) {
-			throw new RuntimeException("Authentication server did not return a device-code response.");
-		}
 		output.info(CliTheme.infoPanel("OAuth2 Device Login",
 				resolveInstructionLine(deviceCode),
 				CliTheme.key("verification url") + CliTheme.muted(" : ")
@@ -41,7 +39,7 @@ public class OAuth2LoginCommandHandler implements CommandHandler<OAuth2LoginComm
 				CliTheme.key("user code") + CliTheme.muted(" : ")
 						+ CliTheme.accent(resolveOrPlaceholder(deviceCode.getUserCode(), "not provided")),
 				CliTheme.key("status") + CliTheme.muted(" : ") + CliTheme.secondary("waiting for provider approval")));
-		OAuth2LoginService.OAuth2Session oauth2Session = oauth2LoginService.login(deviceCode);
+		OAuth2Session oauth2Session = oauth2LoginService.login(deviceCode);
 		session.open(oauth2Session.getUser().getId(), oauth2Session.getCliToken());
 		output.info("Logged in as " + oauth2Session.getUser().getId() + " via OAuth2");
 	}

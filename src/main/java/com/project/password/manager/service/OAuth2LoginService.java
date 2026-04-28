@@ -14,7 +14,9 @@ import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.auth.oauth2.DeviceCode;
 import com.project.password.manager.auth.oauth2.OAuth2AccessToken;
+import com.project.password.manager.auth.oauth2.OAuth2Session;
 import com.project.password.manager.auth.oauth2.OAuth2UserProfile;
+import com.project.password.manager.auth.oauth2.OAuth2VerificationResult;
 import com.project.password.manager.configuration.IOAuth2Configuration;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.util.NetworkClient;
@@ -48,10 +50,10 @@ public class OAuth2LoginService {
 		if (cliToken == null || cliToken.isBlank()) {
 			throw new RuntimeException("OAuth2 login succeeded but no CLI token could be created.");
 		}
-		return new OAuth2Session(deviceCode, providerToken, profile, user, cliToken);
+		return new OAuth2Session(user, cliToken);
 	}
 
-	@Nullable
+	@NotNull
 	public DeviceCode initiateLogin() {
 		validateRequiredConfiguration();
 		try {
@@ -59,7 +61,11 @@ public class OAuth2LoginService {
 					oauth2Configuration.deviceCodeUrl(), "app.oauth2.device.code.url"), buildDeviceAuthorizationParameters());
 			HttpResponse<String> response = client.send(request);
 			ensureSuccess(response, "device code");
-			return new DeviceCode().parse(response.body());
+			DeviceCode deviceCode = new DeviceCode().parse(response.body());
+			if (deviceCode == null) {
+				throw new RuntimeException("Authentication server did not return a device-code response.");
+			}
+			return deviceCode;
 		} catch (Exception e) {
 			throw new RuntimeException("Could not make request to the authentication server.", e);
 		}
@@ -73,7 +79,6 @@ public class OAuth2LoginService {
 		checkConfigured(oauth2Configuration.tokenUrl(), "app.oauth2.token.url", missingProperties);
 		checkConfigured(oauth2Configuration.userUrl(), "app.oauth2.user.url", missingProperties);
 		return new OAuth2VerificationResult(missingProperties.isEmpty(), List.copyOf(missingProperties),
-				oauth2Configuration.deviceCodeUrl(), oauth2Configuration.tokenUrl(), oauth2Configuration.userUrl(),
 				resolveScopes());
 	}
 
@@ -273,104 +278,4 @@ public class OAuth2LoginService {
 						: " | Diagnostic: no client_secret is configured locally, so the provider may require a confidential-client token exchange.");
 	}
 
-	public static final class OAuth2Session {
-		@NotNull
-		private final DeviceCode deviceCode;
-		@NotNull
-		private final OAuth2AccessToken providerToken;
-		@NotNull
-		private final OAuth2UserProfile profile;
-		@NotNull
-		private final IUser user;
-		@NotNull
-		private final String cliToken;
-
-		public OAuth2Session(@NotNull DeviceCode deviceCode, @NotNull OAuth2AccessToken providerToken,
-				@NotNull OAuth2UserProfile profile, @NotNull IUser user, @NotNull String cliToken) {
-			this.deviceCode = deviceCode;
-			this.providerToken = providerToken;
-			this.profile = profile;
-			this.user = user;
-			this.cliToken = cliToken;
-		}
-
-		@NotNull
-		public DeviceCode getDeviceCode() {
-			return deviceCode;
-		}
-
-		@NotNull
-		public OAuth2AccessToken getProviderToken() {
-			return providerToken;
-		}
-
-		@NotNull
-		public OAuth2UserProfile getProfile() {
-			return profile;
-		}
-
-		@NotNull
-		public IUser getUser() {
-			return user;
-		}
-
-		@NotNull
-		public String getCliToken() {
-			return cliToken;
-		}
-	}
-
-	public static final class OAuth2VerificationResult {
-		private final boolean valid;
-		@NotNull
-		private final List<String> missingProperties;
-		@Nullable
-		private final String deviceCodeUrl;
-		@Nullable
-		private final String tokenUrl;
-		@Nullable
-		private final String userUrl;
-		@NotNull
-		private final List<String> scopes;
-
-		public OAuth2VerificationResult(boolean valid, @NotNull List<String> missingProperties,
-				@Nullable String deviceCodeUrl, @Nullable String tokenUrl, @Nullable String userUrl,
-				@NotNull List<String> scopes) {
-			this.valid = valid;
-			this.missingProperties = missingProperties;
-			this.deviceCodeUrl = deviceCodeUrl;
-			this.tokenUrl = tokenUrl;
-			this.userUrl = userUrl;
-			this.scopes = scopes;
-		}
-
-		public boolean isValid() {
-			return valid;
-		}
-
-		@NotNull
-		public List<String> getMissingProperties() {
-			return missingProperties;
-		}
-
-		@Nullable
-		public String getDeviceCodeUrl() {
-			return deviceCodeUrl;
-		}
-
-		@Nullable
-		public String getTokenUrl() {
-			return tokenUrl;
-		}
-
-		@Nullable
-		public String getUserUrl() {
-			return userUrl;
-		}
-
-		@NotNull
-		public List<String> getScopes() {
-			return scopes;
-		}
-	}
 }

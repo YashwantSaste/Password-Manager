@@ -3,6 +3,7 @@ package com.project.password.manager.cli.handlers.auth;
 import org.jetbrains.annotations.NotNull;
 
 import com.google.inject.Inject;
+import com.project.password.manager.auth.oauth2.OAuth2VerificationResult;
 import com.project.password.manager.cli.commands.auth.OAuth2VerifyCommand;
 import com.project.password.manager.cli.handlers.CommandHandler;
 import com.project.password.manager.cli.runtime.CliOutput;
@@ -25,7 +26,7 @@ public class OAuth2VerifyCommandHandler implements CommandHandler<OAuth2VerifyCo
 
 	@Override
 	public void handle(@NotNull OAuth2VerifyCommand.Request request) {
-		OAuth2LoginService.OAuth2VerificationResult verificationResult = oauth2LoginService.verifyConfiguration();
+		OAuth2VerificationResult verificationResult = oauth2LoginService.verifyConfiguration();
 		String scopes = verificationResult.getScopes().isEmpty() ? IOAuth2Configuration.DEFAULT_SCOPE
 				: String.join(" ", verificationResult.getScopes());
 		if (!verificationResult.isValid()) {
@@ -36,12 +37,6 @@ public class OAuth2VerifyCommandHandler implements CommandHandler<OAuth2VerifyCo
 			return;
 		}
 		output.info(CliTheme.successPanel("OAuth2 Configuration Ready",
-				CliTheme.key("device") + CliTheme.muted(" : ")
-						+ CliTheme.secondary(verificationResult.getDeviceCodeUrl()),
-				CliTheme.key("token") + CliTheme.muted(" : ")
-						+ CliTheme.secondary(verificationResult.getTokenUrl()),
-				CliTheme.key("user") + CliTheme.muted(" : ")
-						+ CliTheme.secondary(verificationResult.getUserUrl()),
 				CliTheme.key("scopes") + CliTheme.muted(" : ") + CliTheme.secondary(scopes)));
 	}
 }
