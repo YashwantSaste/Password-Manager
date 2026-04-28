@@ -15,6 +15,10 @@ public class NetworkClient {
 	private static final Logger log = Logger.getLogger(NetworkClient.class);
 	private static final long HTTP_CLIENT_CONNECTION_TIMEOUT = 10;
 
+	public static final String HTTP_METHOD_GET = "GET";
+	public static final String HTTP_METHOD_POST = "POST";
+	public static final String HTTP_METHOD_DELETE = "DELETE";
+
 	@NotNull
 	private final HttpClient httpClient;
 
@@ -47,7 +51,7 @@ public class NetworkClient {
 	 * Protected for tests
 	 */
 	@NotNull
-	protected HttpClient getClient() {
+	public HttpClient getClient() {
 		return HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(HTTP_CLIENT_CONNECTION_TIMEOUT))
 				.followRedirects(HttpClient.Redirect.NEVER).build();
 	}

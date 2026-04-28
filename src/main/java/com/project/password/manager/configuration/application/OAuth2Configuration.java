@@ -1,6 +1,7 @@
 package com.project.password.manager.configuration.application;
 
 import java.util.List;
+import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,13 +38,13 @@ public class OAuth2Configuration implements IOAuth2Configuration {
 	@Override
 	@Nullable
 	public String userUrl() {
-		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_OAUTH2_TOKEN_URL);
+		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_OAUTH2_USER_URL);
 	}
 
 	@Override
 	@Nullable
 	public String authorizeUrl() {
-		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_OAUTH2_TOKEN_URL);
+		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_OAUTH2_AUTHORIZE_URL);
 	}
 
 	@Override
@@ -57,6 +58,13 @@ public class OAuth2Configuration implements IOAuth2Configuration {
 	public List<String> scope() {
 		return reader.readPropertyAsList(ApplicationProperties.PROPERTY_OAUTH2_SCOPES,
 				IOAuth2Configuration.SCOPES_DELIMITER);
+	}
+
+	@Override
+	@NotNull
+	public Map<String, String> tokenParameters() {
+		return reader.readPropertyAsMap(ApplicationProperties.PROPERTY_OAUTH2_TOKEN_PARAMTERS,
+				TOKEN_PARAM_ENTRY_DELIMITER, TOKEN_PARAM_KEY_DELIMITER);
 	}
 
 }

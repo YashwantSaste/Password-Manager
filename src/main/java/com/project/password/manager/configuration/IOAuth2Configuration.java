@@ -1,6 +1,7 @@
 package com.project.password.manager.configuration;
 
 import java.util.List;
+import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +13,12 @@ public interface IOAuth2Configuration {
 
 	@NotNull
 	String SCOPES_DELIMITER = ",";
+
+	@NotNull
+	String TOKEN_PARAM_KEY_DELIMITER = "=";
+
+	@NotNull
+	String TOKEN_PARAM_ENTRY_DELIMITER = ".";
 
 	@Nullable
 	String clientId();
@@ -33,5 +40,8 @@ public interface IOAuth2Configuration {
 
 	@NotNull
 	List<String> scope();
+
+	@NotNull
+	Map<String, String> tokenParameters();
 
 }

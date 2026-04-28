@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -69,6 +70,37 @@ public class AuthService {
 		tokenEntity.setUserId(newUser.getId());
 		tokenEntity.setToken(tokenService.createToken(newUser));
 		tokenService.saveToken(newUser, tokenEntity);
+	}
+
+	@NotNull
+	public IUser loginWithOAuth2Profile(@NotNull String userId, @NotNull String displayName) {
+		IUser user = userService.getUser(userId);
+		if (user == null) {
+			user = createOAuth2User(userId, displayName);
+		}
+		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
+		tokenEntity.setUserId(user.getId());
+		tokenEntity.setToken(tokenService.createToken(user));
+		tokenService.saveToken(user, tokenEntity);
+		return user;
+	}
+
+	@NotNull
+	private IUser createOAuth2User(@NotNull String userId, @NotNull String displayName) {
+		String generatedSecret = UUID.randomUUID().toString();
+		IUser oauthUser = PlatformEntityProvider.getEntityProvider().getUser();
+		oauthUser.setId(userId);
+		oauthUser.setName(displayName);
+		oauthUser.setAuthVerifier(encoder.getHashValue(generatedSecret));
+		byte[] saltBytes = KeyGenerator.generateKeyFromPassword(generatedSecret).getEncoded();
+		oauthUser.setKeySalt(Base64.getEncoder().encodeToString(saltBytes));
+		oauthUser.setVaults(new ArrayList<>());
+		oauthUser.setRoles(determineInitialRoles());
+		userService.saveUser(oauthUser);
+		IVault defaultVault = vaultService.createDefaultVault(oauthUser);
+		oauthUser.setDefaultVaultId(defaultVault.getId());
+		userService.saveUser(oauthUser);
+		return oauthUser;
 	}
 
 	@NotNull

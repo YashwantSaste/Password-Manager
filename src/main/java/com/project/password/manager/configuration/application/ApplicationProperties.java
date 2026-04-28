@@ -54,6 +54,7 @@ public class ApplicationProperties {
 	public static final String PROPERTY_OAUTH2_USER_URL = "app.oauth2.user.url";
 	public static final String PROPERTY_OAUTH2_DEVICE_CODE_URL = "app.oauth2.device.code.url";
 	public static final String PROPERTY_OAUTH2_SCOPES = "app.oauth2.scopes";
+	public static final String PROPERTY_OAUTH2_TOKEN_PARAMTERS = "app.oauth2.token.parameters";
 
 	private static final List<String> SUPPORTED_KEYS = List.of(
 			PROPERTY_APP_NAME,
@@ -87,8 +88,15 @@ public class ApplicationProperties {
 			PROPERTY_AES_TAG_LENGTH,
 			PROPERTY_AES_IV_LENGTH,
 			PROPERTY_SALT_KEY_ITERATIONS,
-			PROPERTY_SALT_KEY_LENGTH, PROPERTY_OAUTH2_TOKEN_URL, PROPERTY_OAUTH2_CLIENT_ID,
-			PROPERTY_OAUTH2_DEVICE_CODE_URL);
+			PROPERTY_SALT_KEY_LENGTH,
+			PROPERTY_OAUTH2_TOKEN_URL,
+			PROPERTY_OAUTH2_CLIENT_ID,
+			PROPERTY_OAUTH2_CLIENT_SECRET,
+			PROPERTY_OAUTH2_AUTHORIZE_URL,
+			PROPERTY_OAUTH2_USER_URL,
+			PROPERTY_OAUTH2_DEVICE_CODE_URL,
+			PROPERTY_OAUTH2_SCOPES,
+			PROPERTY_OAUTH2_TOKEN_PARAMTERS);
 
 	private static final Set<String> SENSITIVE_KEYS = Set.of(
 			PROPERTY_DATABASE_PASSWORD,
