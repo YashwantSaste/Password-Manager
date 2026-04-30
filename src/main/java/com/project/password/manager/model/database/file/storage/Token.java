@@ -10,6 +10,7 @@ public class Token implements IToken, IFileStorableEntity{
 
 	private String userId;
 	private String token;
+	private String tokenType;
 
 	public Token() {
 		//for jackson
@@ -35,13 +36,24 @@ public class Token implements IToken, IFileStorableEntity{
 	@Override
 	@NotNull
 	public String getToken() {
-		return token;
+		return token != null ? token : "";
 	}
 
 	@Override
 	@NotNull
 	public void setToken(@NotNull String token) {
 		this.token = token;
+	}
+
+	@Override
+	@NotNull
+	public String getTokenType() {
+		return tokenType != null ? tokenType : "";
+	}
+
+	@Override
+	public void setTokenType(@NotNull String tokenType) {
+		this.tokenType = tokenType;
 	}
 
 	@Override

@@ -18,6 +18,8 @@ public class JpaToken implements IToken {
 	private String userId;
 	@Column(nullable = false, length = 4096)
 	private String token;
+	@Column(nullable = false, length = 64)
+	private String tokenType;
 
 	protected JpaToken() {
 		// for hibernate
@@ -37,6 +39,17 @@ public class JpaToken implements IToken {
 	@Override
 	public void setToken(@NotNull String token) {
 		this.token = token;
+	}
+
+	@Override
+	@NotNull
+	public String getTokenType() {
+		return tokenType != null ? tokenType : "";
+	}
+
+	@Override
+	public void setTokenType(@NotNull String tokenType) {
+		this.tokenType = tokenType;
 	}
 
 	@Override

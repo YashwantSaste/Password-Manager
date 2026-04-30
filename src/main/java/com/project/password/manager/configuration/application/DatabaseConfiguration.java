@@ -70,4 +70,16 @@ public class DatabaseConfiguration implements IDatabaseConfiguration {
 		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_DATABASE_DDL_MODE);
 	}
 
+	@Override
+	@NotNull
+	public boolean formatSql() {
+		return reader.readPropertyAsBoolean(ApplicationProperties.PROPERTY_DATABASE_SQL_SHOW, false);
+	}
+
+	@Override
+	@NotNull
+	public boolean showSql() {
+		return reader.readPropertyAsBoolean(ApplicationProperties.PROPERTY_DATABASE_SQL_FORMAT, false);
+	}
+
 }

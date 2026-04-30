@@ -3,6 +3,8 @@ package com.project.password.manager.configuration.application;
 import java.util.List;
 import java.util.Set;
 
+import org.jetbrains.annotations.NotNull;
+
 public class ApplicationProperties {
 
 	/** Application Configurations **/
@@ -22,6 +24,8 @@ public class ApplicationProperties {
 	public static final String PROPERTY_DATABASE_NAME = "app.database.name";
 	public static final String PROPERTY_DATABASE_HOST = "app.database.host";
 	public static final String PROPERTY_DATABASE_DDL_MODE = "app.database.ddl.mode";
+	public static final String PROPERTY_DATABASE_SQL_SHOW = "app.database.sql.show";
+	public static final String PROPERTY_DATABASE_SQL_FORMAT = "app.database.sql.format";
 	/** Argon2 Configurations **/
 	public static final String PROPERTY_ARGON2_MEMORY_SIZE = "app.crypto.argon2.memory.kb";
 	public static final String PROPERTY_ARGON2_ITERATIONS = "app.crypto.argon2.iterations";
@@ -44,6 +48,15 @@ public class ApplicationProperties {
 	/** Salt key generation Configurations */
 	public static final String PROPERTY_SALT_KEY_ITERATIONS= "app.salt.iterations";
 	public static final String PROPERTY_SALT_KEY_LENGTH = "app.salt.key.size";
+	/** OAuth2 Configurations */
+	public static final String PROPERTY_OAUTH2_TOKEN_URL = "app.oauth2.token.url";
+	public static final String PROPERTY_OAUTH2_CLIENT_ID = "app.oauth2.client.id";
+	public static final String PROPERTY_OAUTH2_CLIENT_SECRET = "app.oauth2.client.secret";
+	public static final String PROPERTY_OAUTH2_AUTHORIZE_URL = "app.oauth2.authorize.url";
+	public static final String PROPERTY_OAUTH2_USER_URL = "app.oauth2.user.url";
+	public static final String PROPERTY_OAUTH2_DEVICE_CODE_URL = "app.oauth2.device.code.url";
+	public static final String PROPERTY_OAUTH2_SCOPES = "app.oauth2.scopes";
+	public static final String PROPERTY_OAUTH2_TOKEN_PARAMTERS = "app.oauth2.token.parameters";
 
 	private static final List<String> SUPPORTED_KEYS = List.of(
 			PROPERTY_APP_NAME,
@@ -77,11 +90,18 @@ public class ApplicationProperties {
 			PROPERTY_AES_TAG_LENGTH,
 			PROPERTY_AES_IV_LENGTH,
 			PROPERTY_SALT_KEY_ITERATIONS,
-			PROPERTY_SALT_KEY_LENGTH);
+			PROPERTY_SALT_KEY_LENGTH,
+			PROPERTY_OAUTH2_TOKEN_URL,
+			PROPERTY_OAUTH2_CLIENT_SECRET,
+			PROPERTY_OAUTH2_AUTHORIZE_URL,
+			PROPERTY_OAUTH2_USER_URL,
+			PROPERTY_OAUTH2_DEVICE_CODE_URL,
+			PROPERTY_OAUTH2_SCOPES,
+			PROPERTY_OAUTH2_TOKEN_PARAMTERS, PROPERTY_DATABASE_SQL_SHOW, PROPERTY_DATABASE_SQL_FORMAT);
 
 	private static final Set<String> SENSITIVE_KEYS = Set.of(
-			PROPERTY_DATABASE_PASSWORD,
-			PROPERTY_JWT_SECRET);
+			PROPERTY_DATABASE_PASSWORD, PROPERTY_OAUTH2_CLIENT_ID,
+			PROPERTY_JWT_SECRET, PROPERTY_OAUTH2_CLIENT_SECRET);
 
 	private ApplicationProperties() {
 	}
@@ -90,11 +110,11 @@ public class ApplicationProperties {
 		return SUPPORTED_KEYS;
 	}
 
-	public static boolean isSupportedKey(String key) {
+	public static boolean isSupportedKey(@NotNull String key) {
 		return SUPPORTED_KEYS.contains(key);
 	}
 
-	public static boolean isSensitiveKey(String key) {
+	public static boolean isSensitiveKey(@NotNull String key) {
 		return SENSITIVE_KEYS.contains(key);
 	}
 }

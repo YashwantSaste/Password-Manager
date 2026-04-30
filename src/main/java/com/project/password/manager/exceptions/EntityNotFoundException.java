@@ -9,4 +9,8 @@ public class EntityNotFoundException extends RuntimeException {
 	public EntityNotFoundException(@NotNull String message) {
 		super(message);
 	}
+
+	public EntityNotFoundException(@NotNull String message, @NotNull Throwable cause) {
+		super(message, cause);
+	}
 }
