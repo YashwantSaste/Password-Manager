@@ -66,8 +66,7 @@ public class AuthService {
 		newUser.setVaults(new ArrayList<>());
 		newUser.setRoles(determineInitialRoles());
 		userService.saveUser(newUser);
-		IVault defaultVault = vaultService.createDefaultVault(newUser);
-		newUser.setDefaultVaultId(defaultVault.getId());
+		vaultService.createDefaultVault(newUser);
 		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
 		tokenEntity.setUserId(newUser.getId());
 		tokenEntity.setToken(tokenService.createToken(newUser));
@@ -99,9 +98,7 @@ public class AuthService {
 		oauthUser.setVaults(new ArrayList<>());
 		oauthUser.setRoles(determineInitialRoles());
 		userService.saveUser(oauthUser);
-		IVault defaultVault = vaultService.createDefaultVault(oauthUser);
-		oauthUser.setDefaultVaultId(defaultVault.getId());
-		userService.saveUser(oauthUser);
+		vaultService.createDefaultVault(oauthUser);
 		return oauthUser;
 	}
 
