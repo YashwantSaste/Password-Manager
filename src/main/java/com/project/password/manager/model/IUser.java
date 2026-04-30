@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface IUser extends IEntity {
+public interface IUser extends HasMetadata {
 	@NotNull
 	String getId();
 
@@ -26,9 +26,6 @@ public interface IUser extends IEntity {
 	@NotNull
 	List<UserRole> getRoles();
 
-	@NotNull
-	IMetadata metadata();
-
 	void setId(@NotNull String id);
 
 	void setName(@NotNull String name);
@@ -43,5 +40,4 @@ public interface IUser extends IEntity {
 
 	void setRoles(@NotNull List<UserRole> roles);
 
-	void setMetadata(@NotNull IMetadata metadata);
 }

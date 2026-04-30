@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.model.database.file.storage.IFileStorableEntity;
 import com.project.password.manager.util.Logger;
+import com.project.password.manager.util.MetadataListener;
 
 public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> implements DataRepository<T, Id> {
 
@@ -28,6 +29,7 @@ public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> i
 		if (entity.getId() == null) {
 			throw new IllegalStateException("Entity ID cannot be null before saving.");
 		}
+		MetadataListener.beforeCreate(entity);
 		File entityDirectory = resolveEntityDirectoryInFileSystem(entity.getId());
 		entityDirectory.mkdirs();
 		File entityFile = new File(entityDirectory, entity.getFileName());
@@ -91,6 +93,7 @@ public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> i
 		if (entity.getId() == null) {
 			throw new IllegalStateException("Entity ID cannot be null before updating.");
 		}
+		MetadataListener.beforeUpdate(entity);
 		File entityDirectory = resolveEntityDirectoryInFileSystem(id.toString());
 		entityDirectory.mkdirs();
 		File entityFile = new File(entityDirectory, entity.getFileName());

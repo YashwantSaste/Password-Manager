@@ -21,7 +21,7 @@ public class User implements IUser, IFileStorableEntity {
 	private String defaultVaultId;
 	private List<IVault> vaults;
 	private List<UserRole> roles;
-	private IMetadata metadata;
+	private IMetadata metadata = new Metadata();
 
 	public User() {
 		// for jackson
@@ -84,6 +84,9 @@ public class User implements IUser, IFileStorableEntity {
 	@Override
 	@NotNull
 	public IMetadata metadata() {
+		if (metadata == null) {
+			metadata = new Metadata();
+		}
 		return metadata;
 	}
 
@@ -136,6 +139,6 @@ public class User implements IUser, IFileStorableEntity {
 
 	@Override
 	public void setMetadata(@NotNull IMetadata metadata) {
-		this.metadata = metadata;
+		this.metadata = metadata != null ? metadata : new Metadata();
 	}
 }

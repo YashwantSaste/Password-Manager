@@ -1,0 +1,90 @@
+package com.project.password.manager;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.project.password.manager.database.file.storage.UserRepository;
+import com.project.password.manager.model.IUser;
+import com.project.password.manager.model.Status;
+import com.project.password.manager.model.UserRole;
+import com.project.password.manager.model.database.file.storage.Metadata;
+import com.project.password.manager.model.database.file.storage.User;
+
+import junit.framework.TestCase;
+
+public class MetadataListenerTest extends TestCase {
+
+	public void testRepositorySaveInitializesMissingMetadataFields() throws Exception {
+		Path workspace = Files.createTempDirectory("metadata-listener-save");
+		try {
+			UserRepository repository = new UserRepository(workspace.toFile());
+			User user = new User("user-1", "alice", "verifier", "salt", "vault-1", new ArrayList<>(),
+					List.of(UserRole.USER), new Metadata());
+
+			user.metadata().setCreatedAt(null);
+			user.metadata().setUpdatedAt(null);
+			user.metadata().setLastAccessedAt(null);
+			user.metadata().setVersion(null);
+			user.metadata().setStatus(null);
+
+			repository.save(user);
+
+			IUser persistedUser = repository.findById("user-1");
+			assertNotNull(persistedUser);
+			assertNotNull(persistedUser.metadata().createdAt());
+			assertNotNull(persistedUser.metadata().updatedAt());
+			assertNotNull(persistedUser.metadata().lastAccessedAt());
+			assertEquals("1.0", persistedUser.metadata().version());
+			assertEquals(Status.ACTIVE, persistedUser.metadata().status());
+		} finally {
+			deleteRecursively(workspace);
+		}
+	}
+
+	public void testRepositoryUpdateRefreshesUpdatedAt() throws Exception {
+		Path workspace = Files.createTempDirectory("metadata-listener-update");
+		try {
+			UserRepository repository = new UserRepository(workspace.toFile());
+			User user = new User("user-1", "alice", "verifier", "salt", "vault-1", new ArrayList<>(),
+					List.of(UserRole.USER), new Metadata());
+			LocalDateTime originalCreatedAt = LocalDateTime.of(2026, 4, 27, 12, 0, 0);
+			LocalDateTime originalUpdatedAt = LocalDateTime.of(2026, 4, 27, 12, 1, 0);
+
+			user.metadata().setCreatedAt(originalCreatedAt);
+			user.metadata().setUpdatedAt(originalUpdatedAt);
+			user.metadata().setLastAccessedAt(originalCreatedAt);
+			user.metadata().setVersion("1.0");
+			user.metadata().setStatus(Status.ACTIVE);
+			repository.save(user);
+
+			user.setName("alice-updated");
+			repository.update(user.getId(), user);
+
+			IUser persistedUser = repository.findById("user-1");
+			assertNotNull(persistedUser);
+			assertEquals(originalCreatedAt, persistedUser.metadata().createdAt());
+			assertTrue(persistedUser.metadata().updatedAt().isAfter(originalUpdatedAt));
+			assertEquals(Status.ACTIVE, persistedUser.metadata().status());
+		} finally {
+			deleteRecursively(workspace);
+		}
+	}
+
+	private void deleteRecursively(Path path) throws Exception {
+		if (!Files.exists(path)) {
+			return;
+		}
+		Files.walk(path)
+				.sorted((left, right) -> right.compareTo(left))
+				.forEach(currentPath -> {
+					try {
+						Files.deleteIfExists(currentPath);
+					} catch (Exception ex) {
+						throw new RuntimeException(ex);
+					}
+				});
+	}
+}

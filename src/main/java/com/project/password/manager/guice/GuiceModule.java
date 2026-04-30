@@ -87,7 +87,9 @@ import com.project.password.manager.model.database.file.storage.Token;
 import com.project.password.manager.model.database.file.storage.User;
 import com.project.password.manager.model.database.file.storage.Vault;
 import com.project.password.manager.model.database.nosql.UserDocument;
+import com.project.password.manager.model.database.sql.JpaToken;
 import com.project.password.manager.model.database.sql.JpaUser;
+import com.project.password.manager.model.database.sql.JpaVault;
 import com.project.password.manager.service.AuthService;
 import com.project.password.manager.service.EntryService;
 import com.project.password.manager.service.OAuth2LoginService;
@@ -116,9 +118,14 @@ public class GuiceModule extends AbstractModule {
 			switch (configuration.databaseConfiguration().type()) {
 			case IDatabaseConfiguration.DATABASE_TYPE_SQL: {
 				bind(IUser.class).to(JpaUser.class);
+				bind(IVault.class).to(JpaVault.class);
+				bind(IToken.class).to(JpaToken.class);
+				bind(IMetadata.class).to(Metadata.class);
+				break;
 			}
 			case IDatabaseConfiguration.DATABASE_TYPE_NO_SQL: {
 				bind(IUser.class).to(UserDocument.class);
+				break;
 			}
 			default:
 				throw new UnsupportedOperationException("Could not bind entities: Error: Unsupported Database Type");

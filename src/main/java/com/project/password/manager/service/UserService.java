@@ -13,7 +13,7 @@ import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.UserRole;
 import com.project.password.manager.util.Logger;
 
-public class UserService implements IService {
+public class UserService {
 
 	private static final Logger log = Logger.getLogger(UserService.class);
 

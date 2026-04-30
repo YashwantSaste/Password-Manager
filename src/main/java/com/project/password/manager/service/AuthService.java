@@ -9,12 +9,12 @@ import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.argon.Argon2Encoder;
+import com.project.password.manager.configuration.application.Workspace;
 import com.project.password.manager.guice.PlatformEntityProvider;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
-import com.project.password.manager.model.UserRole;
 import com.project.password.manager.model.IVault;
-import com.project.password.manager.configuration.application.Workspace;
+import com.project.password.manager.model.UserRole;
 import com.project.password.manager.util.KeyGenerator;
 
 public class AuthService {
