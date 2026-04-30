@@ -37,9 +37,11 @@ public class AuthService {
 	}
 
 	public void login(@NotNull String username,@NotNull String password) {
-		IUser user = userService.getUser(username);
-		if(user==null) {
-			throw new RuntimeException("Given user does not exist");
+		IUser user;
+		try {
+			user = userService.requireUser(username);
+		} catch (IllegalArgumentException exception) {
+			throw new RuntimeException("Given user does not exist", exception);
 		}
 		if(!encoder.verify(user.getAuthVerifier(),password)) {
 			throw new RuntimeException("Password mismatch. Kindly check your password");

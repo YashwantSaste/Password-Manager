@@ -20,6 +20,7 @@ import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.database.DataRepositoryFactory;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
+import com.project.password.manager.util.ValidationUtils;
 
 public class TokenService implements IService {
 
@@ -86,6 +87,15 @@ public class TokenService implements IService {
 			tokenCacheFor.put(userId, token);
 		}
 		return token;
+	}
+
+	@NotNull
+	public String requireToken(@NotNull IUser user) {
+		try {
+			return ValidationUtils.requireText(getToken(user), "No token is available for user: " + user.getId());
+		} catch (IllegalArgumentException exception) {
+			throw new IllegalStateException(exception.getMessage(), exception);
+		}
 	}
 
 	public void saveToken(@NotNull IUser user, @NotNull IToken token) {

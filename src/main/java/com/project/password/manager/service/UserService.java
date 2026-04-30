@@ -88,7 +88,7 @@ public class UserService implements IService {
 	}
 
 	@NotNull
-	private IUser requireUser(@NotNull String userId) {
+	public IUser requireUser(@NotNull String userId) {
 		IUser user = userRepository.findById(userId);
 		if (user == null) {
 			throw new IllegalArgumentException("User not found: " + userId);

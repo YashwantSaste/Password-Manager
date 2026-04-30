@@ -18,9 +18,11 @@ import com.project.password.manager.auth.oauth2.OAuth2Session;
 import com.project.password.manager.auth.oauth2.OAuth2UserProfile;
 import com.project.password.manager.auth.oauth2.OAuth2VerificationResult;
 import com.project.password.manager.configuration.IOAuth2Configuration;
+import com.project.password.manager.configuration.application.ApplicationProperties;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.util.NetworkClient;
 import com.project.password.manager.util.NetworkRequestBuilder;
+import com.project.password.manager.util.ValidationUtils;
 
 public class OAuth2LoginService {
 	private static final int DEFAULT_POLL_INTERVAL_SECONDS = 5;
@@ -46,10 +48,8 @@ public class OAuth2LoginService {
 		String userId = resolveUserId(profile);
 		String displayName = resolveDisplayName(profile, userId);
 		IUser user = authService.loginWithOAuth2Profile(userId, displayName);
-		String cliToken = tokenService.getToken(user);
-		if (cliToken == null || cliToken.isBlank()) {
-			throw new RuntimeException("OAuth2 login succeeded but no CLI token could be created.");
-		}
+		String cliToken = requireRuntimeValue(tokenService.getToken(user),
+				"OAuth2 login succeeded but no CLI token could be created.");
 		return new OAuth2Session(user, cliToken);
 	}
 
@@ -58,7 +58,8 @@ public class OAuth2LoginService {
 		validateRequiredConfiguration();
 		try {
 			HttpRequest request = new NetworkRequestBuilder().buildFormRequest(requireConfiguredValue(
-					oauth2Configuration.deviceCodeUrl(), "app.oauth2.device.code.url"), buildDeviceAuthorizationParameters());
+					oauth2Configuration.deviceCodeUrl(), ApplicationProperties.PROPERTY_OAUTH2_DEVICE_CODE_URL),
+					buildDeviceAuthorizationParameters());
 			HttpResponse<String> response = client.send(request);
 			ensureSuccess(response, "device code");
 			DeviceCode deviceCode = new DeviceCode().parse(response.body());
@@ -74,17 +75,21 @@ public class OAuth2LoginService {
 	@NotNull
 	public OAuth2VerificationResult verifyConfiguration() {
 		List<String> missingProperties = new ArrayList<>();
-		checkConfigured(oauth2Configuration.clientId(), "app.oauth2.client.id", missingProperties);
-		checkConfigured(oauth2Configuration.deviceCodeUrl(), "app.oauth2.device.code.url", missingProperties);
-		checkConfigured(oauth2Configuration.tokenUrl(), "app.oauth2.token.url", missingProperties);
-		checkConfigured(oauth2Configuration.userUrl(), "app.oauth2.user.url", missingProperties);
+		ValidationUtils.addIfBlank(oauth2Configuration.clientId(), ApplicationProperties.PROPERTY_OAUTH2_CLIENT_ID,
+				missingProperties);
+		ValidationUtils.addIfBlank(oauth2Configuration.deviceCodeUrl(),
+				ApplicationProperties.PROPERTY_OAUTH2_DEVICE_CODE_URL, missingProperties);
+		ValidationUtils.addIfBlank(oauth2Configuration.tokenUrl(), ApplicationProperties.PROPERTY_OAUTH2_TOKEN_URL,
+				missingProperties);
+		ValidationUtils.addIfBlank(oauth2Configuration.userUrl(), ApplicationProperties.PROPERTY_OAUTH2_USER_URL,
+				missingProperties);
 		return new OAuth2VerificationResult(missingProperties.isEmpty(), List.copyOf(missingProperties),
 				resolveScopes());
 	}
 
 	@NotNull
 	private OAuth2AccessToken waitForAccessToken(@NotNull DeviceCode deviceCode) {
-		String deviceCodeValue = requireConfiguredValue(deviceCode.getDeviceCode(), "device_code");
+		String deviceCodeValue = requireRuntimeValue(deviceCode.getDeviceCode(), "Missing OAuth2 value: device_code");
 		long deadlineMillis = System.currentTimeMillis()
 				+ deviceCode.getExpiresInMillisOrDefault(TimeUnit.SECONDS.toMillis(DEFAULT_DEVICE_CODE_EXPIRATION_SECONDS));
 		int pollIntervalSeconds = deviceCode.getPollIntervalSecondsOrDefault(DEFAULT_POLL_INTERVAL_SECONDS);
@@ -115,7 +120,7 @@ public class OAuth2LoginService {
 	private OAuth2AccessToken requestAccessToken(@NotNull String deviceCodeValue) {
 		try {
 			HttpRequest request = new NetworkRequestBuilder().buildFormRequest(
-					requireConfiguredValue(oauth2Configuration.tokenUrl(), "app.oauth2.token.url"),
+					requireConfiguredValue(oauth2Configuration.tokenUrl(), ApplicationProperties.PROPERTY_OAUTH2_TOKEN_URL),
 					buildTokenRequestParameters(deviceCodeValue));
 			HttpResponse<String> response = client.send(request);
 			if (response.statusCode() >= 200 && response.statusCode() < 300) {
@@ -134,10 +139,11 @@ public class OAuth2LoginService {
 
 	@NotNull
 	private OAuth2UserProfile fetchUserProfile(@NotNull OAuth2AccessToken providerToken) {
-		String accessToken = requireConfiguredValue(providerToken.getAccessToken(), "access_token");
+		String accessToken = requireRuntimeValue(providerToken.getAccessToken(), "Missing OAuth2 value: access_token");
 		try {
 			HttpRequest request = new NetworkRequestBuilder().buildJsonRequest(
-					requireConfiguredValue(oauth2Configuration.userUrl(), "app.oauth2.user.url"), NetworkClient.HTTP_METHOD_GET,
+					requireConfiguredValue(oauth2Configuration.userUrl(), ApplicationProperties.PROPERTY_OAUTH2_USER_URL),
+					NetworkClient.HTTP_METHOD_GET,
 					null, accessToken);
 			HttpResponse<String> response = client.send(request);
 			ensureSuccess(response, "user info");
@@ -150,7 +156,8 @@ public class OAuth2LoginService {
 	@NotNull
 	private Map<String, String> buildDeviceAuthorizationParameters() {
 		Map<String, String> parameters = new LinkedHashMap<>(oauth2Configuration.tokenParameters());
-		parameters.putIfAbsent("client_id", requireConfiguredValue(oauth2Configuration.clientId(), "app.oauth2.client.id"));
+		parameters.putIfAbsent("client_id",
+				requireConfiguredValue(oauth2Configuration.clientId(), ApplicationProperties.PROPERTY_OAUTH2_CLIENT_ID));
 		parameters.putIfAbsent("scope", String.join(" ", resolveScopes()));
 		return parameters;
 	}
@@ -160,9 +167,10 @@ public class OAuth2LoginService {
 		Map<String, String> parameters = new LinkedHashMap<>(oauth2Configuration.tokenParameters());
 		parameters.put("grant_type", "urn:ietf:params:oauth:grant-type:device_code");
 		parameters.put("device_code", deviceCodeValue);
-		parameters.put("client_id", requireConfiguredValue(oauth2Configuration.clientId(), "app.oauth2.client.id"));
+		parameters.put("client_id",
+				requireConfiguredValue(oauth2Configuration.clientId(), ApplicationProperties.PROPERTY_OAUTH2_CLIENT_ID));
 		String clientSecret = oauth2Configuration.clientSecret();
-		if (clientSecret != null && !clientSecret.isBlank()) {
+		if (ValidationUtils.hasText(clientSecret)) {
 			parameters.put("client_secret", clientSecret);
 		}
 		return parameters;
@@ -185,29 +193,23 @@ public class OAuth2LoginService {
 		}
 	}
 
-	private void checkConfigured(@Nullable String value, @NotNull String propertyName, @NotNull List<String> missingProperties) {
-		if (value == null || value.isBlank()) {
-			missingProperties.add(propertyName);
-		}
-	}
-
 	@NotNull
 	private String resolveUserId(@NotNull OAuth2UserProfile profile) {
 		String preferredUsername = profile.getPreferredUsername();
-		if (preferredUsername != null && !preferredUsername.isBlank()) {
+		if (ValidationUtils.hasText(preferredUsername)) {
 			return preferredUsername.trim();
 		}
 		String email = profile.getEmail();
-		if (email != null && !email.isBlank()) {
+		if (ValidationUtils.hasText(email)) {
 			return email.trim();
 		}
-		return requireConfiguredValue(profile.getSubject(), "sub");
+		return requireRuntimeValue(profile.getSubject(), "Missing OAuth2 value: sub");
 	}
 
 	@NotNull
 	private String resolveDisplayName(@NotNull OAuth2UserProfile profile, @NotNull String fallbackUserId) {
 		String name = profile.getName();
-		if (name != null && !name.isBlank()) {
+		if (ValidationUtils.hasText(name)) {
 			return name.trim();
 		}
 		return fallbackUserId;
@@ -220,7 +222,7 @@ public class OAuth2LoginService {
 		String details = response.body();
 		HttpHeaders headers = response.headers();
 		throw new RuntimeException("OAuth2 " + endpointName + " endpoint returned HTTP " + response.statusCode()
-		+ (details == null || details.isBlank() ? "" : ": " + details)
+		+ (!ValidationUtils.hasText(details) ? "" : ": " + details)
 		+ (headers.map().isEmpty() ? "" : " | headers=" + headers.map()));
 	}
 
@@ -235,19 +237,25 @@ public class OAuth2LoginService {
 
 	@NotNull
 	private String requireConfiguredValue(@Nullable String value, @NotNull String label) {
-		if (value == null || value.isBlank()) {
-			throw new RuntimeException("Missing OAuth2 value: " + label);
+		return requireRuntimeValue(value, "Missing OAuth2 value: " + label);
+	}
+
+	@NotNull
+	private String requireRuntimeValue(@Nullable String value, @NotNull String message) {
+		try {
+			return ValidationUtils.requireText(value, message);
+		} catch (IllegalArgumentException exception) {
+			throw new RuntimeException(exception.getMessage(), exception);
 		}
-		return value.trim();
 	}
 
 	@NotNull
 	private String buildOAuth2Error(@NotNull String prefix, @Nullable String error, @Nullable String description) {
 		StringBuilder builder = new StringBuilder(prefix);
-		if (error != null && !error.isBlank()) {
+		if (ValidationUtils.hasText(error)) {
 			builder.append(" [").append(error).append(']');
 		}
-		if (description != null && !description.isBlank()) {
+		if (ValidationUtils.hasText(description)) {
 			builder.append(": ").append(description);
 		}
 		return builder.toString();
@@ -262,14 +270,15 @@ public class OAuth2LoginService {
 
 		String tokenUrl = oauth2Configuration.tokenUrl();
 		boolean microsoftEntraTokenEndpoint = tokenUrl != null && tokenUrl.contains("login.microsoftonline.com");
-		boolean hasClientSecret = oauth2Configuration.clientSecret() != null
-				&& !oauth2Configuration.clientSecret().isBlank();
+		boolean hasClientSecret = ValidationUtils.hasText(oauth2Configuration.clientSecret());
 
 		if (microsoftEntraTokenEndpoint) {
 			return message
 					+ " | Diagnostic: the request already includes client_id"
 					+ (hasClientSecret ? " and a configured client_secret" : " but no configured client_secret")
-					+ ". Microsoft Entra device-code flow expects a public client by default. If this app registration is configured as confidential, enable 'Allow public client flows' and clear app.oauth2.client.secret, or verify that the configured secret is valid for the same app registration and tenant.";
+					+ ". Microsoft Entra device-code flow expects a public client by default. If this app registration is configured as confidential, enable 'Allow public client flows' and clear "
+					+ ApplicationProperties.PROPERTY_OAUTH2_CLIENT_SECRET
+					+ ", or verify that the configured secret is valid for the same app registration and tenant.";
 		}
 
 		return message

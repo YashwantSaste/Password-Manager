@@ -11,6 +11,7 @@ import com.project.password.manager.cli.runtime.CliOutput;
 import com.project.password.manager.cli.runtime.CliSession;
 import com.project.password.manager.cli.runtime.CliTheme;
 import com.project.password.manager.service.OAuth2LoginService;
+import com.project.password.manager.util.ValidationUtils;
 
 public class OAuth2LoginCommandHandler implements CommandHandler<OAuth2LoginCommand.Request> {
 
@@ -47,7 +48,7 @@ public class OAuth2LoginCommandHandler implements CommandHandler<OAuth2LoginComm
 	@NotNull
 	private String resolveInstructionLine(@NotNull DeviceCode deviceCode) {
 		String message = deviceCode.getMessage();
-		if (message != null && !message.isBlank()) {
+		if (ValidationUtils.hasText(message)) {
 			return CliTheme.secondary(message);
 		}
 		return CliTheme.secondary("Complete the device authorization in your browser, then return to the CLI.");
@@ -55,7 +56,7 @@ public class OAuth2LoginCommandHandler implements CommandHandler<OAuth2LoginComm
 
 	@NotNull
 	private String resolveOrPlaceholder(String value, @NotNull String placeholder) {
-		if (value == null || value.isBlank()) {
+		if (!ValidationUtils.hasText(value)) {
 			return placeholder;
 		}
 		return value;

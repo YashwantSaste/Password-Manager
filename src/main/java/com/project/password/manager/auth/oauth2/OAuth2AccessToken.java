@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.password.manager.util.ModelObjectMapperFactory;
+import com.project.password.manager.util.ValidationUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OAuth2AccessToken {
@@ -76,11 +77,11 @@ public class OAuth2AccessToken {
 	}
 
 	public boolean hasAccessToken() {
-		return accessToken != null && !accessToken.isBlank();
+		return ValidationUtils.hasText(accessToken);
 	}
 
 	public boolean hasError() {
-		return error != null && !error.isBlank();
+		return ValidationUtils.hasText(error);
 	}
 
 	@NotNull
