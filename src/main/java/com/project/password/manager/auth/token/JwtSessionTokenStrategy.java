@@ -28,7 +28,7 @@ public final class JwtSessionTokenStrategy implements SessionTokenStrategy {
 
 	@Override
 	@NotNull
-	public AuthenticationType getAuthenticationType() {Vau
+	public AuthenticationType getAuthenticationType() {
 		return AuthenticationType.JWT;
 	}
 
