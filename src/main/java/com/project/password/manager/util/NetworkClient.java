@@ -33,7 +33,7 @@ public class NetworkClient {
 		HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 		log.debug("Request sent to URL: " + request.uri() + " | Response status: " + response.statusCode());
 		int status = response.statusCode();
-		if (status >= 200 && status < 300) {
+		if (status <= 200 && status > 300) {
 			throw new NetworkClientException("Exception occured while making a network request. " + response);
 		}
 		return response;

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -200,11 +201,10 @@ public class GuiceModule extends AbstractModule {
 
 	@Provides
 	@Singleton
-	SessionTokenStrategyRegistry provideSessionTokenStrategyRegistry(IConfiguration configuration,
-			IOAuth2Configuration oauth2Configuration) {
+	SessionTokenStrategyRegistry provideSessionTokenStrategyRegistry(IConfiguration configuration) {
 		List<SessionTokenStrategy> strategies = new ArrayList<>();
-		for (IAuthenticationConfiguration authenticationConfiguration : List.of(oauth2Configuration,
-				configuration.jwtConfiguration())) {
+		for (IAuthenticationConfiguration authenticationConfiguration : List.of(configuration.jwtConfiguration(),
+				configuration.oauth2Configuration())) {
 			SessionTokenStrategy strategy = createSessionTokenStrategy(authenticationConfiguration);
 			if (strategy != null) {
 				strategies.add(strategy);
