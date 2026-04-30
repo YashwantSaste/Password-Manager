@@ -18,6 +18,8 @@ public class DeviceCode {
 	private String userCode;
 	@JsonProperty("verification_uri")
 	private String verificationUrl;
+	@JsonProperty("verification_uri_complete")
+	private String verificationUrlComplete;
 	@JsonProperty("expires_in")
 	private String expiresIn;
 	@JsonProperty("interval")
@@ -51,6 +53,11 @@ public class DeviceCode {
 	@Nullable
 	public String getVerificationUrl() {
 		return verificationUrl;
+	}
+
+	@Nullable
+	public String getVerificationUrlComplete() {
+		return verificationUrlComplete;
 	}
 
 	@Nullable
