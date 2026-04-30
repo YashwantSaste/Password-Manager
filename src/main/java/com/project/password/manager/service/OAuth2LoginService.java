@@ -3,7 +3,6 @@ package com.project.password.manager.service;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,12 +15,12 @@ import com.project.password.manager.auth.oauth2.DeviceCode;
 import com.project.password.manager.auth.oauth2.OAuth2AccessToken;
 import com.project.password.manager.auth.oauth2.OAuth2Session;
 import com.project.password.manager.auth.oauth2.OAuth2UserProfile;
-import com.project.password.manager.auth.oauth2.OAuth2VerificationResult;
 import com.project.password.manager.configuration.IOAuth2Configuration;
 import com.project.password.manager.configuration.application.ApplicationProperties;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.util.NetworkClient;
 import com.project.password.manager.util.NetworkRequestBuilder;
+import com.project.password.manager.util.PropertyUtils;
 import com.project.password.manager.util.ValidationUtils;
 
 public class OAuth2LoginService {
@@ -47,7 +46,9 @@ public class OAuth2LoginService {
 		OAuth2UserProfile profile = fetchUserProfile(providerToken);
 		String userId = resolveUserId(profile);
 		String displayName = resolveDisplayName(profile, userId);
-		IUser user = authService.loginWithOAuth2Profile(userId, displayName);
+		String providerAccessToken = requireRuntimeValue(providerToken.getAccessToken(),
+				"OAuth2 login succeeded but the provider did not return an access token.");
+		IUser user = authService.loginWithOAuth2Profile(userId, displayName, providerAccessToken);
 		String cliToken = requireRuntimeValue(tokenService.getToken(user),
 				"OAuth2 login succeeded but no CLI token could be created.");
 		return new OAuth2Session(user, cliToken);
@@ -55,7 +56,11 @@ public class OAuth2LoginService {
 
 	@NotNull
 	public DeviceCode initiateLogin() {
-		validateRequiredConfiguration();
+		requireConfiguredProperty(oauth2Configuration.clientId(), ApplicationProperties.PROPERTY_OAUTH2_CLIENT_ID);
+		requireConfiguredProperty(oauth2Configuration.deviceCodeUrl(),
+				ApplicationProperties.PROPERTY_OAUTH2_DEVICE_CODE_URL);
+		requireConfiguredProperty(oauth2Configuration.tokenUrl(), ApplicationProperties.PROPERTY_OAUTH2_TOKEN_URL);
+		requireConfiguredProperty(oauth2Configuration.userUrl(), ApplicationProperties.PROPERTY_OAUTH2_USER_URL);
 		try {
 			HttpRequest request = new NetworkRequestBuilder().buildFormRequest(requireConfiguredValue(
 					oauth2Configuration.deviceCodeUrl(), ApplicationProperties.PROPERTY_OAUTH2_DEVICE_CODE_URL),
@@ -70,21 +75,6 @@ public class OAuth2LoginService {
 		} catch (Exception e) {
 			throw new RuntimeException("Could not make request to the authentication server.", e);
 		}
-	}
-
-	@NotNull
-	public OAuth2VerificationResult verifyConfiguration() {
-		List<String> missingProperties = new ArrayList<>();
-		ValidationUtils.addIfBlank(oauth2Configuration.clientId(), ApplicationProperties.PROPERTY_OAUTH2_CLIENT_ID,
-				missingProperties);
-		ValidationUtils.addIfBlank(oauth2Configuration.deviceCodeUrl(),
-				ApplicationProperties.PROPERTY_OAUTH2_DEVICE_CODE_URL, missingProperties);
-		ValidationUtils.addIfBlank(oauth2Configuration.tokenUrl(), ApplicationProperties.PROPERTY_OAUTH2_TOKEN_URL,
-				missingProperties);
-		ValidationUtils.addIfBlank(oauth2Configuration.userUrl(), ApplicationProperties.PROPERTY_OAUTH2_USER_URL,
-				missingProperties);
-		return new OAuth2VerificationResult(missingProperties.isEmpty(), List.copyOf(missingProperties),
-				resolveScopes());
 	}
 
 	@NotNull
@@ -185,14 +175,6 @@ public class OAuth2LoginService {
 		return scopes;
 	}
 
-	private void validateRequiredConfiguration() {
-		OAuth2VerificationResult verificationResult = verifyConfiguration();
-		if (!verificationResult.isValid()) {
-			throw new RuntimeException("OAuth2 configuration is incomplete: "
-					+ String.join(", ", verificationResult.getMissingProperties()));
-		}
-	}
-
 	@NotNull
 	private String resolveUserId(@NotNull OAuth2UserProfile profile) {
 		String preferredUsername = profile.getPreferredUsername();
@@ -237,7 +219,16 @@ public class OAuth2LoginService {
 
 	@NotNull
 	private String requireConfiguredValue(@Nullable String value, @NotNull String label) {
-		return requireRuntimeValue(value, "Missing OAuth2 value: " + label);
+		return requireConfiguredProperty(value, label);
+	}
+
+	@NotNull
+	private String requireConfiguredProperty(@Nullable String value, @NotNull String propertyName) {
+		try {
+			return PropertyUtils.requireProperty(value, propertyName, "OAuth2");
+		} catch (IllegalStateException exception) {
+			throw new RuntimeException(exception.getMessage(), exception);
+		}
 	}
 
 	@NotNull
@@ -284,7 +275,7 @@ public class OAuth2LoginService {
 		return message
 				+ (hasClientSecret
 						? " | Diagnostic: a client_secret is configured locally, so verify that the provider accepts device-code flow for confidential clients and that the secret is valid."
-						: " | Diagnostic: no client_secret is configured locally, so the provider may require a confidential-client token exchange.");
+								: " | Diagnostic: no client_secret is configured locally, so the provider may require a confidential-client token exchange.");
 	}
 
 }

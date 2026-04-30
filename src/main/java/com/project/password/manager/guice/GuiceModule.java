@@ -1,6 +1,8 @@
 package com.project.password.manager.guice;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -10,10 +12,13 @@ import com.google.inject.Singleton;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.project.password.manager.argon.Argon2Encoder;
+import com.project.password.manager.auth.token.JwtSessionTokenStrategy;
+import com.project.password.manager.auth.token.OAuth2SessionTokenStrategy;
+import com.project.password.manager.auth.token.SessionTokenStrategy;
+import com.project.password.manager.auth.token.SessionTokenStrategyRegistry;
 import com.project.password.manager.cli.commands.auth.LoginCommand;
 import com.project.password.manager.cli.commands.auth.LogoutCommand;
 import com.project.password.manager.cli.commands.auth.OAuth2LoginCommand;
-import com.project.password.manager.cli.commands.auth.OAuth2VerifyCommand;
 import com.project.password.manager.cli.commands.auth.PingCommand;
 import com.project.password.manager.cli.commands.auth.SignupCommand;
 import com.project.password.manager.cli.commands.auth.WhoAmICommand;
@@ -38,7 +43,6 @@ import com.project.password.manager.cli.commands.vault.VaultListCommand;
 import com.project.password.manager.cli.handlers.auth.LoginCommandHandler;
 import com.project.password.manager.cli.handlers.auth.LogoutCommandHandler;
 import com.project.password.manager.cli.handlers.auth.OAuth2LoginCommandHandler;
-import com.project.password.manager.cli.handlers.auth.OAuth2VerifyCommandHandler;
 import com.project.password.manager.cli.handlers.auth.PingCommandHandler;
 import com.project.password.manager.cli.handlers.auth.SignupCommandHandler;
 import com.project.password.manager.cli.handlers.auth.WhoAmICommandHandler;
@@ -65,6 +69,8 @@ import com.project.password.manager.cli.runtime.CliSession;
 import com.project.password.manager.cli.runtime.CommandHandlerInvoker;
 import com.project.password.manager.cli.runtime.CommandHandlerRegistry;
 import com.project.password.manager.cli.runtime.ConsoleCliOutput;
+import com.project.password.manager.configuration.AuthenticationType;
+import com.project.password.manager.configuration.IAuthenticationConfiguration;
 import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
 import com.project.password.manager.configuration.IOAuth2Configuration;
@@ -189,7 +195,43 @@ public class GuiceModule extends AbstractModule {
 	@Provides
 	@Singleton
 	TokenService provideTokenService(IConfiguration configuration) {
-		return new TokenService(configuration.jwtConfiguration());
+		return new TokenService(provideSessionTokenStrategyRegistry(configuration));
+	}
+
+	@Provides
+	@Singleton
+	SessionTokenStrategyRegistry provideSessionTokenStrategyRegistry(IConfiguration configuration,
+			IOAuth2Configuration oauth2Configuration) {
+		List<SessionTokenStrategy> strategies = new ArrayList<>();
+		for (IAuthenticationConfiguration authenticationConfiguration : List.of(oauth2Configuration,
+				configuration.jwtConfiguration())) {
+			SessionTokenStrategy strategy = createSessionTokenStrategy(authenticationConfiguration);
+			if (strategy != null) {
+				strategies.add(strategy);
+			}
+		}
+		return new SessionTokenStrategyRegistry(strategies);
+	}
+
+	@Nullable
+	private SessionTokenStrategy createSessionTokenStrategy(
+			@NotNull IAuthenticationConfiguration authenticationConfiguration) {
+		try {
+			switch (authenticationConfiguration.type()) {
+			case OAUTH2:
+				return new OAuth2SessionTokenStrategy();
+			case JWT:
+				return new JwtSessionTokenStrategy((com.project.password.manager.configuration.IJwtConfiguration) authenticationConfiguration);
+			case SAML:
+			default:
+				return null;
+			}
+		} catch (RuntimeException exception) {
+			if (authenticationConfiguration.type() == AuthenticationType.JWT) {
+				return null;
+			}
+			throw exception;
+		}
 	}
 
 	@Provides
@@ -241,7 +283,6 @@ public class GuiceModule extends AbstractModule {
 				.register(ConfigSetCommand.class, ConfigSetCommandHandler.class)
 				.register(LoginCommand.class, LoginCommandHandler.class)
 				.register(OAuth2LoginCommand.class, OAuth2LoginCommandHandler.class)
-				.register(OAuth2VerifyCommand.class, OAuth2VerifyCommandHandler.class)
 				.register(SignupCommand.class, SignupCommandHandler.class)
 				.register(LogoutCommand.class, LogoutCommandHandler.class)
 				.register(WhoAmICommand.class, WhoAmICommandHandler.class)

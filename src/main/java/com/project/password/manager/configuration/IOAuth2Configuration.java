@@ -6,7 +6,7 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface IOAuth2Configuration {
+public interface IOAuth2Configuration extends IAuthenticationConfiguration {
 
 	@NotNull
 	String DEFAULT_SCOPE = "openid profile email";
@@ -19,6 +19,11 @@ public interface IOAuth2Configuration {
 
 	@NotNull
 	String TOKEN_PARAM_ENTRY_DELIMITER = ".";
+
+	@Override
+	default AuthenticationType type() {
+		return AuthenticationType.OAUTH2;
+	}
 
 	@Nullable
 	String clientId();

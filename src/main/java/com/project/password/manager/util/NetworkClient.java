@@ -9,6 +9,8 @@ import java.util.concurrent.CompletableFuture;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.project.password.manager.exceptions.NetworkClientException;
+
 
 public class NetworkClient {
 
@@ -30,6 +32,10 @@ public class NetworkClient {
 	public HttpResponse<String> send(@NotNull HttpRequest request) throws IOException, InterruptedException {
 		HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 		log.debug("Request sent to URL: " + request.uri() + " | Response status: " + response.statusCode());
+		int status = response.statusCode();
+		if (status >= 200 && status < 300) {
+			throw new NetworkClientException("Exception occured while making a network request. " + response);
+		}
 		return response;
 	}
 

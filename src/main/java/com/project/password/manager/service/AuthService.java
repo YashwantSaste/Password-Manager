@@ -9,9 +9,9 @@ import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.argon.Argon2Encoder;
+import com.project.password.manager.auth.token.SessionTokenRequest;
 import com.project.password.manager.configuration.application.Workspace;
 import com.project.password.manager.guice.PlatformEntityProvider;
-import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.UserRole;
@@ -46,10 +46,7 @@ public class AuthService {
 		if(!encoder.verify(user.getAuthVerifier(),password)) {
 			throw new RuntimeException("Password mismatch. Kindly check your password");
 		}
-		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
-		tokenEntity.setUserId(user.getId());
-		tokenEntity.setToken(tokenService.createToken(user));
-		tokenService.saveToken(user,tokenEntity);
+		tokenService.issueToken(user, SessionTokenRequest.jwt());
 	}
 
 	public void signup(@NotNull String username, @NotNull String password) {
@@ -67,22 +64,17 @@ public class AuthService {
 		newUser.setRoles(determineInitialRoles());
 		userService.saveUser(newUser);
 		vaultService.createDefaultVault(newUser);
-		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
-		tokenEntity.setUserId(newUser.getId());
-		tokenEntity.setToken(tokenService.createToken(newUser));
-		tokenService.saveToken(newUser, tokenEntity);
+		tokenService.issueToken(newUser, SessionTokenRequest.jwt());
 	}
 
 	@NotNull
-	public IUser loginWithOAuth2Profile(@NotNull String userId, @NotNull String displayName) {
+	public IUser loginWithOAuth2Profile(@NotNull String userId, @NotNull String displayName,
+			@NotNull String providerAccessToken) {
 		IUser user = userService.getUser(userId);
 		if (user == null) {
 			user = createOAuth2User(userId, displayName);
 		}
-		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
-		tokenEntity.setUserId(user.getId());
-		tokenEntity.setToken(tokenService.createToken(user));
-		tokenService.saveToken(user, tokenEntity);
+		tokenService.issueToken(user, SessionTokenRequest.oauth2(providerAccessToken));
 		return user;
 	}
 
