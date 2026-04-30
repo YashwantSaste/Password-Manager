@@ -4,13 +4,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.argon.Argon2Encoder;
+import com.project.password.manager.auth.token.SessionTokenRequest;
 import com.project.password.manager.configuration.application.Workspace;
 import com.project.password.manager.guice.PlatformEntityProvider;
-import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.UserRole;
@@ -36,17 +37,16 @@ public class AuthService {
 	}
 
 	public void login(@NotNull String username,@NotNull String password) {
-		IUser user = userService.getUser(username);
-		if(user==null) {
-			throw new RuntimeException("Given user does not exist");
+		IUser user;
+		try {
+			user = userService.requireUser(username);
+		} catch (IllegalArgumentException exception) {
+			throw new RuntimeException("Given user does not exist", exception);
 		}
 		if(!encoder.verify(user.getAuthVerifier(),password)) {
 			throw new RuntimeException("Password mismatch. Kindly check your password");
 		}
-		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
-		tokenEntity.setUserId(user.getId());
-		tokenEntity.setToken(tokenService.createToken(user));
-		tokenService.saveToken(user,tokenEntity);
+		tokenService.issueToken(user, SessionTokenRequest.jwt());
 	}
 
 	public void signup(@NotNull String username, @NotNull String password) {
@@ -63,12 +63,35 @@ public class AuthService {
 		newUser.setVaults(new ArrayList<>());
 		newUser.setRoles(determineInitialRoles());
 		userService.saveUser(newUser);
-		IVault defaultVault = vaultService.createDefaultVault(newUser);
-		newUser.setDefaultVaultId(defaultVault.getId());
-		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
-		tokenEntity.setUserId(newUser.getId());
-		tokenEntity.setToken(tokenService.createToken(newUser));
-		tokenService.saveToken(newUser, tokenEntity);
+		vaultService.createDefaultVault(newUser);
+		tokenService.issueToken(newUser, SessionTokenRequest.jwt());
+	}
+
+	@NotNull
+	public IUser loginWithOAuth2Profile(@NotNull String userId, @NotNull String displayName,
+			@NotNull String providerAccessToken) {
+		IUser user = userService.getUser(userId);
+		if (user == null) {
+			user = createOAuth2User(userId, displayName);
+		}
+		tokenService.issueToken(user, SessionTokenRequest.oauth2(providerAccessToken));
+		return user;
+	}
+
+	@NotNull
+	private IUser createOAuth2User(@NotNull String userId, @NotNull String displayName) {
+		String generatedSecret = UUID.randomUUID().toString();
+		IUser oauthUser = PlatformEntityProvider.getEntityProvider().getUser();
+		oauthUser.setId(userId);
+		oauthUser.setName(displayName);
+		oauthUser.setAuthVerifier(encoder.getHashValue(generatedSecret));
+		byte[] saltBytes = KeyGenerator.generateKeyFromPassword(generatedSecret).getEncoded();
+		oauthUser.setKeySalt(Base64.getEncoder().encodeToString(saltBytes));
+		oauthUser.setVaults(new ArrayList<>());
+		oauthUser.setRoles(determineInitialRoles());
+		userService.saveUser(oauthUser);
+		vaultService.createDefaultVault(oauthUser);
+		return oauthUser;
 	}
 
 	@NotNull

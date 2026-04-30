@@ -7,6 +7,11 @@ import com.project.password.manager.auth.jwt.JwtAlgorithm;
 
 public interface IJwtConfiguration extends IAuthenticationConfiguration {
 
+	@Override
+	default AuthenticationType type() {
+		return AuthenticationType.JWT;
+	}
+
 	/** Algorithm: HS256, RS256, ES256, etc */
 	@NotNull
 	JwtAlgorithm algorithm();

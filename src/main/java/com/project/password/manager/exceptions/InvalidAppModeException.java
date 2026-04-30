@@ -9,4 +9,8 @@ public class InvalidAppModeException extends RuntimeException {
 	public InvalidAppModeException(@NotNull String message) {
 		super(message);
 	}
+
+	public InvalidAppModeException(@NotNull String message, @NotNull Throwable cause) {
+		super(message, cause);
+	}
 }
