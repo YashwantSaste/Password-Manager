@@ -9,6 +9,7 @@ import com.project.password.manager.configuration.ICLIConfiguration;
 import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
 import com.project.password.manager.configuration.IJwtConfiguration;
+import com.project.password.manager.configuration.IOAuth2Configuration;
 import com.project.password.manager.configuration.ISaltKeyConfiguration;
 
 public class Configuration implements IConfiguration {
@@ -63,13 +64,19 @@ public class Configuration implements IConfiguration {
 
 	@Override
 	@NotNull
-	public  IAESConfiguration aesConfiguration() {
+	public IAESConfiguration aesConfiguration() {
 		return new AESConfiguration(propertiesReader);
 	}
 
 	@Override
 	@NotNull
-	public  ISaltKeyConfiguration saltKeyConfiguration() {
+	public ISaltKeyConfiguration saltKeyConfiguration() {
 		return new SaltKeyConfigurations(propertiesReader);
+	}
+
+	@Override
+	@NotNull
+	public IOAuth2Configuration oauth2Configuration() {
+		return new OAuth2Configuration(propertiesReader);
 	}
 }
