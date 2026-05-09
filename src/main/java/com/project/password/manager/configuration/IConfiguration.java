@@ -26,5 +26,9 @@ public interface IConfiguration {
 	ISaltKeyConfiguration saltKeyConfiguration();
 
 	@NotNull
+	IOAuth2Configuration oauth2Configuration();
+
+	@NotNull
 	ITeamConfiguration teamConfiguration();
+
 }

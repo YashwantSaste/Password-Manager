@@ -9,5 +9,10 @@ public interface IToken extends IEntity{
 
 	void setToken(@NotNull String token);
 
+	@NotNull
+	String getTokenType();
+
+	void setTokenType(@NotNull String tokenType);
+
 	void setUserId(@NotNull String userId);
 }

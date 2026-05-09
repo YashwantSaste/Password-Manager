@@ -31,4 +31,8 @@ public interface IDatabaseConfiguration {
 
 	@NotNull
 	String ddlMode();
+
+	boolean formatSql();
+
+	boolean showSql();
 }

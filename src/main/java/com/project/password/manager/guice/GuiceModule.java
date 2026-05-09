@@ -1,8 +1,11 @@
 package com.project.password.manager.guice;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -10,8 +13,13 @@ import com.google.inject.Singleton;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.project.password.manager.argon.Argon2Encoder;
+import com.project.password.manager.auth.token.JwtSessionTokenStrategy;
+import com.project.password.manager.auth.token.OAuth2SessionTokenStrategy;
+import com.project.password.manager.auth.token.SessionTokenStrategy;
+import com.project.password.manager.auth.token.SessionTokenStrategyRegistry;
 import com.project.password.manager.cli.commands.auth.LoginCommand;
 import com.project.password.manager.cli.commands.auth.LogoutCommand;
+import com.project.password.manager.cli.commands.auth.OAuth2LoginCommand;
 import com.project.password.manager.cli.commands.auth.PingCommand;
 import com.project.password.manager.cli.commands.auth.SignupCommand;
 import com.project.password.manager.cli.commands.auth.WhoAmICommand;
@@ -40,6 +48,7 @@ import com.project.password.manager.cli.commands.vault.VaultDefaultCommand;
 import com.project.password.manager.cli.commands.vault.VaultListCommand;
 import com.project.password.manager.cli.handlers.auth.LoginCommandHandler;
 import com.project.password.manager.cli.handlers.auth.LogoutCommandHandler;
+import com.project.password.manager.cli.handlers.auth.OAuth2LoginCommandHandler;
 import com.project.password.manager.cli.handlers.auth.PingCommandHandler;
 import com.project.password.manager.cli.handlers.auth.SignupCommandHandler;
 import com.project.password.manager.cli.handlers.auth.WhoAmICommandHandler;
@@ -71,9 +80,14 @@ import com.project.password.manager.cli.runtime.CliSession;
 import com.project.password.manager.cli.runtime.CommandHandlerInvoker;
 import com.project.password.manager.cli.runtime.CommandHandlerRegistry;
 import com.project.password.manager.cli.runtime.ConsoleCliOutput;
+import com.project.password.manager.configuration.AuthenticationType;
+import com.project.password.manager.configuration.IAuthenticationConfiguration;
 import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
+import com.project.password.manager.configuration.IOAuth2Configuration;
 import com.project.password.manager.configuration.application.Configuration;
+import com.project.password.manager.configuration.application.OAuth2Configuration;
+import com.project.password.manager.configuration.application.PropertiesReader;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.database.DataRepositoryFactory;
 import com.project.password.manager.database.EntryDataRepository;
@@ -96,8 +110,8 @@ import com.project.password.manager.model.database.sql.JpaToken;
 import com.project.password.manager.model.database.sql.JpaUser;
 import com.project.password.manager.model.database.sql.JpaVault;
 import com.project.password.manager.service.AuthService;
-import com.project.password.manager.service.ConfigService;
 import com.project.password.manager.service.EntryService;
+import com.project.password.manager.service.OAuth2LoginService;
 import com.project.password.manager.service.TeamService;
 import com.project.password.manager.service.TokenService;
 import com.project.password.manager.service.UserService;
@@ -154,6 +168,12 @@ public class GuiceModule extends AbstractModule {
 
 	@Provides
 	@Singleton
+	IOAuth2Configuration provideOAuth2Configuration() {
+		return new OAuth2Configuration(PropertiesReader.getInstance());
+	}
+
+	@Provides
+	@Singleton
 	Argon2Encoder provideArgon2Encoder(IConfiguration configuration) {
 		return new Argon2Encoder(configuration.argon2Configuration());
 	}
@@ -203,7 +223,42 @@ public class GuiceModule extends AbstractModule {
 	@Provides
 	@Singleton
 	TokenService provideTokenService(IConfiguration configuration) {
-		return new TokenService(configuration.jwtConfiguration());
+		return new TokenService(provideSessionTokenStrategyRegistry(configuration));
+	}
+
+	@Provides
+	@Singleton
+	SessionTokenStrategyRegistry provideSessionTokenStrategyRegistry(IConfiguration configuration) {
+		List<SessionTokenStrategy> strategies = new ArrayList<>();
+		for (IAuthenticationConfiguration authenticationConfiguration : List.of(configuration.jwtConfiguration(),
+				configuration.oauth2Configuration())) {
+			SessionTokenStrategy strategy = createSessionTokenStrategy(authenticationConfiguration);
+			if (strategy != null) {
+				strategies.add(strategy);
+			}
+		}
+		return new SessionTokenStrategyRegistry(strategies);
+	}
+
+	@Nullable
+	private SessionTokenStrategy createSessionTokenStrategy(
+			@NotNull IAuthenticationConfiguration authenticationConfiguration) {
+		try {
+			switch (authenticationConfiguration.type()) {
+			case OAUTH2:
+				return new OAuth2SessionTokenStrategy();
+			case JWT:
+				return new JwtSessionTokenStrategy((com.project.password.manager.configuration.IJwtConfiguration) authenticationConfiguration);
+			case SAML:
+			default:
+				return null;
+			}
+		} catch (RuntimeException exception) {
+			if (authenticationConfiguration.type() == AuthenticationType.JWT) {
+				return null;
+			}
+			throw exception;
+		}
 	}
 
 	@Provides
@@ -243,6 +298,13 @@ public class GuiceModule extends AbstractModule {
 
 	@Provides
 	@Singleton
+	OAuth2LoginService provideOAuth2LoginService(IOAuth2Configuration oauth2Configuration, AuthService authService,
+			TokenService tokenService) {
+		return new OAuth2LoginService(oauth2Configuration, authService, tokenService);
+	}
+
+	@Provides
+	@Singleton
 	CommandHandlerInvoker provideCommandHandlerInvoker() {
 		return new CommandHandlerInvoker();
 	}
@@ -255,6 +317,7 @@ public class GuiceModule extends AbstractModule {
 				.register(ConfigGetCommand.class, ConfigGetCommandHandler.class)
 				.register(ConfigSetCommand.class, ConfigSetCommandHandler.class)
 				.register(LoginCommand.class, LoginCommandHandler.class)
+				.register(OAuth2LoginCommand.class, OAuth2LoginCommandHandler.class)
 				.register(SignupCommand.class, SignupCommandHandler.class)
 				.register(LogoutCommand.class, LogoutCommandHandler.class)
 				.register(WhoAmICommand.class, WhoAmICommandHandler.class)

@@ -10,4 +10,8 @@ public class UserNotFoundException extends EntityNotFoundException {
 		super(message);
 	}
 
+	public UserNotFoundException(@NotNull String message, @NotNull Throwable cause) {
+		super(message, cause);
+	}
+
 }

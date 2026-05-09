@@ -5,9 +5,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -112,6 +117,37 @@ public class PropertiesReader {
 		}
 		log.warn("Property not found for key=" + key + ", using default=" + defaultValue);
 		return defaultValue;
+	}
+
+	@NotNull
+	public List<String> readPropertyAsList(@NotNull String key,@NotNull String delimiter){
+		return readPropertyAsList(key, delimiter, Function.identity());
+	}
+
+	@NotNull
+	private <T> List<T> readPropertyAsList(@NotNull String key, @NotNull String delimiter,
+			@NotNull Function<String, T> mapper) {
+		String value = (String) readPropertiesFromPropertiesMap(key);
+		if (value == null || value.trim().isEmpty()) {
+			return Collections.emptyList();
+		}
+		return Arrays.stream(value.split(delimiter)).map(String::trim).filter(v -> !v.isEmpty()).map(mapper)
+				.collect(Collectors.toList());
+	}
+
+	@NotNull
+	public Map<String, String> readPropertyAsMap(@NotNull String key, @NotNull String entryDelimiter,
+			@NotNull String keyValueDelimiter) {
+
+		String value = (String) readPropertiesFromPropertiesMap(key);
+
+		if (value == null || value.trim().isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		return Arrays.stream(value.split(entryDelimiter)).map(String::trim).filter(v -> !v.isEmpty())
+				.map(entry -> entry.split(keyValueDelimiter, 2))
+				.collect(Collectors.toMap(arr -> arr[0].trim(), arr -> arr.length > 1 ? arr[1].trim() : ""));
 	}
 
 	private void extractProperties() {

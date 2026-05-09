@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.google.inject.Inject;
 import com.project.password.manager.cli.runtime.CliSession;
 import com.project.password.manager.exceptions.UnauthorizedSessionException;
@@ -40,17 +39,7 @@ public class TokenVerifier {
 			session.clear();
 			throw new UnauthorizedSessionException("Authenticated user no longer exists.");
 		}
-		String persistedToken = tokenService.getToken(user);
-		if (persistedToken == null || !persistedToken.equals(rawToken)) {
-			session.clear();
-			throw new UnauthorizedSessionException(UNAUTHORIZED_ACCESS_MESSAGE);
-		}
-		try {
-			if (tokenService.verify(rawToken, user) == null) {
-				session.clear();
-				throw new UnauthorizedSessionException(UNAUTHORIZED_ACCESS_MESSAGE);
-			}
-		} catch (JWTVerificationException ex) {
+		if (!tokenService.isCurrentSessionTokenValid(user, rawToken)) {
 			session.clear();
 			throw new UnauthorizedSessionException(UNAUTHORIZED_ACCESS_MESSAGE);
 		}

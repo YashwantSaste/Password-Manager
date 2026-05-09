@@ -52,6 +52,7 @@ public final class HibernateBootStrap {
 		sessionFactory.close();
 	}
 
+	@NotNull
 	private static Map<String, Object> hibernateConfiguration(@NotNull IDatabaseConfiguration databaseConfiguration) {
 		DatabaseVendor vendor = DatabaseVendor.from(databaseConfiguration.vendor());
 		Map<String, Object> config = new HashMap<>();
@@ -60,10 +61,9 @@ public final class HibernateBootStrap {
 		config.put(Environment.JAKARTA_JDBC_USER, databaseConfiguration.username());
 		config.put(Environment.JAKARTA_JDBC_PASSWORD, databaseConfiguration.password());
 		config.put(Environment.HBM2DDL_AUTO, databaseConfiguration.ddlMode());
-		config.put(Environment.SHOW_SQL, "true");
-		config.put(Environment.FORMAT_SQL, "true");
+		config.put(Environment.SHOW_SQL, String.valueOf(databaseConfiguration.showSql()));
+		config.put(Environment.FORMAT_SQL, String.valueOf(databaseConfiguration.showSql()));
 		config.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
-		System.out.println(config);
 		return config;
 	}
 

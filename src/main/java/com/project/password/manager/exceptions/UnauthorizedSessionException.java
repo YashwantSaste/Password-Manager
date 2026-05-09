@@ -9,4 +9,8 @@ public class UnauthorizedSessionException extends RuntimeException {
 	public UnauthorizedSessionException(@NotNull String message) {
 		super(message);
 	}
+
+	public UnauthorizedSessionException(@NotNull String message, @NotNull Throwable cause) {
+		super(message, cause);
+	}
 }
