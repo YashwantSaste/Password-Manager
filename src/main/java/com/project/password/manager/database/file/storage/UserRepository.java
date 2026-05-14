@@ -4,14 +4,15 @@ import java.io.File;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.project.password.manager.logging.ITransactionLogger;
 import com.project.password.manager.model.database.file.storage.User;
 
 public class UserRepository extends FileStorageRepository<User, String> {
 
 	private static final String USERS_WORKSPACE_FOLDER = "users";
 
-	public UserRepository(@NotNull File workspace) {
-		super(new File(workspace, USERS_WORKSPACE_FOLDER));
+	public UserRepository(@NotNull File workspace, @NotNull ITransactionLogger transactionLogger) {
+		super(new File(workspace, USERS_WORKSPACE_FOLDER), transactionLogger);
 	}
 
 	@Override

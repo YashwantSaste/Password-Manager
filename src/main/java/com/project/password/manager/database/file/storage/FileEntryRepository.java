@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.database.EntryDataRepository;
 import com.project.password.manager.database.EntryStorageKey;
+import com.project.password.manager.logging.ITransactionLogger;
 import com.project.password.manager.model.entry.EncryptedEntryRecord;
 
 public class FileEntryRepository implements EntryDataRepository {
@@ -16,9 +17,12 @@ public class FileEntryRepository implements EntryDataRepository {
 	private static final String ENTRIES_WORKSPACE_FOLDER = "entries";
 	@NotNull
 	private final File workspace;
+	@NotNull
+	private final ITransactionLogger transactionLogger;
 
-	public FileEntryRepository(@NotNull File workspace) {
+	public FileEntryRepository(@NotNull File workspace, @NotNull ITransactionLogger transactionLogger) {
 		this.workspace = new File(workspace, ENTRIES_WORKSPACE_FOLDER);
+		this.transactionLogger = transactionLogger;
 	}
 
 	@Override
@@ -26,6 +30,7 @@ public class FileEntryRepository implements EntryDataRepository {
 		File entryFile = resolveEntryFile(record.getVaultId(), record.getId());
 		entryFile.getParentFile().mkdirs();
 		new FileManager<>(entryFile, EncryptedEntryRecord.class).writeToFile(record);
+		logRepositoryOperation("save", record.getId(), "SUCCESS", entryFile.getAbsolutePath());
 	}
 
 	@Override
@@ -33,9 +38,13 @@ public class FileEntryRepository implements EntryDataRepository {
 	public EncryptedEntryRecord findById(@NotNull EntryStorageKey key) {
 		File entryFile = resolveEntryFile(key.vaultId(), key.entryId());
 		if (!entryFile.exists()) {
+			logRepositoryOperation("findById", key.entryId(), "MISS", entryFile.getAbsolutePath());
 			return null;
 		}
-		return new FileManager<>(entryFile, EncryptedEntryRecord.class).readFromFile();
+		EncryptedEntryRecord record = new FileManager<>(entryFile, EncryptedEntryRecord.class).readFromFile();
+		logRepositoryOperation("findById", key.entryId(), record == null ? "MISS" : "SUCCESS",
+				entryFile.getAbsolutePath());
+		return record;
 	}
 
 	@Override
@@ -58,6 +67,7 @@ public class FileEntryRepository implements EntryDataRepository {
 				}
 			}
 		}
+		logRepositoryOperation("findAll", null, "SUCCESS", "count=" + entries.size());
 		return entries;
 	}
 
@@ -76,6 +86,7 @@ public class FileEntryRepository implements EntryDataRepository {
 				entries.add(entry);
 			}
 		}
+		logRepositoryOperation("findByVaultId", vaultId, "SUCCESS", "count=" + entries.size());
 		return entries;
 	}
 
@@ -93,12 +104,21 @@ public class FileEntryRepository implements EntryDataRepository {
 		File entryFile = resolveEntryFile(key.vaultId(), key.entryId());
 		if (entryFile.exists()) {
 			entryFile.delete();
+			logRepositoryOperation("delete", key.entryId(), "SUCCESS", entryFile.getAbsolutePath());
+			return;
 		}
+		logRepositoryOperation("delete", key.entryId(), "MISS", entryFile.getAbsolutePath());
 	}
 
 	@NotNull
 	private File resolveEntryFile(@NotNull String vaultId, @NotNull String entryId) {
 		return new File(new File(workspace, vaultId), entryId + ".json");
+	}
+
+	private void logRepositoryOperation(@NotNull String operation, @Nullable String entityId, @NotNull String status,
+			@Nullable String details) {
+		transactionLogger.logRepositoryOperation(false, getClass().getSimpleName(), operation,
+				EncryptedEntryRecord.class.getSimpleName(), entityId, status, details);
 	}
 
 }

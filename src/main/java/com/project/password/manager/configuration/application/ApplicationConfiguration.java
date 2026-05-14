@@ -24,4 +24,21 @@ public class ApplicationConfiguration implements IAppConfiguration {
 	public String version() {
 		return reader.readPropertyAsString(ApplicationProperties.PROPERTY_APP_VERSION);
 	}
+
+	@Override
+	public boolean transactionLoggingEnabled() {
+		return reader.readPropertyAsBoolean(ApplicationProperties.PROPERTY_APP_TRANSACTION_LOG_ENABLED, true);
+	}
+
+	@Override
+	@NotNull
+	public String transactionLogPath() {
+		String path = reader.readPropertyAsString(ApplicationProperties.PROPERTY_APP_TRANSACTION_LOG_PATH);
+		return path == null || path.isBlank() ? "logs/transactions.log" : path;
+	}
+
+	@Override
+	public boolean includeDatabaseTransactions() {
+		return reader.readPropertyAsBoolean(ApplicationProperties.PROPERTY_APP_TRANSACTION_LOG_INCLUDE_DATABASE, true);
+	}
 }

@@ -1,16 +1,13 @@
 package com.project.password.manager.event.listener;
 
-import com.project.password.manager.event.EventLogger;
+import org.jetbrains.annotations.NotNull;
+
 import com.project.password.manager.event.IEvent;
 
-public interface IEventListener<T extends IEvent> {
+public interface IEventListener {
 
-	EventLogger eventLogger = new EventLogger();
+	boolean supports(@NotNull IEvent event);
 
-	T receivedEvent();
-
-	Object handleEvent();
-
-	void logEvent();
+	void onEvent(@NotNull IEvent event);
 
 }

@@ -21,6 +21,14 @@ import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.database.EntryDataRepository;
 import com.project.password.manager.database.EntryStorageKey;
 import com.project.password.manager.encryption.IEncryptionService;
+import com.project.password.manager.event.EntityChangeDetector;
+import com.project.password.manager.event.EntityEventFactory;
+import com.project.password.manager.event.EntityEventSupport;
+import com.project.password.manager.event.EntitySnapshotter;
+import com.project.password.manager.event.EventDispatcher;
+import com.project.password.manager.event.EventLogger;
+import com.project.password.manager.event.IEntityEventSupport;
+import com.project.password.manager.event.listener.EventLoggingListener;
 import com.project.password.manager.exceptions.EntityNotFoundException;
 import com.project.password.manager.exceptions.UnauthorizedSessionException;
 import com.project.password.manager.model.IVault;
@@ -44,16 +52,28 @@ public class EntryService {
 	@NotNull
 	private final ObjectMapper objectMapper;
 	@NotNull
+	private final IEntityEventSupport eventSupport;
+	@NotNull
 	private final Cache<String, VaultSearchIndex> searchIndexByVault = Caffeine.newBuilder()
 	.expireAfterAccess(20, TimeUnit.MINUTES).maximumSize(200).build();
 
 	public EntryService(@NotNull EntryDataRepository entryRepository,
 			@NotNull DataRepository<IVault, String> vaultRepository,
 			@NotNull IEncryptionService encryptionService) {
+		this(entryRepository, vaultRepository, encryptionService, new EntityEventSupport(
+				new EntitySnapshotter(ModelObjectMapperFactory.create()),
+				new EntityEventFactory(new EntityChangeDetector(ModelObjectMapperFactory.create())),
+				new EventDispatcher(List.of(new EventLoggingListener(new EventLogger())))));
+	}
+
+	public EntryService(@NotNull EntryDataRepository entryRepository,
+			@NotNull DataRepository<IVault, String> vaultRepository,
+			@NotNull IEncryptionService encryptionService, @NotNull IEntityEventSupport eventSupport) {
 		this.entryRepository = entryRepository;
 		this.vaultRepository = vaultRepository;
 		this.encryptionService = encryptionService;
 		this.objectMapper = ModelObjectMapperFactory.create();
+		this.eventSupport = eventSupport;
 	}
 
 	@NotNull
@@ -70,6 +90,7 @@ public class EntryService {
 		record.setUpdatedAtEpochMs(now);
 		record.setEncryptedPayload(encryptPayload(userId, toSecretPayload(request)));
 		entryRepository.save(record);
+		eventSupport.publishCreated(record);
 		EntryView view = toView(record, request);
 		upsertIndex(view);
 		return view;
@@ -121,9 +142,11 @@ public class EntryService {
 		ValidationUtils.validate(request);
 		assertOwnedVault(userId, vaultId);
 		EncryptedEntryRecord record = requireRecord(vaultId, entryId);
+		EncryptedEntryRecord beforeSnapshot = eventSupport.snapshot(record);
 		record.setUpdatedAtEpochMs(System.currentTimeMillis());
 		record.setEncryptedPayload(encryptPayload(userId, toSecretPayload(request)));
 		entryRepository.update(new EntryStorageKey(vaultId, entryId), record);
+		eventSupport.publishUpdated(beforeSnapshot, record);
 		EntryView view = toView(record, request);
 		upsertIndex(view);
 		return view;
@@ -131,9 +154,10 @@ public class EntryService {
 
 	public void deleteEntry(@NotNull String userId, @NotNull String vaultId, @NotNull String entryId) {
 		assertOwnedVault(userId, vaultId);
-		requireRecord(vaultId, entryId);
+		EncryptedEntryRecord record = requireRecord(vaultId, entryId);
 		entryRepository.delete(new EntryStorageKey(vaultId, entryId));
 		removeFromIndex(vaultId, entryId);
+		eventSupport.publishDeleted(record);
 	}
 
 	@NotNull
