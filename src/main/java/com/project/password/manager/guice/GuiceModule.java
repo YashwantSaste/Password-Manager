@@ -74,6 +74,7 @@ import com.project.password.manager.configuration.AuthenticationType;
 import com.project.password.manager.configuration.IAuthenticationConfiguration;
 import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
+import com.project.password.manager.configuration.IJwtConfiguration;
 import com.project.password.manager.configuration.IOAuth2Configuration;
 import com.project.password.manager.configuration.application.Configuration;
 import com.project.password.manager.configuration.application.OAuth2Configuration;
@@ -81,8 +82,21 @@ import com.project.password.manager.configuration.application.PropertiesReader;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.database.DataRepositoryFactory;
 import com.project.password.manager.database.EntryDataRepository;
+import com.project.password.manager.database.EntryStorageKey;
 import com.project.password.manager.encryption.AesGcmEncryptionService;
 import com.project.password.manager.encryption.IEncryptionService;
+import com.project.password.manager.event.EntityChangeDetector;
+import com.project.password.manager.event.EntityEventFactory;
+import com.project.password.manager.event.EntityEventSupport;
+import com.project.password.manager.event.EntitySnapshotter;
+import com.project.password.manager.event.EventDispatcher;
+import com.project.password.manager.event.EventLogger;
+import com.project.password.manager.event.IEntityEventSupport;
+import com.project.password.manager.event.IEventPublisher;
+import com.project.password.manager.event.listener.EventLoggingListener;
+import com.project.password.manager.event.listener.IEventListener;
+import com.project.password.manager.logging.ITransactionLogger;
+import com.project.password.manager.logging.WorkspaceTransactionLogger;
 import com.project.password.manager.middleware.RequireAuthorization;
 import com.project.password.manager.middleware.TokenAuthorizationInterceptor;
 import com.project.password.manager.model.IMetadata;
@@ -113,6 +127,7 @@ public class GuiceModule extends AbstractModule {
 		TokenAuthorizationInterceptor authorizationInterceptor = new TokenAuthorizationInterceptor();
 		bind(IConfiguration.class).toInstance(configuration);
 		bind(CliSession.class).in(Singleton.class);
+		bind(EntryStorageKey.class).in(Singleton.class);
 		bind(CliOutput.class).to(ConsoleCliOutput.class).in(Singleton.class);
 		requestInjection(authorizationInterceptor);
 		bindInterceptor(Matchers.any(), authorizationMethodMatcher(), authorizationInterceptor);
@@ -138,7 +153,6 @@ public class GuiceModule extends AbstractModule {
 				throw new UnsupportedOperationException("Could not bind entities: Error: Unsupported Database Type");
 			}
 		}
-
 	}
 
 	@NotNull
@@ -166,31 +180,34 @@ public class GuiceModule extends AbstractModule {
 	@Provides
 	@Singleton
 	DataRepository<IUser, String> provideUserRepository(IConfiguration configuration) {
-		return new DataRepositoryFactory(configuration.databaseConfiguration()).getRepository(IUser.class, String.class);
+		return new DataRepositoryFactory(configuration).getRepository(IUser.class, String.class);
 	}
 
 	@Provides
 	@Singleton
 	DataRepository<IToken, String> provideTokenRepository(IConfiguration configuration) {
-		return new DataRepositoryFactory(configuration.databaseConfiguration()).getRepository(IToken.class, String.class);
+		return new DataRepositoryFactory(configuration).getRepository(IToken.class, String.class);
 	}
 
 	@Provides
 	@Singleton
 	DataRepository<IVault, String> provideVaultRepository(IConfiguration configuration) {
-		return new DataRepositoryFactory(configuration.databaseConfiguration()).getRepository(IVault.class, String.class);
+		return new DataRepositoryFactory(configuration).getRepository(IVault.class, String.class);
 	}
 
 	@Provides
 	@Singleton
 	EntryDataRepository provideEntryRepository(IConfiguration configuration) {
-		return new DataRepositoryFactory(configuration.databaseConfiguration()).getEntryRepository();
+		return (EntryDataRepository) new DataRepositoryFactory(configuration)
+				.getRepository(com.project.password.manager.model.entry.EncryptedEntryRecord.class,
+						EntryStorageKey.class);
 	}
 
 	@Provides
 	@Singleton
-	UserService provideUserService(DataRepository<IUser, String> userRepository, TokenService tokenService) {
-		return new UserService(userRepository, tokenService);
+	ITransactionLogger provideTransactionLogger(IConfiguration configuration) {
+		return new WorkspaceTransactionLogger(configuration.appConfiguration(),
+				com.project.password.manager.configuration.application.Workspace.getInstance().getRoot());
 	}
 
 	@Provides
@@ -221,8 +238,7 @@ public class GuiceModule extends AbstractModule {
 			case OAUTH2:
 				return new OAuth2SessionTokenStrategy();
 			case JWT:
-				return new JwtSessionTokenStrategy((com.project.password.manager.configuration.IJwtConfiguration) authenticationConfiguration);
-			case SAML:
+				return new JwtSessionTokenStrategy((IJwtConfiguration) authenticationConfiguration);
 			default:
 				return null;
 			}
@@ -236,6 +252,38 @@ public class GuiceModule extends AbstractModule {
 
 	@Provides
 	@Singleton
+	EventLogger provideEventLogger(ITransactionLogger transactionLogger) {
+		return new EventLogger(transactionLogger);
+	}
+
+	@Provides
+	@Singleton
+	IEventListener provideEventLoggingListener(EventLogger eventLogger) {
+		return new EventLoggingListener(eventLogger);
+	}
+
+	@Provides
+	@Singleton
+	IEventPublisher provideEventPublisher(IEventListener eventListener) {
+		return new EventDispatcher(List.of(eventListener));
+	}
+
+	@Provides
+	@Singleton
+	IEntityEventSupport provideEntityEventSupport(IEventPublisher eventPublisher) {
+		return new EntityEventSupport(new EntitySnapshotter(ModelObjectMapperFactory.create()),
+				new EntityEventFactory(new EntityChangeDetector(ModelObjectMapperFactory.create())), eventPublisher);
+	}
+
+	@Provides
+	@Singleton
+	UserService provideUserService(DataRepository<IUser, String> userRepository, TokenService tokenService,
+			IEntityEventSupport eventSupport) {
+		return new UserService(userRepository, tokenService, eventSupport);
+	}
+
+	@Provides
+	@Singleton
 	IEncryptionService provideEncryptionService(UserService userService) {
 		return new AesGcmEncryptionService(userService);
 	}
@@ -243,15 +291,18 @@ public class GuiceModule extends AbstractModule {
 	@Provides
 	@Singleton
 	VaultService provideVaultService(DataRepository<IUser, String> userRepository,
-			DataRepository<IVault, String> vaultRepository, IEncryptionService encryptionService) {
-		return new VaultService(userRepository, vaultRepository, encryptionService, ModelObjectMapperFactory.create());
+			DataRepository<IVault, String> vaultRepository, IEncryptionService encryptionService,
+			IEntityEventSupport eventSupport) {
+		return new VaultService(userRepository, vaultRepository, encryptionService, ModelObjectMapperFactory.create(),
+				eventSupport);
 	}
 
 	@Provides
 	@Singleton
-	EntryService provideEntryService(EntryDataRepository entryRepository, DataRepository<IVault, String> vaultRepository,
-			IEncryptionService encryptionService) {
-		return new EntryService(entryRepository, vaultRepository, encryptionService);
+	EntryService provideEntryService(EntryDataRepository entryRepository,
+			DataRepository<IVault, String> vaultRepository, IEncryptionService encryptionService,
+			IEntityEventSupport eventSupport) {
+		return new EntryService(entryRepository, vaultRepository, encryptionService, eventSupport);
 	}
 
 	@Provides

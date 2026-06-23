@@ -30,7 +30,7 @@ public class TokenService {
 
 	public TokenService(@NotNull SessionTokenStrategyRegistry sessionTokenStrategyRegistry) {
 		this.sessionTokenStrategyRegistry = sessionTokenStrategyRegistry;
-		this.tokenRepo = new DataRepositoryFactory(Configuration.getInstance().databaseConfiguration())
+		this.tokenRepo = new DataRepositoryFactory(Configuration.getInstance())
 				.getRepository(IToken.class, String.class);
 	}
 

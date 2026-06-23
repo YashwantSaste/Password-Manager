@@ -10,4 +10,11 @@ public interface IAppConfiguration {
 	@NotNull
 	String version();
 
+	boolean transactionLoggingEnabled();
+
+	@NotNull
+	String transactionLogPath();
+
+	boolean includeDatabaseTransactions();
+
 }

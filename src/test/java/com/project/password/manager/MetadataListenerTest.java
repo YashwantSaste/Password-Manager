@@ -6,7 +6,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.project.password.manager.configuration.application.Configuration;
 import com.project.password.manager.database.file.storage.UserRepository;
+import com.project.password.manager.logging.WorkspaceTransactionLogger;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.Status;
 import com.project.password.manager.model.UserRole;
@@ -20,7 +22,8 @@ public class MetadataListenerTest extends TestCase {
 	public void testRepositorySaveInitializesMissingMetadataFields() throws Exception {
 		Path workspace = Files.createTempDirectory("metadata-listener-save");
 		try {
-			UserRepository repository = new UserRepository(workspace.toFile());
+			UserRepository repository = new UserRepository(workspace.toFile(),
+					new WorkspaceTransactionLogger(Configuration.getInstance().appConfiguration(), workspace.toFile()));
 			User user = new User("user-1", "alice", "verifier", "salt", "vault-1", new ArrayList<>(),
 					List.of(UserRole.USER), new Metadata());
 
@@ -47,7 +50,8 @@ public class MetadataListenerTest extends TestCase {
 	public void testRepositoryUpdateRefreshesUpdatedAt() throws Exception {
 		Path workspace = Files.createTempDirectory("metadata-listener-update");
 		try {
-			UserRepository repository = new UserRepository(workspace.toFile());
+			UserRepository repository = new UserRepository(workspace.toFile(),
+					new WorkspaceTransactionLogger(Configuration.getInstance().appConfiguration(), workspace.toFile()));
 			User user = new User("user-1", "alice", "verifier", "salt", "vault-1", new ArrayList<>(),
 					List.of(UserRole.USER), new Metadata());
 			LocalDateTime originalCreatedAt = LocalDateTime.of(2026, 4, 27, 12, 0, 0);
