@@ -31,4 +31,7 @@ public interface IConfiguration {
 	@NotNull
 	ITeamConfiguration teamConfiguration();
 
+	@NotNull
+	ICacheConfiguration cacheConfiguration();
+
 }

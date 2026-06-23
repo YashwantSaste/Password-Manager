@@ -6,6 +6,7 @@ import com.project.password.manager.configuration.IAESConfiguration;
 import com.project.password.manager.configuration.IAppConfiguration;
 import com.project.password.manager.configuration.IArgon2Configuration;
 import com.project.password.manager.configuration.ICLIConfiguration;
+import com.project.password.manager.configuration.ICacheConfiguration;
 import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
 import com.project.password.manager.configuration.IJwtConfiguration;
@@ -77,12 +78,18 @@ public class Configuration implements IConfiguration {
 
 	@Override
 	@NotNull
-<<<<<<< HEAD
 	public ITeamConfiguration teamConfiguration() {
 		return new TeamConfiguration(propertiesReader);
-=======
+	}
+
+	@Override
 	public IOAuth2Configuration oauth2Configuration() {
 		return new OAuth2Configuration(propertiesReader);
->>>>>>> cc0d61cd0a09f5dce010bf7fa05d0300059ec54f
+	}
+
+	@Override
+	@NotNull
+	public ICacheConfiguration cacheConfiguration() {
+		return new CacheConfiguration(propertiesReader);
 	}
 }

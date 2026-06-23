@@ -59,6 +59,9 @@ public class ApplicationProperties {
 	public static final String PROPERTY_OAUTH2_TOKEN_PARAMTERS = "app.oauth2.token.parameters";
 	/** Team Configurations **/
 	public static final String PROPERTY_ALLOW_ONLY_ADMIN_TO_CREATE_TEAM = "app.team.create.allow.admin.only";
+	/** Cache Configurations **/
+	public static final String PROPERTY_APP_CACHE_MAXIMUM_SIZE = "app.cache.maximum.size";
+	public static final String PROPERTY_APP_CACHE_EXPIRY_DURATION = "app.cache.expiry.duration";
 
 	private static final List<String> SUPPORTED_KEYS = List.of(
 			PROPERTY_APP_NAME,
