@@ -4,14 +4,15 @@ import java.io.File;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.project.password.manager.logging.ITransactionLogger;
 import com.project.password.manager.model.database.file.storage.Token;
 
 public class TokenRepository extends FileStorageRepository<Token, String>{
 
 	private static final String USERS_WORKSPACE_FOLDER = "users";
 
-	public TokenRepository(@NotNull File workspace) {
-		super(new File(workspace, USERS_WORKSPACE_FOLDER));
+	public TokenRepository(@NotNull File workspace, @NotNull ITransactionLogger transactionLogger) {
+		super(new File(workspace, USERS_WORKSPACE_FOLDER), transactionLogger);
 	}
 
 	/*As we are storing the token inside the user folder in the workspace so the
