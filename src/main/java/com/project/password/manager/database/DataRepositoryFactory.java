@@ -9,16 +9,18 @@ import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
 import com.project.password.manager.configuration.application.Workspace;
 import com.project.password.manager.database.file.storage.FileEntryRepository;
+import com.project.password.manager.database.file.storage.TeamRepository;
 import com.project.password.manager.database.file.storage.TokenRepository;
 import com.project.password.manager.database.file.storage.UserRepository;
 import com.project.password.manager.database.file.storage.VaultRepository;
 import com.project.password.manager.database.postgres.hibernate.HibernateBootStrap;
-import com.project.password.manager.database.postgres.hibernate.HibernateEntryRepository;
 import com.project.password.manager.database.postgres.hibernate.HibernateEntityProvider;
+import com.project.password.manager.database.postgres.hibernate.HibernateEntryRepository;
 import com.project.password.manager.database.postgres.hibernate.HibernateRepository;
 import com.project.password.manager.logging.ITransactionLogger;
 import com.project.password.manager.logging.WorkspaceTransactionLogger;
 import com.project.password.manager.model.IEntity;
+import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
@@ -46,9 +48,10 @@ public class DataRepositoryFactory {
 	@NotNull
 	public <T extends IEntity, Id> DataRepository<T, Id> getRepository(@NotNull Class<T> entityClass,
 			@NotNull Class<Id> idClass) {
-		if (entityClass.equals(EncryptedEntryRecord.class)) {
+		File workspace = Workspace.getInstance().getRoot();
+		if (entityClass.equals(ITeam.class)) {
 			@SuppressWarnings("unchecked")
-			DataRepository<T, Id> repo = (DataRepository<T, Id>) createEntryRepository();
+			DataRepository<T, Id> repo = (DataRepository<T, Id>) new TeamRepository(workspace);
 			return repo;
 		}
 		if (databaseConfiguration.databaseEnabled()
@@ -57,7 +60,6 @@ public class DataRepositoryFactory {
 			return new HibernateRepository<>(factory, resolveSqlEntityClass(entityClass), transactionLogger);
 		}
 		log.warn("Database is not enabled hence using local file system as storage");
-		File workspace = Workspace.getInstance().getRoot();
 		if (entityClass.equals(IUser.class)) {
 			@SuppressWarnings("unchecked")
 			DataRepository<T, Id> repo = (DataRepository<T, Id>) new UserRepository(workspace, transactionLogger);

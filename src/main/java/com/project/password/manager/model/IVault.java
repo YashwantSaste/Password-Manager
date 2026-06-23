@@ -17,7 +17,10 @@ public interface IVault extends HasMetadata {
 	String getName();
 
 	@NotNull
-	String getUserId();
+	VaultScope getScope();
+
+	@NotNull
+	String getScopeId();
 
 	@NotNull
 	String getEncryptedBlob();
@@ -26,7 +29,9 @@ public interface IVault extends HasMetadata {
 
 	void setName(@NotNull String vaultName);
 
-	void setUserId(@NotNull String userId);
+	void setScope(@NotNull VaultScope scope);
+
+	void setScopeId(@NotNull String scopeId);
 
 	void setEncryptedBlob(@NotNull String encryptedBlob);
 

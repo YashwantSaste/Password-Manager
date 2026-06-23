@@ -32,6 +32,11 @@ import com.project.password.manager.cli.commands.entry.EntryGetCommand;
 import com.project.password.manager.cli.commands.entry.EntryListCommand;
 import com.project.password.manager.cli.commands.entry.EntrySearchCommand;
 import com.project.password.manager.cli.commands.entry.EntryUpdateCommand;
+import com.project.password.manager.cli.commands.team.CreateTeamCommand;
+import com.project.password.manager.cli.commands.team.GetTeamCommand;
+import com.project.password.manager.cli.commands.team.ListTeamCommand;
+import com.project.password.manager.cli.commands.team.TeamVaultCreateCommand;
+import com.project.password.manager.cli.commands.team.TeamVaultListCommand;
 import com.project.password.manager.cli.commands.theme.ThemeListCommand;
 import com.project.password.manager.cli.commands.theme.ThemePreviewCommand;
 import com.project.password.manager.cli.commands.theme.ThemeSetCommand;
@@ -56,6 +61,11 @@ import com.project.password.manager.cli.handlers.entry.EntryGetCommandHandler;
 import com.project.password.manager.cli.handlers.entry.EntryListCommandHandler;
 import com.project.password.manager.cli.handlers.entry.EntrySearchCommandHandler;
 import com.project.password.manager.cli.handlers.entry.EntryUpdateCommandHandler;
+import com.project.password.manager.cli.handlers.team.CreateTeamCommandHandler;
+import com.project.password.manager.cli.handlers.team.GetTeamCommandHandler;
+import com.project.password.manager.cli.handlers.team.ListTeamCommandHandler;
+import com.project.password.manager.cli.handlers.team.TeamVaultCreateCommandHandler;
+import com.project.password.manager.cli.handlers.team.TeamVaultListCommandHandler;
 import com.project.password.manager.cli.handlers.theme.ThemeListCommandHandler;
 import com.project.password.manager.cli.handlers.theme.ThemePreviewCommandHandler;
 import com.project.password.manager.cli.handlers.theme.ThemeSetCommandHandler;
@@ -100,10 +110,12 @@ import com.project.password.manager.logging.WorkspaceTransactionLogger;
 import com.project.password.manager.middleware.RequireAuthorization;
 import com.project.password.manager.middleware.TokenAuthorizationInterceptor;
 import com.project.password.manager.model.IMetadata;
+import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.database.file.storage.Metadata;
+import com.project.password.manager.model.database.file.storage.Team;
 import com.project.password.manager.model.database.file.storage.Token;
 import com.project.password.manager.model.database.file.storage.User;
 import com.project.password.manager.model.database.file.storage.Vault;
@@ -114,8 +126,10 @@ import com.project.password.manager.model.database.sql.JpaVault;
 import com.project.password.manager.service.AuthService;
 import com.project.password.manager.service.EntryService;
 import com.project.password.manager.service.OAuth2LoginService;
+import com.project.password.manager.service.TeamService;
 import com.project.password.manager.service.TokenService;
 import com.project.password.manager.service.UserService;
+import com.project.password.manager.service.VaultAccessService;
 import com.project.password.manager.service.VaultService;
 import com.project.password.manager.util.ModelObjectMapperFactory;
 
@@ -136,6 +150,7 @@ public class GuiceModule extends AbstractModule {
 			bind(IVault.class).to(Vault.class);
 			bind(IMetadata.class).to(Metadata.class);
 			bind(IToken.class).to(Token.class);
+			bind(ITeam.class).to(Team.class);
 		} else {
 			switch (configuration.databaseConfiguration().type()) {
 			case IDatabaseConfiguration.DATABASE_TYPE_SQL: {
@@ -205,9 +220,20 @@ public class GuiceModule extends AbstractModule {
 
 	@Provides
 	@Singleton
-	ITransactionLogger provideTransactionLogger(IConfiguration configuration) {
-		return new WorkspaceTransactionLogger(configuration.appConfiguration(),
-				com.project.password.manager.configuration.application.Workspace.getInstance().getRoot());
+	DataRepository<ITeam, String> provideTeamRepository(IConfiguration configuration) {
+		return new DataRepositoryFactory(configuration.databaseConfiguration()).getRepository(ITeam.class, String.class);
+	}
+
+	@Provides
+	@Singleton
+	UserService provideUserService(DataRepository<IUser, String> userRepository, TokenService tokenService) {
+		return new UserService(userRepository, tokenService);
+	}
+
+	@Provides
+	@Singleton
+	TeamService provideTeamService(DataRepository<ITeam, String> teamRepository, UserService userService) {
+		return new TeamService(teamRepository, userService);
 	}
 
 	@Provides
@@ -254,6 +280,12 @@ public class GuiceModule extends AbstractModule {
 	@Singleton
 	EventLogger provideEventLogger(ITransactionLogger transactionLogger) {
 		return new EventLogger(transactionLogger);
+  }
+  
+  @Provides
+	@Singleton
+	IEncryptionService provideEncryptionService(UserService userService, TeamService teamService) {
+		return new AesGcmEncryptionService(userService, teamService);
 	}
 
 	@Provides
@@ -286,6 +318,8 @@ public class GuiceModule extends AbstractModule {
 	@Singleton
 	IEncryptionService provideEncryptionService(UserService userService) {
 		return new AesGcmEncryptionService(userService);
+	VaultAccessService provideVaultAccessService(DataRepository<IVault, String> vaultRepository, TeamService teamService) {
+		return new VaultAccessService(vaultRepository, teamService);
 	}
 
 	@Provides
@@ -293,16 +327,14 @@ public class GuiceModule extends AbstractModule {
 	VaultService provideVaultService(DataRepository<IUser, String> userRepository,
 			DataRepository<IVault, String> vaultRepository, IEncryptionService encryptionService,
 			IEntityEventSupport eventSupport) {
-		return new VaultService(userRepository, vaultRepository, encryptionService, ModelObjectMapperFactory.create(),
-				eventSupport);
-	}
+		return new VaultService(userRepository, vaultRepository, encryptionService, ModelObjectMapperFactory.create(),eventSupport);
+			}
 
 	@Provides
 	@Singleton
-	EntryService provideEntryService(EntryDataRepository entryRepository,
-			DataRepository<IVault, String> vaultRepository, IEncryptionService encryptionService,
-			IEntityEventSupport eventSupport) {
-		return new EntryService(entryRepository, vaultRepository, encryptionService, eventSupport);
+	EntryService provideEntryService(EntryDataRepository entryRepository, DataRepository<IVault, String> vaultRepository,
+			IEncryptionService encryptionService, VaultAccessService vaultAccessService) {
+		return new EntryService(entryRepository, vaultRepository, encryptionService, vaultAccessService);
 	}
 
 	@Provides
@@ -347,6 +379,11 @@ public class GuiceModule extends AbstractModule {
 				.register(VaultListCommand.class, VaultListCommandHandler.class)
 				.register(VaultCreateCommand.class, VaultCreateCommandHandler.class)
 				.register(VaultDefaultCommand.class, VaultDefaultCommandHandler.class)
+				.register(ListTeamCommand.class, ListTeamCommandHandler.class)
+				.register(GetTeamCommand.class, GetTeamCommandHandler.class)
+				.register(CreateTeamCommand.class, CreateTeamCommandHandler.class)
+				.register(TeamVaultListCommand.class, TeamVaultListCommandHandler.class)
+				.register(TeamVaultCreateCommand.class, TeamVaultCreateCommandHandler.class)
 				.register(EntryListCommand.class, EntryListCommandHandler.class)
 				.register(EntryGetCommand.class, EntryGetCommandHandler.class)
 				.register(EntryCreateCommand.class, EntryCreateCommandHandler.class)

@@ -27,4 +27,8 @@ public interface IConfiguration {
 
 	@NotNull
 	IOAuth2Configuration oauth2Configuration();
+
+	@NotNull
+	ITeamConfiguration teamConfiguration();
+
 }
