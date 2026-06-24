@@ -77,12 +77,12 @@ public class Configuration implements IConfiguration {
 
 	@Override
 	@NotNull
-<<<<<<< HEAD
 	public ITeamConfiguration teamConfiguration() {
 		return new TeamConfiguration(propertiesReader);
-=======
+	}
+
+	@Override
 	public IOAuth2Configuration oauth2Configuration() {
 		return new OAuth2Configuration(propertiesReader);
->>>>>>> cc0d61cd0a09f5dce010bf7fa05d0300059ec54f
 	}
 }
