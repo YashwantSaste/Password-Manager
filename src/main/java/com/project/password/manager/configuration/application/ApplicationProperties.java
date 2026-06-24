@@ -13,6 +13,9 @@ public class ApplicationProperties {
 	public static final String PROPERTY_APP_CLI_THEME = "app.cli.theme";
 	public static final String PROPERTY_APP_CLI_ENABLED = "app.cli.enabled";
 	public static final String PROPERTY_APP_CLI_DISPLAY_PROMPT = "app.cli.prompt";
+	public static final String PROPERTY_APP_TRANSACTION_LOG_ENABLED = "app.transaction.log.enabled";
+	public static final String PROPERTY_APP_TRANSACTION_LOG_PATH = "app.transaction.log.path";
+	public static final String PROPERTY_APP_TRANSACTION_LOG_INCLUDE_DATABASE = "app.transaction.log.include.database";
 
 	/** Database Configurations **/
 	public static final String PROPERTY_DATABASE_ENABLED = "app.database.enabled";
@@ -69,6 +72,9 @@ public class ApplicationProperties {
 			PROPERTY_APP_CLI_THEME,
 			PROPERTY_APP_CLI_ENABLED,
 			PROPERTY_APP_CLI_DISPLAY_PROMPT,
+			PROPERTY_APP_TRANSACTION_LOG_ENABLED,
+			PROPERTY_APP_TRANSACTION_LOG_PATH,
+			PROPERTY_APP_TRANSACTION_LOG_INCLUDE_DATABASE,
 			PROPERTY_DATABASE_ENABLED,
 			PROPERTY_DATABASE_TYPE,
 			PROPERTY_DATABASE_USERNAME,

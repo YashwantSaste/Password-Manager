@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.database.DataRepository;
+import com.project.password.manager.logging.ITransactionLogger;
 import com.project.password.manager.model.database.file.storage.IFileStorableEntity;
 import com.project.password.manager.util.Logger;
 import com.project.password.manager.util.MetadataListener;
@@ -18,10 +19,13 @@ public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> i
 	@NotNull
 	protected final File workspace;
 	@NotNull
+	protected final ITransactionLogger transactionLogger;
+	@NotNull
 	protected FileManager<T> fileManager;
 
-	protected FileStorageRepository(@NotNull File workspace) {
+	protected FileStorageRepository(@NotNull File workspace, @NotNull ITransactionLogger transactionLogger) {
 		this.workspace = workspace;
+		this.transactionLogger = transactionLogger;
 	}
 
 	@Override
@@ -36,7 +40,11 @@ public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> i
 		fileManager = new FileManager<>(entityFile, getEntityClass());
 		if (!fileManager.doFileExist()) {
 			fileManager.writeToFile(entity);
+			logRepositoryOperation("save", entity.getClass().getSimpleName(), entity.getId(), "SUCCESS",
+					entityFile.getAbsolutePath());
 		} else {
+			logRepositoryOperation("save", entity.getClass().getSimpleName(), entity.getId(), "SKIPPED",
+					"Entity file already exists at " + entityFile.getAbsolutePath());
 			log.warn("Given file already exists in the workspace: " + entityFile.getAbsolutePath());
 		}
 	}
@@ -47,11 +55,15 @@ public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> i
 		File entityDir = resolveEntityDirectoryInFileSystem(id.toString());
 		if (!entityDir.exists()) {
 			log.debug("File related to related ID does not exist in the workspace");
+			logRepositoryOperation("findById", getEntityClass().getSimpleName(), id.toString(), "MISS", null);
 			return null;
 		}
 		File entityFile = new File(entityDir, getEntityFileName());
 		fileManager = new FileManager<T>(entityFile, getEntityClass());
-		return fileManager.readFromFile();
+		T entity = fileManager.readFromFile();
+		logRepositoryOperation("findById", getEntityClass().getSimpleName(), id.toString(),
+				entity == null ? "MISS" : "SUCCESS", entityFile.getAbsolutePath());
+		return entity;
 	}
 
 	@Override
@@ -76,6 +88,8 @@ public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> i
 				entities.add(entity);
 			}
 		}
+		logRepositoryOperation("findAll", getEntityClass().getSimpleName(), null, "SUCCESS",
+				"count=" + entities.size());
 		return entities;
 	}
 
@@ -85,7 +99,12 @@ public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> i
 		File entityFile = new File(entityDirectory, getEntityFileName());
 		if (entityFile.exists()) {
 			entityFile.delete();
+			logRepositoryOperation("delete", getEntityClass().getSimpleName(), id.toString(), "SUCCESS",
+					entityFile.getAbsolutePath());
+			return;
 		}
+		logRepositoryOperation("delete", getEntityClass().getSimpleName(), id.toString(), "MISS",
+				entityFile.getAbsolutePath());
 	}
 
 	@Override
@@ -99,6 +118,14 @@ public abstract class FileStorageRepository<T extends IFileStorableEntity, Id> i
 		File entityFile = new File(entityDirectory, entity.getFileName());
 		fileManager = new FileManager<>(entityFile, getEntityClass());
 		fileManager.writeToFile(entity);
+		logRepositoryOperation("update", entity.getClass().getSimpleName(), entity.getId(), "SUCCESS",
+				entityFile.getAbsolutePath());
+	}
+
+	protected void logRepositoryOperation(@NotNull String operation, @NotNull String entityType,
+			@Nullable String entityId, @NotNull String status, @Nullable String details) {
+		transactionLogger.logRepositoryOperation(false, getClass().getSimpleName(), operation, entityType, entityId,
+				status, details);
 	}
 
 	@NotNull
