@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.encryption.AesGcmEncryptionService;
 import com.project.password.manager.encryption.IEncryptionService;
@@ -79,6 +80,7 @@ public class VaultService {
 				new EventDispatcher(List.of(new EventLoggingListener(new EventLogger()))));
 	}
 
+	@Inject
 	public VaultService(@NotNull DataRepository<IUser, String> userRepository,
 			@NotNull DataRepository<IVault, String> vaultRepository, @NotNull IEncryptionService encryptionService,
 			@NotNull ObjectMapper objectMapper, @NotNull TeamService teamService,
