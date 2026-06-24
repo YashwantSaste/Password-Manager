@@ -43,8 +43,8 @@ public class WorkspaceTransactionLogger implements ITransactionLogger {
 		if (databaseOperation && !appConfiguration.includeDatabaseTransactions()) {
 			return;
 		}
-		writeEntry(new TransactionLogEntry(Instant.now(), databaseOperation ? "database" : "repository",
-				repositoryName, operation, entityType, entityId, status, details));
+		writeEntry(new TransactionLogEntry(Instant.now(), databaseOperation ? "database" : "repository", repositoryName,
+				operation, entityType, entityId, status, details));
 	}
 
 	private void writeEntry(@NotNull TransactionLogEntry entry) {

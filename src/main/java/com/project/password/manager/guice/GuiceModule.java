@@ -81,6 +81,7 @@ import com.project.password.manager.cli.runtime.CommandHandlerInvoker;
 import com.project.password.manager.cli.runtime.CommandHandlerRegistry;
 import com.project.password.manager.cli.runtime.ConsoleCliOutput;
 import com.project.password.manager.configuration.AuthenticationType;
+import com.project.password.manager.configuration.IAppConfiguration;
 import com.project.password.manager.configuration.IAuthenticationConfiguration;
 import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
@@ -89,6 +90,7 @@ import com.project.password.manager.configuration.IOAuth2Configuration;
 import com.project.password.manager.configuration.application.Configuration;
 import com.project.password.manager.configuration.application.OAuth2Configuration;
 import com.project.password.manager.configuration.application.PropertiesReader;
+import com.project.password.manager.configuration.application.Workspace;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.database.DataRepositoryFactory;
 import com.project.password.manager.database.EntryDataRepository;
@@ -106,6 +108,7 @@ import com.project.password.manager.event.IEventPublisher;
 import com.project.password.manager.event.listener.EventLoggingListener;
 import com.project.password.manager.event.listener.IEventListener;
 import com.project.password.manager.logging.ITransactionLogger;
+import com.project.password.manager.logging.WorkspaceTransactionLogger;
 import com.project.password.manager.middleware.RequireAuthorization;
 import com.project.password.manager.middleware.TokenAuthorizationInterceptor;
 import com.project.password.manager.model.IMetadata;
@@ -340,6 +343,18 @@ public class GuiceModule extends AbstractModule {
 	OAuth2LoginService provideOAuth2LoginService(IOAuth2Configuration oauth2Configuration, AuthService authService,
 			TokenService tokenService) {
 		return new OAuth2LoginService(oauth2Configuration, authService, tokenService);
+	}
+
+	@Provides
+	@Singleton
+	IAppConfiguration provideAppConfiguration(IConfiguration configuration) {
+		return configuration.appConfiguration();
+	}
+
+	@Provides
+	@Singleton
+	ITransactionLogger provideTransactionLogger(IAppConfiguration appConfiguration) {
+		return new WorkspaceTransactionLogger(appConfiguration, Workspace.getInstance().getRoot());
 	}
 
 	@Provides

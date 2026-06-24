@@ -75,16 +75,15 @@ public class CacheStore implements ICacheStore {
 
 		if (!sameKeyType || !sameValueType) {
 			throw new IllegalStateException("Cache '" + requestedDefinition.getName()
-			+ "' already exists with incompatible types. " + "Existing: <"
-			+ existingDefinition.getKeyType().getName() + ", " + existingDefinition.getValueType().getName()
-			+ ">, requested: <" + requestedDefinition.getKeyType().getName() + ", "
-			+ requestedDefinition.getValueType().getName() + ">");
+					+ "' already exists with incompatible types. " + "Existing: <"
+					+ existingDefinition.getKeyType().getName() + ", " + existingDefinition.getValueType().getName()
+					+ ">, requested: <" + requestedDefinition.getKeyType().getName() + ", "
+					+ requestedDefinition.getValueType().getName() + ">");
 		}
 	}
 
 	@Override
-	public <K, V> Cache<K, V> getCache(
-			@NotNull CacheDefinition<K, V> cacheDefinition) {
+	public <K, V> Cache<K, V> getCache(@NotNull CacheDefinition<K, V> cacheDefinition) {
 		return getOrCreateCache(cacheDefinition);
 	}
 }

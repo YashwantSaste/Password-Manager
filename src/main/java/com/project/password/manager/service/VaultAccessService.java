@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.google.inject.Inject;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.exceptions.EntityNotFoundException;
 import com.project.password.manager.exceptions.IlleagalAccessException;
@@ -19,6 +20,7 @@ public class VaultAccessService {
 	@NotNull
 	private final TeamService teamService;
 
+	@Inject
 	public VaultAccessService(@NotNull DataRepository<IVault, String> vaultRepository, @NotNull TeamService teamService) {
 		this.vaultRepository = vaultRepository;
 		this.teamService = teamService;

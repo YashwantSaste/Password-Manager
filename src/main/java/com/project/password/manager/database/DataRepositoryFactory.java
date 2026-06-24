@@ -40,8 +40,8 @@ public class DataRepositoryFactory {
 	private final ITransactionLogger transactionLogger;
 
 	public DataRepositoryFactory(@NotNull IConfiguration configuration) {
-		this.databaseConfiguration = configuration.databaseConfiguration();
-		this.transactionLogger = new WorkspaceTransactionLogger(configuration.appConfiguration(),
+		databaseConfiguration = configuration.databaseConfiguration();
+		transactionLogger = new WorkspaceTransactionLogger(configuration.appConfiguration(),
 				Workspace.getInstance().getRoot());
 	}
 
@@ -65,7 +65,7 @@ public class DataRepositoryFactory {
 			DataRepository<T, Id> repo = (DataRepository<T, Id>) new UserRepository(workspace, transactionLogger);
 			return repo;
 		}
-		if(entityClass.equals(IToken.class)) {
+		if (entityClass.equals(IToken.class)) {
 			@SuppressWarnings("unchecked")
 			DataRepository<T, Id> repo = (DataRepository<T, Id>) new TokenRepository(workspace, transactionLogger);
 			return repo;
@@ -73,6 +73,11 @@ public class DataRepositoryFactory {
 		if (entityClass.equals(IVault.class)) {
 			@SuppressWarnings("unchecked")
 			DataRepository<T, Id> repo = (DataRepository<T, Id>) new VaultRepository(workspace, transactionLogger);
+			return repo;
+		}
+		if (entityClass.equals(EncryptedEntryRecord.class)) {
+			@SuppressWarnings("unchecked")
+			DataRepository<T, Id> repo = (DataRepository<T, Id>) getEntryRepository();
 			return repo;
 		}
 		throw new IllegalArgumentException("No repository available for entity: " + entityClass.getName());
