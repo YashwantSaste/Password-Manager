@@ -8,8 +8,8 @@ import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.VaultScope;
-import com.project.password.manager.service.UserService;
 import com.project.password.manager.service.TeamService;
+import com.project.password.manager.service.UserService;
 import com.project.password.manager.util.AesGcmUtils;
 import com.project.password.manager.util.KeyGenerator;
 

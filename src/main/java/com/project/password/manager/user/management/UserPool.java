@@ -1,23 +1,21 @@
 package com.project.password.manager.user.management;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import com.project.password.manager.cache.UserCache;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.UserRole;
 import com.project.password.manager.service.UserService;
 
 public class UserPool implements IUserPool {
 
-	private final Cache<String, IUser> userCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES)
-			.maximumSize(100).build();
-
 	@NotNull
 	private UserService userService;
+
+	@NotNull
+	private UserCache cache = new UserCache();
 
 	public UserPool(@NotNull UserService userService) {
 		this.userService = userService;
@@ -27,13 +25,15 @@ public class UserPool implements IUserPool {
 	@Override
 	@NotNull
 	public List<IUser> getAdminUsers() {
-		return getAllUsers().stream().filter(user -> user.getRoles().contains(UserRole.ADMIN)).distinct().toList();
+		return loadUsersFromCache().stream().filter(user -> user.getRoles().contains(UserRole.ADMIN)).distinct()
+				.toList();
 	}
 
 	@Override
 	@NotNull
 	public List<IUser> getNonAdminUsers() {
-		return getAllUsers().stream().filter(user -> !user.getRoles().contains(UserRole.ADMIN)).distinct().toList();
+		return loadUsersFromCache().stream().filter(user -> !user.getRoles().contains(UserRole.ADMIN)).distinct()
+				.toList();
 	}
 
 	@Override
@@ -42,9 +42,11 @@ public class UserPool implements IUserPool {
 		return userService.getUsers();
 	}
 
+	private List<IUser> loadUsersFromCache() {
+		return cache.getCachedUsers();
+	}
+
 	private void loadUsersInCache() {
-		for (IUser user : getAllUsers()) {
-			userCache.put(user.getId(), user);
-		}
+		cache.addUsersToCache(getAllUsers());
 	}
 }

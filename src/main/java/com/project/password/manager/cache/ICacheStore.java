@@ -1,15 +1,20 @@
 package com.project.password.manager.cache;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.benmanes.caffeine.cache.Cache;
+
 public interface ICacheStore {
 
 	@NotNull
-	Set<String> availableCaches();
+	List<String> availableCaches();
+
+	@Nullable
+	<K, V> Cache<K, V> getCache(@NotNull CacheDefinition<K, V> cacheDefinition);
 
 	<K, V> void createCache(@NotNull CacheDefinition<K, V> cacheDefinition);
 

@@ -1,8 +1,7 @@
 package com.project.password.manager.cache;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jetbrains.annotations.NotNull;
@@ -16,8 +15,8 @@ public class CacheStore implements ICacheStore {
 
 	@Override
 	@NotNull
-	public Set<String> availableCaches() {
-		return Collections.unmodifiableSet(caches.keySet());
+	public List<String> availableCaches() {
+		return caches.keySet().stream().toList();
 	}
 
 	@Override
@@ -81,5 +80,11 @@ public class CacheStore implements ICacheStore {
 			+ ">, requested: <" + requestedDefinition.getKeyType().getName() + ", "
 			+ requestedDefinition.getValueType().getName() + ">");
 		}
+	}
+
+	@Override
+	public <K, V> Cache<K, V> getCache(
+			@NotNull CacheDefinition<K, V> cacheDefinition) {
+		return getOrCreateCache(cacheDefinition);
 	}
 }

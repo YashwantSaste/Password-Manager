@@ -160,4 +160,10 @@ public class Team implements ITeam, IFileStorableEntity {
 		}
 		return normalizedIds;
 	}
+
+	@Override
+	@NotNull
+	public Class<?> entityClassType() {
+		return ITeam.class;
+	}
 }
