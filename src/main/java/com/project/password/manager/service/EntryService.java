@@ -44,33 +44,39 @@ public class EntryService {
 
 	@NotNull
 	private final EntryDataRepository entryRepository;
+
 	@NotNull
 	private final DataRepository<IVault, String> vaultRepository;
+
 	@NotNull
 	private final IEncryptionService encryptionService;
+
 	@NotNull
 	private final ObjectMapper objectMapper;
+
 	@NotNull
 	private final IEntityEventSupport eventSupport;
-  @NotNull
+
+	@NotNull
 	private final VaultAccessService vaultAccessService;
+
 	@NotNull
 	private final Cache<String, VaultSearchIndex> searchIndexByVault = Caffeine.newBuilder()
-	.expireAfterAccess(20, TimeUnit.MINUTES).maximumSize(200).build();
+			.expireAfterAccess(20, TimeUnit.MINUTES).maximumSize(200).build();
 
 	public EntryService(@NotNull EntryDataRepository entryRepository,
-			@NotNull DataRepository<IVault, String> vaultRepository,
-			@NotNull IEncryptionService encryptionService) {
-		this(entryRepository, vaultRepository, encryptionService, new EntityEventSupport(
-				new EntitySnapshotter(ModelObjectMapperFactory.create()),
-				new EntityEventFactory(new EntityChangeDetector(ModelObjectMapperFactory.create())),
-				new EventDispatcher(List.of(new EventLoggingListener(new EventLogger())))));
+			@NotNull DataRepository<IVault, String> vaultRepository, @NotNull IEncryptionService encryptionService,
+			@NotNull VaultAccessService vaultAccessService) {
+		this(entryRepository, vaultRepository, encryptionService,
+				new EntityEventSupport(new EntitySnapshotter(ModelObjectMapperFactory.create()),
+						new EntityEventFactory(new EntityChangeDetector(ModelObjectMapperFactory.create())),
+						new EventDispatcher(List.of(new EventLoggingListener(new EventLogger())))),
+				vaultAccessService);
 	}
 
 	public EntryService(@NotNull EntryDataRepository entryRepository,
-			@NotNull DataRepository<IVault, String> vaultRepository,
-			@NotNull IEncryptionService encryptionService, @NotNull IEntityEventSupport eventSupport) {
-			@NotNull IEncryptionService encryptionService, @NotNull VaultAccessService vaultAccessService) {
+			@NotNull DataRepository<IVault, String> vaultRepository, @NotNull IEncryptionService encryptionService,
+			@NotNull IEntityEventSupport eventSupport, @NotNull VaultAccessService vaultAccessService) {
 		this.entryRepository = entryRepository;
 		this.vaultRepository = vaultRepository;
 		this.encryptionService = encryptionService;
@@ -80,20 +86,23 @@ public class EntryService {
 	}
 
 	@NotNull
-	public EntryView createEntry(@NotNull String userId, @NotNull String vaultId,
-			@NotNull EntryUpsertRequest request) {
+	public EntryView createEntry(@NotNull String userId, @NotNull String vaultId, @NotNull EntryUpsertRequest request) {
 		ValidationUtils.validate(request);
+
 		IVault vault = requireVaultAccessibleToUser(userId, vaultId);
 		String entryId = UUID.randomUUID().toString();
 		long now = System.currentTimeMillis();
+
 		EncryptedEntryRecord record = new EncryptedEntryRecord();
 		record.setId(entryId);
 		record.setVaultId(vaultId);
 		record.setCreatedAtEpochMs(now);
 		record.setUpdatedAtEpochMs(now);
 		record.setEncryptedPayload(encryptPayload(vault, toSecretPayload(request)));
+
 		entryRepository.save(record);
 		eventSupport.publishCreated(record);
+
 		EntryView view = toView(record, request);
 		upsertIndex(view);
 		return view;
@@ -111,22 +120,28 @@ public class EntryService {
 			@NotNull String entryReference) {
 		String normalizedReference = requireText(entryReference, "Entry reference");
 		List<EntryView> matchedEntries = new ArrayList<>();
+
 		for (String vaultId : vaultIds) {
 			IVault vault = requireVaultAccessibleToUser(userId, vaultId);
+
 			EncryptedEntryRecord record = entryRepository.findById(new EntryStorageKey(vaultId, normalizedReference));
+
 			if (record != null) {
 				matchedEntries.add(decryptRecord(vault, record));
 				continue;
 			}
+
 			for (EntryView entry : loadIndex(vault, vaultId).orderedEntries()) {
 				if (normalizedReference.equalsIgnoreCase(entry.getLabel())) {
 					matchedEntries.add(entry);
 				}
 			}
 		}
+
 		if (matchedEntries.isEmpty()) {
 			throw new EntityNotFoundException("The entry with reference " + normalizedReference + " does not exist");
 		}
+
 		matchedEntries.sort(ENTRY_RECENCY_COMPARATOR);
 		return Collections.unmodifiableList(matchedEntries);
 	}
@@ -143,23 +158,26 @@ public class EntryService {
 	public EntryView updateEntry(@NotNull String userId, @NotNull String vaultId, @NotNull String entryId,
 			@NotNull EntryUpsertRequest request) {
 		ValidationUtils.validate(request);
+
 		IVault vault = requireVaultAccessibleToUser(userId, vaultId);
 		EncryptedEntryRecord record = requireRecord(vaultId, entryId);
 		EncryptedEntryRecord beforeSnapshot = eventSupport.snapshot(record);
+
 		record.setUpdatedAtEpochMs(System.currentTimeMillis());
 		record.setEncryptedPayload(encryptPayload(vault, toSecretPayload(request)));
+
 		entryRepository.update(new EntryStorageKey(vaultId, entryId), record);
 		eventSupport.publishUpdated(beforeSnapshot, record);
+
 		EntryView view = toView(record, request);
 		upsertIndex(view);
 		return view;
 	}
 
 	public void deleteEntry(@NotNull String userId, @NotNull String vaultId, @NotNull String entryId) {
-		assertOwnedVault(userId, vaultId);
-		EncryptedEntryRecord record = requireRecord(vaultId, entryId);
 		requireVaultAccessibleToUser(userId, vaultId);
-		requireRecord(vaultId, entryId);
+		EncryptedEntryRecord record = requireRecord(vaultId, entryId);
+
 		entryRepository.delete(new EntryStorageKey(vaultId, entryId));
 		removeFromIndex(vaultId, entryId);
 		eventSupport.publishDeleted(record);
@@ -169,32 +187,40 @@ public class EntryService {
 	public List<EntryView> searchEntries(@NotNull String userId, @NotNull String vaultId, @NotNull String query) {
 		IVault vault = requireVaultAccessibleToUser(userId, vaultId);
 		String normalizedQuery = normalize(query);
+
 		if (normalizedQuery.isEmpty()) {
 			return Collections.emptyList();
 		}
+
 		VaultSearchIndex index = loadIndex(vault, vaultId);
 		List<String> queryTokens = tokenize(normalizedQuery);
+
 		Set<String> matchedIds = new HashSet<>();
 		for (String token : queryTokens) {
 			Set<String> tokenMatches = index.invertedIndex.get(token);
+
 			if (tokenMatches == null || tokenMatches.isEmpty()) {
 				return Collections.emptyList();
 			}
+
 			if (matchedIds.isEmpty()) {
 				matchedIds.addAll(tokenMatches);
 			} else {
 				matchedIds.retainAll(tokenMatches);
 			}
+
 			if (matchedIds.isEmpty()) {
 				return Collections.emptyList();
 			}
 		}
+
 		List<EntryView> results = new ArrayList<>();
 		for (EntryView entry : index.entriesById.values()) {
 			if (matchedIds.contains(entry.getId())) {
 				results.add(entry);
 			}
 		}
+
 		results.sort(ENTRY_RECENCY_COMPARATOR);
 		return results;
 	}
@@ -236,6 +262,7 @@ public class EntryService {
 		try {
 			String rawPayload = encryptionService.decrypt(record.getEncryptedPayload(), vault);
 			EntrySecretPayload payload = objectMapper.readValue(rawPayload, EntrySecretPayload.class);
+
 			EntryView view = new EntryView();
 			view.setId(record.getId());
 			view.setVaultId(record.getVaultId());
@@ -339,10 +366,9 @@ public class EntryService {
 
 	@NotNull
 	private static final Comparator<EntryView> ENTRY_RECENCY_COMPARATOR = Comparator
-	.comparingLong(EntryView::getUpdatedAtEpochMs)
-	.reversed()
-	.thenComparing(Comparator.comparingLong(EntryView::getCreatedAtEpochMs).reversed())
-	.thenComparing(EntryView::getId);
+			.comparingLong(EntryView::getUpdatedAtEpochMs).reversed()
+			.thenComparing(Comparator.comparingLong(EntryView::getCreatedAtEpochMs).reversed())
+			.thenComparing(EntryView::getId);
 
 	private static final class VaultSearchIndex {
 
@@ -352,6 +378,7 @@ public class EntryService {
 		private void add(@NotNull EntryView entry) {
 			remove(entry.getId());
 			entriesById.put(entry.getId(), entry);
+
 			for (String token : collectTokens(entry)) {
 				invertedIndex.computeIfAbsent(token, ignored -> new HashSet<>()).add(entry.getId());
 			}
@@ -362,6 +389,7 @@ public class EntryService {
 			if (existing == null) {
 				return;
 			}
+
 			for (String token : collectTokens(existing)) {
 				Set<String> ids = invertedIndex.get(token);
 				if (ids != null) {
@@ -381,25 +409,30 @@ public class EntryService {
 		@NotNull
 		private List<String> collectTokens(@NotNull EntryView entry) {
 			List<String> tokens = new ArrayList<>();
+
 			tokens.addAll(tokenize(normalize(entry.getLabel())));
+
 			if (entry.getUsername() != null) {
 				tokens.addAll(tokenize(normalize(entry.getUsername())));
 			}
+
 			if (entry.getLoginName() != null) {
 				tokens.addAll(tokenize(normalize(entry.getLoginName())));
 			}
+
 			if (entry.getUrl() != null) {
 				tokens.addAll(tokenize(normalize(entry.getUrl())));
 			}
+
 			for (TagValue tag : entry.getTags()) {
 				tokens.addAll(tokenize(normalize(tag.getValue())));
 			}
+
 			for (NoteValue note : entry.getNotes()) {
 				tokens.addAll(tokenize(normalize(note.getDescription())));
 			}
+
 			return tokens;
 		}
-
 	}
-
 }

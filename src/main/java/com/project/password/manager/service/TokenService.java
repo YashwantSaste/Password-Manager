@@ -11,6 +11,7 @@ import com.project.password.manager.auth.token.SessionTokenRequest;
 import com.project.password.manager.auth.token.SessionTokenStrategy;
 import com.project.password.manager.auth.token.SessionTokenStrategyRegistry;
 import com.project.password.manager.configuration.AuthenticationType;
+import com.project.password.manager.configuration.ICacheConfiguration;
 import com.project.password.manager.configuration.application.Configuration;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.database.DataRepositoryFactory;
@@ -21,8 +22,12 @@ import com.project.password.manager.util.ValidationUtils;
 
 public class TokenService {
 
+	private ICacheConfiguration cacheConfiguration = Configuration.getInstance().cacheConfiguration();
 	private final Cache<String, String> tokenCache = Caffeine.newBuilder()
-			.expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
+			.expireAfterWrite(cacheConfiguration.cacheExpiryDuration(), TimeUnit.MILLISECONDS)
+			.maximumSize(cacheConfiguration.maximumCacheSize())
+			.build();
+
 	@NotNull
 	private final DataRepository<IToken, String> tokenRepo;
 	@NotNull

@@ -24,8 +24,8 @@ import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
-import com.project.password.manager.model.database.sql.JpaToken;
 import com.project.password.manager.model.database.sql.JpaEncryptedEntryRecord;
+import com.project.password.manager.model.database.sql.JpaToken;
 import com.project.password.manager.model.database.sql.JpaUser;
 import com.project.password.manager.model.database.sql.JpaVault;
 import com.project.password.manager.model.entry.EncryptedEntryRecord;
@@ -51,7 +51,7 @@ public class DataRepositoryFactory {
 		File workspace = Workspace.getInstance().getRoot();
 		if (entityClass.equals(ITeam.class)) {
 			@SuppressWarnings("unchecked")
-			DataRepository<T, Id> repo = (DataRepository<T, Id>) new TeamRepository(workspace);
+			DataRepository<T, Id> repo = (DataRepository<T, Id>) new TeamRepository(workspace, transactionLogger);
 			return repo;
 		}
 		if (databaseConfiguration.databaseEnabled()

@@ -106,7 +106,6 @@ import com.project.password.manager.event.IEventPublisher;
 import com.project.password.manager.event.listener.EventLoggingListener;
 import com.project.password.manager.event.listener.IEventListener;
 import com.project.password.manager.logging.ITransactionLogger;
-import com.project.password.manager.logging.WorkspaceTransactionLogger;
 import com.project.password.manager.middleware.RequireAuthorization;
 import com.project.password.manager.middleware.TokenAuthorizationInterceptor;
 import com.project.password.manager.model.IMetadata;
@@ -221,13 +220,7 @@ public class GuiceModule extends AbstractModule {
 	@Provides
 	@Singleton
 	DataRepository<ITeam, String> provideTeamRepository(IConfiguration configuration) {
-		return new DataRepositoryFactory(configuration.databaseConfiguration()).getRepository(ITeam.class, String.class);
-	}
-
-	@Provides
-	@Singleton
-	UserService provideUserService(DataRepository<IUser, String> userRepository, TokenService tokenService) {
-		return new UserService(userRepository, tokenService);
+		return new DataRepositoryFactory(configuration).getRepository(ITeam.class, String.class);
 	}
 
 	@Provides
@@ -280,12 +273,6 @@ public class GuiceModule extends AbstractModule {
 	@Singleton
 	EventLogger provideEventLogger(ITransactionLogger transactionLogger) {
 		return new EventLogger(transactionLogger);
-  }
-  
-  @Provides
-	@Singleton
-	IEncryptionService provideEncryptionService(UserService userService, TeamService teamService) {
-		return new AesGcmEncryptionService(userService, teamService);
 	}
 
 	@Provides
@@ -316,8 +303,10 @@ public class GuiceModule extends AbstractModule {
 
 	@Provides
 	@Singleton
-	IEncryptionService provideEncryptionService(UserService userService) {
-		return new AesGcmEncryptionService(userService);
+	IEncryptionService provideEncryptionService(UserService userService, TeamService teamService) {
+		return new AesGcmEncryptionService(userService, teamService);
+	}
+
 	VaultAccessService provideVaultAccessService(DataRepository<IVault, String> vaultRepository, TeamService teamService) {
 		return new VaultAccessService(vaultRepository, teamService);
 	}
@@ -325,10 +314,12 @@ public class GuiceModule extends AbstractModule {
 	@Provides
 	@Singleton
 	VaultService provideVaultService(DataRepository<IUser, String> userRepository,
-			DataRepository<IVault, String> vaultRepository, IEncryptionService encryptionService,
+			DataRepository<ITeam, String> teamRepository, DataRepository<IVault, String> vaultRepository,
+			IEncryptionService encryptionService,
 			IEntityEventSupport eventSupport) {
-		return new VaultService(userRepository, vaultRepository, encryptionService, ModelObjectMapperFactory.create(),eventSupport);
-			}
+		return new VaultService(userRepository, teamRepository, vaultRepository, encryptionService,
+				ModelObjectMapperFactory.create());
+	}
 
 	@Provides
 	@Singleton
