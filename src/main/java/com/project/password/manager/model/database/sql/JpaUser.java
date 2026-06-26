@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
@@ -157,5 +158,18 @@ public class JpaUser implements IUser {
 	@Override
 	public void setRoles(@NotNull List<UserRole> roles) {
 		this.roles = new ArrayList<>(roles);
+	}
+
+	@Override
+	@NotNull
+	public List<ICustomRole> getCustomRoles() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setCustomRoles(@NotNull List<ICustomRole> customRoles) {
+		// TODO Auto-generated method stub
+
 	}
 }

@@ -3,6 +3,7 @@ package com.project.password.manager;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,15 +31,8 @@ public class ModelObjectMapperFactoryTest extends TestCase {
 		metadata.setVersion("1.0");
 		metadata.setStatus(Status.ACTIVE);
 
-		User user = new User(
-				"user-1",
-				"alice",
-				"verifier",
-				"salt",
-				"vault-1",
-				List.of(),
-				List.of(UserRole.USER),
-				metadata);
+		User user = new User("user-1", "alice", "verifier", "salt", "vault-1", new ArrayList<>(),
+				List.of(UserRole.USER), List.of(), metadata);
 
 		String json = mapper.writeValueAsString(user);
 
@@ -89,6 +83,7 @@ public class ModelObjectMapperFactoryTest extends TestCase {
 		metadata.setVersion("1.0");
 		metadata.setStatus(Status.ACTIVE);
 
-		return new User("user-1", "alice", "verifier", "salt", "vault-1", List.of(), List.of(UserRole.USER), metadata);
+		return new User("user-1", "alice", "verifier", "salt", "vault-1", List.of(), List.of(UserRole.USER), List.of(),
+				metadata);
 	}
 }

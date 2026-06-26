@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
 import com.project.password.manager.configuration.application.Workspace;
+import com.project.password.manager.database.file.storage.CustomRoleRepository;
 import com.project.password.manager.database.file.storage.FileEntryRepository;
 import com.project.password.manager.database.file.storage.TeamRepository;
 import com.project.password.manager.database.file.storage.TokenRepository;
@@ -19,6 +20,7 @@ import com.project.password.manager.database.postgres.hibernate.HibernateEntryRe
 import com.project.password.manager.database.postgres.hibernate.HibernateRepository;
 import com.project.password.manager.logging.ITransactionLogger;
 import com.project.password.manager.logging.WorkspaceTransactionLogger;
+import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.IEntity;
 import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IToken;
@@ -78,6 +80,11 @@ public class DataRepositoryFactory {
 		if (entityClass.equals(EncryptedEntryRecord.class)) {
 			@SuppressWarnings("unchecked")
 			DataRepository<T, Id> repo = (DataRepository<T, Id>) getEntryRepository();
+			return repo;
+		}
+		if (entityClass.equals(ICustomRole.class)) {
+			@SuppressWarnings("unchecked")
+			DataRepository<T, Id> repo = (DataRepository<T, Id>) new CustomRoleRepository(workspace, transactionLogger);
 			return repo;
 		}
 		throw new IllegalArgumentException("No repository available for entity: " + entityClass.getName());

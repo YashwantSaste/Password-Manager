@@ -2,6 +2,7 @@ package com.project.password.manager.guice;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.IEntity;
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.ITeam;
@@ -50,6 +51,11 @@ public class PlatformEntityProvider {
 	@NotNull
 	public ITeam getTeam() {
 		return getInstance(ITeam.class);
+	}
+
+	@NotNull
+	public ICustomRole getCustomRole() {
+		return getInstance(ICustomRole.class);
 	}
 
 	@NotNull

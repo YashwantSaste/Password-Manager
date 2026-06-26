@@ -17,4 +17,7 @@ public interface IAppConfiguration {
 
 	boolean includeDatabaseTransactions();
 
+	boolean enableCustomPermissions();
+
+	boolean enableCustomAppRoles();
 }

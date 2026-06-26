@@ -25,7 +25,7 @@ public class MetadataListenerTest extends TestCase {
 			UserRepository repository = new UserRepository(workspace.toFile(),
 					new WorkspaceTransactionLogger(Configuration.getInstance().appConfiguration(), workspace.toFile()));
 			User user = new User("user-1", "alice", "verifier", "salt", "vault-1", new ArrayList<>(),
-					List.of(UserRole.USER), new Metadata());
+					List.of(UserRole.USER), List.of(), new Metadata());
 
 			user.metadata().setCreatedAt(null);
 			user.metadata().setUpdatedAt(null);
@@ -53,7 +53,7 @@ public class MetadataListenerTest extends TestCase {
 			UserRepository repository = new UserRepository(workspace.toFile(),
 					new WorkspaceTransactionLogger(Configuration.getInstance().appConfiguration(), workspace.toFile()));
 			User user = new User("user-1", "alice", "verifier", "salt", "vault-1", new ArrayList<>(),
-					List.of(UserRole.USER), new Metadata());
+					List.of(UserRole.USER), List.of(), new Metadata());
 			LocalDateTime originalCreatedAt = LocalDateTime.of(2026, 4, 27, 12, 0, 0);
 			LocalDateTime originalUpdatedAt = LocalDateTime.of(2026, 4, 27, 12, 1, 0);
 
@@ -81,14 +81,12 @@ public class MetadataListenerTest extends TestCase {
 		if (!Files.exists(path)) {
 			return;
 		}
-		Files.walk(path)
-				.sorted((left, right) -> right.compareTo(left))
-				.forEach(currentPath -> {
-					try {
-						Files.deleteIfExists(currentPath);
-					} catch (Exception ex) {
-						throw new RuntimeException(ex);
-					}
-				});
+		Files.walk(path).sorted((left, right) -> right.compareTo(left)).forEach(currentPath -> {
+			try {
+				Files.deleteIfExists(currentPath);
+			} catch (Exception ex) {
+				throw new RuntimeException(ex);
+			}
+		});
 	}
 }

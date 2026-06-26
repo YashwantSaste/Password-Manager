@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.project.password.manager.configuration.application.Configuration;
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.Status;
 
@@ -12,13 +13,12 @@ public class Metadata implements IMetadata {
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private LocalDateTime lastAccessedAt;
-	private String version;
+	private String version = Configuration.getInstance().appConfiguration().version();
 	private Status status;
 
 	public Metadata() {
-		this.version = "1.0";
+		// for jackson
 	}
-
 
 	@Override
 	@NotNull

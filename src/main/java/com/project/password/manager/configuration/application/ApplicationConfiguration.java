@@ -41,4 +41,14 @@ public class ApplicationConfiguration implements IAppConfiguration {
 	public boolean includeDatabaseTransactions() {
 		return reader.readPropertyAsBoolean(ApplicationProperties.PROPERTY_APP_TRANSACTION_LOG_INCLUDE_DATABASE, true);
 	}
+
+	@Override
+	public boolean enableCustomPermissions() {
+		return reader.readPropertyAsBoolean(ApplicationProperties.PROPERTY_APP_CUSTOM_PERMISSIONS_ENABLED, false);
+	}
+
+	@Override
+	public boolean enableCustomAppRoles() {
+		return reader.readPropertyAsBoolean(ApplicationProperties.PROPERTY_APP_CUSTOM_ROLES_ENABLED, false);
+	}
 }

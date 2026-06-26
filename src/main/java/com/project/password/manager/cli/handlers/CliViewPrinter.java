@@ -6,10 +6,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.cli.runtime.CliTheme;
+import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IUser;
-import com.project.password.manager.model.UserRole;
 import com.project.password.manager.model.IVault;
+import com.project.password.manager.model.UserRole;
 import com.project.password.manager.model.VaultScope;
 import com.project.password.manager.model.entry.EntryView;
 import com.project.password.manager.model.entry.NoteValue;
@@ -24,11 +25,8 @@ public final class CliViewPrinter {
 
 	@NotNull
 	public static String formatUser(@NotNull IUser user) {
-		return section(
-				CliTheme.badge("user") + "  " + CliTheme.title(user.getName()),
-				field("user", user.getName()),
-				field("roles", joinRoles(user.getRoles())),
-				field("vaults", String.valueOf(user.getVaults().size())),
+		return section(CliTheme.badge("user") + "  " + CliTheme.title(user.getName()), field("user", user.getName()),
+				field("roles", joinRoles(user.getRoles())), field("vaults", String.valueOf(user.getVaults().size())),
 				field("default vault", valueOrDash(user.getDefaultVaultId())));
 	}
 
@@ -39,12 +37,10 @@ public final class CliViewPrinter {
 
 	@NotNull
 	public static String formatVault(@NotNull IVault vault, boolean showIds) {
-		String content = section(
-				CliTheme.badge("vault") + "  " + CliTheme.title(vault.getName()),
+		String content = section(CliTheme.badge("vault") + "  " + CliTheme.title(vault.getName()),
 				field(vault.getScope() == VaultScope.TEAM ? "team" : "owner", vault.getScopeId()));
 		if (showIds) {
-			content = section(
-					CliTheme.badge("vault") + "  " + CliTheme.title(vault.getName()),
+			content = section(CliTheme.badge("vault") + "  " + CliTheme.title(vault.getName()),
 					field(vault.getScope() == VaultScope.TEAM ? "team" : "owner", vault.getScopeId()),
 					field("internal id", vault.getId()));
 		}
@@ -70,12 +66,27 @@ public final class CliViewPrinter {
 
 	@NotNull
 	public static String formatTeam(@NotNull ITeam team) {
-		return section(
-				CliTheme.badge("team") + "  " + CliTheme.title(team.name()),
-				field("team", team.name()),
-				field("owners", joinValues(team.owners())),
-				field("members", joinValues(team.memebers())),
+		return section(CliTheme.badge("team") + "  " + CliTheme.title(team.name()), field("team", team.name()),
+				field("owners", joinValues(team.owners())), field("members", joinValues(team.memebers())),
 				field("default vault", valueOrDash(team.getDefaultVaultId())));
+	}
+
+	@NotNull
+	public static String formatRoles(@NotNull List<ICustomRole> roles) {
+		if (roles.isEmpty()) {
+			return CliTheme.muted("No roles found.");
+		}
+		StringBuilder builder = new StringBuilder();
+		for (ICustomRole role : roles) {
+			appendSection(builder, formatRole(role));
+		}
+		return builder.toString();
+	}
+
+	@NotNull
+	public static String formatRole(@NotNull ICustomRole role) {
+		return section(CliTheme.badge("role") + "  " + CliTheme.title(role.roleName()), field("role", role.roleName()),
+				field("roleId", valueOrDash(role.getId())));
 	}
 
 	@NotNull
@@ -97,29 +108,21 @@ public final class CliViewPrinter {
 
 	@NotNull
 	public static String formatEntry(@NotNull EntryView entry, boolean showIds) {
-		StringBuilder builder = new StringBuilder(section(
-				CliTheme.badge("entry") + "  " + CliTheme.title(entry.getLabel()),
-				field("password", entry.getPassword()),
-				field("username", valueOrDash(entry.getUsername())),
-				field("login", valueOrDash(entry.getLoginName())),
-				field("url", valueOrDash(entry.getUrl())),
-				field("tags", joinTags(entry.getTags())),
-				field("notes", joinNotes(entry.getNotes())),
-				field("created", String.valueOf(entry.getCreatedAtEpochMs())),
-				field("updated", String.valueOf(entry.getUpdatedAtEpochMs()))));
+		StringBuilder builder = new StringBuilder(
+				section(CliTheme.badge("entry") + "  " + CliTheme.title(entry.getLabel()),
+						field("password", entry.getPassword()), field("username", valueOrDash(entry.getUsername())),
+						field("login", valueOrDash(entry.getLoginName())), field("url", valueOrDash(entry.getUrl())),
+						field("tags", joinTags(entry.getTags())), field("notes", joinNotes(entry.getNotes())),
+						field("created", String.valueOf(entry.getCreatedAtEpochMs())),
+						field("updated", String.valueOf(entry.getUpdatedAtEpochMs()))));
 		if (showIds) {
 			builder.setLength(0);
-			builder.append(section(
-					CliTheme.badge("entry") + "  " + CliTheme.title(entry.getLabel()),
-					field("password", entry.getPassword()),
-					field("username", valueOrDash(entry.getUsername())),
-					field("login", valueOrDash(entry.getLoginName())),
-					field("url", valueOrDash(entry.getUrl())),
-					field("tags", joinTags(entry.getTags())),
-					field("notes", joinNotes(entry.getNotes())),
+			builder.append(section(CliTheme.badge("entry") + "  " + CliTheme.title(entry.getLabel()),
+					field("password", entry.getPassword()), field("username", valueOrDash(entry.getUsername())),
+					field("login", valueOrDash(entry.getLoginName())), field("url", valueOrDash(entry.getUrl())),
+					field("tags", joinTags(entry.getTags())), field("notes", joinNotes(entry.getNotes())),
 					field("created", String.valueOf(entry.getCreatedAtEpochMs())),
-					field("updated", String.valueOf(entry.getUpdatedAtEpochMs())),
-					field("entry id", entry.getId())));
+					field("updated", String.valueOf(entry.getUpdatedAtEpochMs())), field("entry id", entry.getId())));
 		}
 		return builder.toString();
 	}

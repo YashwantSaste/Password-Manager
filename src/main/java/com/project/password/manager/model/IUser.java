@@ -33,6 +33,9 @@ public interface IUser extends HasMetadata {
 	@NotNull
 	List<UserRole> getRoles();
 
+	@NotNull
+	List<ICustomRole> getCustomRoles();
+
 	void setId(@NotNull String id);
 
 	void setName(@NotNull String name);
@@ -47,4 +50,5 @@ public interface IUser extends HasMetadata {
 
 	void setRoles(@NotNull List<UserRole> roles);
 
+	void setCustomRoles(@NotNull List<ICustomRole> customRoles);
 }

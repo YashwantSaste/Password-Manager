@@ -1,9 +1,9 @@
-package com.project.password.manager.event;
+package com.project.password.manager.event.listener;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.cache.UserCache;
-import com.project.password.manager.event.listener.IEventListener;
+import com.project.password.manager.event.IEvent;
 import com.project.password.manager.model.IEntity;
 import com.project.password.manager.model.IUser;
 

@@ -6,10 +6,11 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IUser;
-import com.project.password.manager.model.UserRole;
 import com.project.password.manager.model.IVault;
+import com.project.password.manager.model.UserRole;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements IUser, IFileStorableEntity {
@@ -22,13 +23,14 @@ public class User implements IUser, IFileStorableEntity {
 	private List<IVault> vaults;
 	private List<UserRole> roles;
 	private IMetadata metadata = new Metadata();
+	private List<ICustomRole> customRoles;
 
 	public User() {
 		// for jackson
 	}
 
-	public User(String id, String name, String authVerifier, String keySalt, String defaultVaultId,
-			List<IVault> vaults, List<UserRole> roles, IMetadata metadata) {
+	public User(String id, String name, String authVerifier, String keySalt, String defaultVaultId, List<IVault> vaults,
+			List<UserRole> roles, List<ICustomRole> customRoles, IMetadata metadata) {
 		this.id = id;
 		this.name = name;
 		this.authVerifier = authVerifier;
@@ -140,5 +142,19 @@ public class User implements IUser, IFileStorableEntity {
 	@Override
 	public void setMetadata(@NotNull IMetadata metadata) {
 		this.metadata = metadata != null ? metadata : new Metadata();
+	}
+
+	@Override
+	@NotNull
+	public List<ICustomRole> getCustomRoles() {
+		if (customRoles == null) {
+			return new ArrayList<>();
+		}
+		return customRoles;
+	}
+
+	@Override
+	public void setCustomRoles(@NotNull List<ICustomRole> customRoles) {
+		this.customRoles = customRoles;
 	}
 }

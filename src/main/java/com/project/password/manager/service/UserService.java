@@ -9,18 +9,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.database.DataRepository;
-import com.project.password.manager.event.IEntityEventSupport;
-import com.project.password.manager.event.EntityEventSupport;
-import com.project.password.manager.event.EntityEventFactory;
 import com.project.password.manager.event.EntityChangeDetector;
+import com.project.password.manager.event.EntityEventFactory;
+import com.project.password.manager.event.EntityEventSupport;
 import com.project.password.manager.event.EntitySnapshotter;
 import com.project.password.manager.event.EventDispatcher;
-import com.project.password.manager.util.ModelObjectMapperFactory;
+import com.project.password.manager.event.EventLogger;
+import com.project.password.manager.event.IEntityEventSupport;
+import com.project.password.manager.event.listener.EventLoggingListener;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.UserRole;
 import com.project.password.manager.util.Logger;
-import com.project.password.manager.event.EventLogger;
-import com.project.password.manager.event.listener.EventLoggingListener;
+import com.project.password.manager.util.ModelObjectMapperFactory;
 
 public class UserService {
 
@@ -32,26 +32,30 @@ public class UserService {
 	private final TokenService tokenService;
 	@NotNull
 	private final IEntityEventSupport eventSupport;
+	@NotNull
+	private final CustomRoleService customRoleService;
 
 	public UserService(@NotNull DataRepository<IUser, String> userRepository) {
-		this(userRepository, null, new EntityEventSupport(
-				new EntitySnapshotter(ModelObjectMapperFactory.create()),
-				new EntityEventFactory(new EntityChangeDetector(ModelObjectMapperFactory.create())),
-				new EventDispatcher(List.of(new EventLoggingListener(new EventLogger())))));
-	}
-
-	public UserService(@NotNull DataRepository<IUser, String> userRepository, @Nullable TokenService tokenService) {
-		this(userRepository, tokenService, new EntityEventSupport(
-				new EntitySnapshotter(ModelObjectMapperFactory.create()),
-				new EntityEventFactory(new EntityChangeDetector(ModelObjectMapperFactory.create())),
-				new EventDispatcher(List.of(new EventLoggingListener(new EventLogger())))));
+		this(userRepository, null, null,
+				new EntityEventSupport(new EntitySnapshotter(ModelObjectMapperFactory.create()),
+						new EntityEventFactory(new EntityChangeDetector(ModelObjectMapperFactory.create())),
+						new EventDispatcher(List.of(new EventLoggingListener(new EventLogger())))));
 	}
 
 	public UserService(@NotNull DataRepository<IUser, String> userRepository, @Nullable TokenService tokenService,
-			@NotNull IEntityEventSupport eventSupport) {
+			@NotNull CustomRoleService customRoleService) {
+		this(userRepository, tokenService, customRoleService,
+				new EntityEventSupport(new EntitySnapshotter(ModelObjectMapperFactory.create()),
+						new EntityEventFactory(new EntityChangeDetector(ModelObjectMapperFactory.create())),
+						new EventDispatcher(List.of(new EventLoggingListener(new EventLogger())))));
+	}
+
+	public UserService(@NotNull DataRepository<IUser, String> userRepository, @Nullable TokenService tokenService,
+			@NotNull CustomRoleService customRoleService, @NotNull IEntityEventSupport eventSupport) {
 		this.userRepository = userRepository;
 		this.tokenService = tokenService;
 		this.eventSupport = eventSupport;
+		this.customRoleService = customRoleService;
 	}
 
 	@Nullable
@@ -82,7 +86,8 @@ public class UserService {
 		}
 		updatedRoles.add(role);
 		persistRoles(target, updatedRoles, beforeSnapshot);
-		log.info("Role granted by user [" + actor.getId() + "] to user [" + target.getId() + "] for role [" + role + "]");
+		log.info("Role granted by user [" + actor.getId() + "] to user [" + target.getId() + "] for role [" + role
+				+ "]");
 		return true;
 	}
 
@@ -101,7 +106,8 @@ public class UserService {
 			// Remove duplicate assignments if older data introduced them.
 		}
 		persistRoles(target, updatedRoles, beforeSnapshot);
-		log.info("Role revoked by user [" + actor.getId() + "] from user [" + target.getId() + "] for role [" + role + "]");
+		log.info("Role revoked by user [" + actor.getId() + "] from user [" + target.getId() + "] for role [" + role
+				+ "]");
 		return true;
 	}
 

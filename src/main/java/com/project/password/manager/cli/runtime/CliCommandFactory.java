@@ -14,7 +14,7 @@ public class CliCommandFactory implements CommandLine.IFactory {
 	private final CommandHandlerBinder handlerBinder;
 
 	public CliCommandFactory(@NotNull Injector injector, @NotNull CommandHandlerRegistry handlerRegistry) {
-		this.handlerBinder = new CommandHandlerBinder(injector, handlerRegistry,
+		handlerBinder = new CommandHandlerBinder(injector, handlerRegistry,
 				injector.getInstance(CommandHandlerInvoker.class));
 	}
 

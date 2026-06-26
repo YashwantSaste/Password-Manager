@@ -26,6 +26,9 @@ import com.project.password.manager.cli.commands.auth.WhoAmICommand;
 import com.project.password.manager.cli.commands.config.ConfigGetCommand;
 import com.project.password.manager.cli.commands.config.ConfigListCommand;
 import com.project.password.manager.cli.commands.config.ConfigSetCommand;
+import com.project.password.manager.cli.commands.customization.role.CustomRoleCreateCommand;
+import com.project.password.manager.cli.commands.customization.role.CustomRoleGetCommand;
+import com.project.password.manager.cli.commands.customization.role.CustomRoleListCommand;
 import com.project.password.manager.cli.commands.entry.EntryCreateCommand;
 import com.project.password.manager.cli.commands.entry.EntryDeleteCommand;
 import com.project.password.manager.cli.commands.entry.EntryGetCommand;
@@ -55,6 +58,9 @@ import com.project.password.manager.cli.handlers.auth.WhoAmICommandHandler;
 import com.project.password.manager.cli.handlers.config.ConfigGetCommandHandler;
 import com.project.password.manager.cli.handlers.config.ConfigListCommandHandler;
 import com.project.password.manager.cli.handlers.config.ConfigSetCommandHandler;
+import com.project.password.manager.cli.handlers.customization.role.CustomRoleCreateCommandHandler;
+import com.project.password.manager.cli.handlers.customization.role.CustomRoleGetCommandHandler;
+import com.project.password.manager.cli.handlers.customization.role.CustomRoleListCommandHandler;
 import com.project.password.manager.cli.handlers.entry.EntryCreateCommandHandler;
 import com.project.password.manager.cli.handlers.entry.EntryDeleteCommandHandler;
 import com.project.password.manager.cli.handlers.entry.EntryGetCommandHandler;
@@ -111,6 +117,8 @@ import com.project.password.manager.logging.ITransactionLogger;
 import com.project.password.manager.logging.WorkspaceTransactionLogger;
 import com.project.password.manager.middleware.RequireAuthorization;
 import com.project.password.manager.middleware.TokenAuthorizationInterceptor;
+import com.project.password.manager.model.CustomRole;
+import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IToken;
@@ -125,7 +133,9 @@ import com.project.password.manager.model.database.nosql.UserDocument;
 import com.project.password.manager.model.database.sql.JpaToken;
 import com.project.password.manager.model.database.sql.JpaUser;
 import com.project.password.manager.model.database.sql.JpaVault;
+import com.project.password.manager.model.entry.EncryptedEntryRecord;
 import com.project.password.manager.service.AuthService;
+import com.project.password.manager.service.CustomRoleService;
 import com.project.password.manager.service.EntryService;
 import com.project.password.manager.service.OAuth2LoginService;
 import com.project.password.manager.service.TeamService;
@@ -153,6 +163,7 @@ public class GuiceModule extends AbstractModule {
 			bind(IMetadata.class).to(Metadata.class);
 			bind(IToken.class).to(Token.class);
 			bind(ITeam.class).to(Team.class);
+			bind(ICustomRole.class).to(CustomRole.class);
 		} else {
 			switch (configuration.databaseConfiguration().type()) {
 			case IDatabaseConfiguration.DATABASE_TYPE_SQL: {
@@ -215,15 +226,20 @@ public class GuiceModule extends AbstractModule {
 	@Provides
 	@Singleton
 	EntryDataRepository provideEntryRepository(IConfiguration configuration) {
-		return (EntryDataRepository) new DataRepositoryFactory(configuration)
-				.getRepository(com.project.password.manager.model.entry.EncryptedEntryRecord.class,
-						EntryStorageKey.class);
+		return (EntryDataRepository) new DataRepositoryFactory(configuration).getRepository(EncryptedEntryRecord.class,
+				EntryStorageKey.class);
 	}
 
 	@Provides
 	@Singleton
 	DataRepository<ITeam, String> provideTeamRepository(IConfiguration configuration) {
 		return new DataRepositoryFactory(configuration).getRepository(ITeam.class, String.class);
+	}
+
+	@Provides
+	@Singleton
+	DataRepository<ICustomRole, String> provideCustomRoleRepository(IConfiguration configuration) {
+		return new DataRepositoryFactory(configuration).getRepository(ICustomRole.class, String.class);
 	}
 
 	@Provides
@@ -300,8 +316,8 @@ public class GuiceModule extends AbstractModule {
 	@Provides
 	@Singleton
 	UserService provideUserService(DataRepository<IUser, String> userRepository, TokenService tokenService,
-			IEntityEventSupport eventSupport) {
-		return new UserService(userRepository, tokenService, eventSupport);
+			CustomRoleService customRoleService, IEntityEventSupport eventSupport) {
+		return new UserService(userRepository, tokenService, customRoleService, eventSupport);
 	}
 
 	@Provides
@@ -310,7 +326,8 @@ public class GuiceModule extends AbstractModule {
 		return new AesGcmEncryptionService(userService, teamService);
 	}
 
-	VaultAccessService provideVaultAccessService(DataRepository<IVault, String> vaultRepository, TeamService teamService) {
+	VaultAccessService provideVaultAccessService(DataRepository<IVault, String> vaultRepository,
+			TeamService teamService) {
 		return new VaultAccessService(vaultRepository, teamService);
 	}
 
@@ -318,16 +335,16 @@ public class GuiceModule extends AbstractModule {
 	@Singleton
 	VaultService provideVaultService(DataRepository<IUser, String> userRepository,
 			DataRepository<ITeam, String> teamRepository, DataRepository<IVault, String> vaultRepository,
-			IEncryptionService encryptionService,
-			IEntityEventSupport eventSupport) {
+			IEncryptionService encryptionService, IEntityEventSupport eventSupport) {
 		return new VaultService(userRepository, teamRepository, vaultRepository, encryptionService,
 				ModelObjectMapperFactory.create());
 	}
 
 	@Provides
 	@Singleton
-	EntryService provideEntryService(EntryDataRepository entryRepository, DataRepository<IVault, String> vaultRepository,
-			IEncryptionService encryptionService, VaultAccessService vaultAccessService) {
+	EntryService provideEntryService(EntryDataRepository entryRepository,
+			DataRepository<IVault, String> vaultRepository, IEncryptionService encryptionService,
+			VaultAccessService vaultAccessService) {
 		return new EntryService(entryRepository, vaultRepository, encryptionService, vaultAccessService);
 	}
 
@@ -359,6 +376,12 @@ public class GuiceModule extends AbstractModule {
 
 	@Provides
 	@Singleton
+	CustomRoleService provideCustomRoleService(DataRepository<ICustomRole, String> customRoleRepository) {
+		return new CustomRoleService(customRoleRepository);
+	}
+
+	@Provides
+	@Singleton
 	CommandHandlerInvoker provideCommandHandlerInvoker() {
 		return new CommandHandlerInvoker();
 	}
@@ -366,8 +389,7 @@ public class GuiceModule extends AbstractModule {
 	@Provides
 	@Singleton
 	CommandHandlerRegistry provideCommandHandlerRegistry() {
-		return new CommandHandlerRegistry()
-				.register(ConfigListCommand.class, ConfigListCommandHandler.class)
+		return new CommandHandlerRegistry().register(ConfigListCommand.class, ConfigListCommandHandler.class)
 				.register(ConfigGetCommand.class, ConfigGetCommandHandler.class)
 				.register(ConfigSetCommand.class, ConfigSetCommandHandler.class)
 				.register(LoginCommand.class, LoginCommandHandler.class)
@@ -395,6 +417,9 @@ public class GuiceModule extends AbstractModule {
 				.register(EntryCreateCommand.class, EntryCreateCommandHandler.class)
 				.register(EntryUpdateCommand.class, EntryUpdateCommandHandler.class)
 				.register(EntryDeleteCommand.class, EntryDeleteCommandHandler.class)
-				.register(EntrySearchCommand.class, EntrySearchCommandHandler.class);
+				.register(EntrySearchCommand.class, EntrySearchCommandHandler.class)
+				.register(CustomRoleListCommand.class, CustomRoleListCommandHandler.class)
+				.register(CustomRoleGetCommand.class, CustomRoleGetCommandHandler.class)
+				.register(CustomRoleCreateCommand.class, CustomRoleCreateCommandHandler.class);
 	}
 }

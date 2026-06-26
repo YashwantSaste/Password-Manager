@@ -9,8 +9,7 @@ public final class PropertyUtils {
 	}
 
 	@NotNull
-	public static String requireProperty(@Nullable String value, @NotNull String propertyName,
-			@NotNull String owner) {
+	public static String requireProperty(@Nullable String value, @NotNull String propertyName, @NotNull String owner) {
 		try {
 			return ValidationUtils.requireText(value,
 					owner + " configuration is missing required property: " + propertyName);
