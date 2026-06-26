@@ -376,8 +376,9 @@ public class GuiceModule extends AbstractModule {
 
 	@Provides
 	@Singleton
-	CustomRoleService provideCustomRoleService(DataRepository<ICustomRole, String> customRoleRepository) {
-		return new CustomRoleService(customRoleRepository);
+	CustomRoleService provideCustomRoleService(DataRepository<ICustomRole, String> customRoleRepository,
+			DataRepository<IUser, String> userDataRepository) {
+		return new CustomRoleService(customRoleRepository, userDataRepository);
 	}
 
 	@Provides

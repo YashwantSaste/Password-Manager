@@ -2,10 +2,14 @@ package com.project.password.manager.model;
 
 import org.jetbrains.annotations.NotNull;
 
-public class CustomRole implements ICustomRole {
+import com.project.password.manager.model.database.file.storage.IFileStorableEntity;
+import com.project.password.manager.permission.ICrudPermission;
+
+public class CustomRole implements IFileStorableEntity, ICustomRole {
 
 	private String id;
 	private String roleName;
+	private ICrudPermission can;
 
 	public CustomRole() {
 		// Required by Jackson
@@ -47,7 +51,18 @@ public class CustomRole implements ICustomRole {
 
 	@Override
 	public void setId(@NotNull String roleId) {
-		this.id = roleId;
+		id = roleId;
+	}
+
+	@Override
+	@NotNull
+	public ICrudPermission can() {
+		return can;
+	}
+
+	@Override
+	public void setPermissions(@NotNull ICrudPermission can) {
+		this.can = can;
 	}
 
 }

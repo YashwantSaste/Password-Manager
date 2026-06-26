@@ -1,4 +1,4 @@
-package com.project.password.manager.permission;
+package com.project.password.manager.permission.management;
 
 import java.util.Set;
 
@@ -6,16 +6,14 @@ import org.jetbrains.annotations.NotNull;
 
 import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.UserRole;
+import com.project.password.manager.permission.IBasePermission;
+import com.project.password.manager.permission.IPermission;
+import com.project.password.manager.permission.IPermissionBuilder;
 
-public class BasePermission implements IBasePermission {
-
-	public BasePermission() {
-		//
-	}
+public class Permission implements IPermission {
 
 	@Override
-	@NotNull
-	public Set<UserRole> allowedUserRoles() {
+	public @NotNull Set<UserRole> allowedUserRoles() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -30,31 +28,6 @@ public class BasePermission implements IBasePermission {
 	public IBasePermission can() {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public boolean read() {
-
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean delete() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean modify() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean create() {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override

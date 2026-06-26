@@ -6,7 +6,7 @@ public interface IBasePermission extends IPermission {
 
 	boolean delete();
 
-	boolean edit();
+	boolean modify();
 
 	boolean create();
 }
