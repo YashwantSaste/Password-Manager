@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.configuration.application.Configuration;
 import com.project.password.manager.database.DataRepository;
@@ -20,6 +20,7 @@ import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.Status;
 import com.project.password.manager.model.UserRole;
 import com.project.password.manager.util.KeyGenerator;
+import com.project.password.manager.validation.utlis.UserValidationUtils;
 
 public class TeamService {
 
@@ -111,9 +112,7 @@ public class TeamService {
 	}
 
 	private void assertUserCanCreateTeam(@NotNull IUser user) {
-		if (userService.getUser(user.getId()) == null) {
-			throw new IlleagalAccessException("User does not exist.");
-		}
+		UserValidationUtils.requireUser(user.getId());
 		boolean onlyAdminCanCreate = Configuration.getInstance().teamConfiguration().onlyAdminCanCreate();
 		if (onlyAdminCanCreate && !user.getRoles().contains(UserRole.ADMIN)) {
 			throw new IlleagalAccessException("Only Admin is allowed to create a Team.");

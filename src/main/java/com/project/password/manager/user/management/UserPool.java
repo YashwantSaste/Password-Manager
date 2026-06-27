@@ -2,7 +2,7 @@ package com.project.password.manager.user.management;
 
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.cache.UserCache;
 import com.project.password.manager.model.IUser;

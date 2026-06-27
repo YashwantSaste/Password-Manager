@@ -3,7 +3,7 @@ package com.project.password.manager.model.database.sql;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.IMetadata;

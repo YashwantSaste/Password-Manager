@@ -3,7 +3,7 @@ package com.project.password.manager.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public class VaultPayload {
 

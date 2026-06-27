@@ -1,6 +1,6 @@
 package com.project.password.manager.event;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.password.manager.model.IEntity;

@@ -1,6 +1,6 @@
 package com.project.password.manager.argon;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.configuration.IArgon2Configuration;
 

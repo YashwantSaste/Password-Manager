@@ -1,7 +1,7 @@
 package com.project.password.manager.util;
 
 import org.apache.logging.log4j.Level;
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class Logger {

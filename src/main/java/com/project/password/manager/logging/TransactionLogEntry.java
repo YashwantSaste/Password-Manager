@@ -2,7 +2,7 @@ package com.project.password.manager.logging;
 
 import java.time.Instant;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TransactionLogEntry {

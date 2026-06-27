@@ -3,7 +3,7 @@ package com.project.password.manager.cli.handlers.theme;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.google.inject.Inject;
 import com.project.password.manager.cli.commands.theme.ThemeSetCommand;

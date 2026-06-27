@@ -1,6 +1,6 @@
 package com.project.password.manager.database;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

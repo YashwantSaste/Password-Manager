@@ -1,6 +1,6 @@
 package com.project.password.manager.exceptions;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public class UnauthorizedSessionException extends RuntimeException {
 

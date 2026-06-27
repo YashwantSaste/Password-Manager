@@ -1,6 +1,6 @@
 package com.project.password.manager.guice;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.IEntity;
@@ -8,6 +8,7 @@ import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
+import com.project.password.manager.model.IUserGroup;
 import com.project.password.manager.model.IVault;
 
 public class PlatformEntityProvider {
@@ -56,6 +57,11 @@ public class PlatformEntityProvider {
 	@NotNull
 	public ICustomRole getCustomRole() {
 		return getInstance(ICustomRole.class);
+	}
+
+	@NotNull
+	public IUserGroup getUserGroup() {
+		return getInstance(IUserGroup.class);
 	}
 
 	@NotNull

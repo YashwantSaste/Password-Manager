@@ -2,7 +2,7 @@ package com.project.password.manager.encryption;
 
 import javax.crypto.SecretKey;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IUser;

@@ -2,7 +2,7 @@ package com.project.password.manager.database;
 
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface DataRepository<T, Id> {

@@ -2,7 +2,7 @@ package com.project.password.manager.auth.token;
 
 import java.util.Date;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;

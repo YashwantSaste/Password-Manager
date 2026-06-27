@@ -1,6 +1,6 @@
 package com.project.password.manager.util;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.project.password.manager.model.CustomRole;
+import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.IEntry;
 import com.project.password.manager.model.ILogin;
 import com.project.password.manager.model.IMetadata;
@@ -15,15 +17,19 @@ import com.project.password.manager.model.INote;
 import com.project.password.manager.model.ITag;
 import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IUser;
+import com.project.password.manager.model.IUserGroup;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.database.file.storage.Metadata;
 import com.project.password.manager.model.database.file.storage.Team;
 import com.project.password.manager.model.database.file.storage.User;
+import com.project.password.manager.model.database.file.storage.UserGroup;
 import com.project.password.manager.model.database.file.storage.Vault;
 import com.project.password.manager.model.payload.Entry;
 import com.project.password.manager.model.payload.Login;
 import com.project.password.manager.model.payload.Note;
 import com.project.password.manager.model.payload.Tag;
+import com.project.password.manager.permission.BasePermission;
+import com.project.password.manager.permission.IBasePermission;
 
 public final class ModelObjectMapperFactory {
 
@@ -45,6 +51,9 @@ public final class ModelObjectMapperFactory {
 		module.addAbstractTypeMapping(ITag.class, Tag.class);
 		module.addAbstractTypeMapping(IMetadata.class, Metadata.class);
 		module.addAbstractTypeMapping(ITeam.class, Team.class);
+		module.addAbstractTypeMapping(ICustomRole.class, CustomRole.class);
+		module.addAbstractTypeMapping(IUserGroup.class, UserGroup.class);
+		module.addAbstractTypeMapping(IBasePermission.class, BasePermission.class);
 		mapper.registerModule(module);
 		return mapper;
 	}

@@ -1,6 +1,6 @@
 package com.project.password.manager.configuration.application;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.configuration.IAESConfiguration;
 

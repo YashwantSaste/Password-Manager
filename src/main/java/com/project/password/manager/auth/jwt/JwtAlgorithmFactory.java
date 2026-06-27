@@ -1,6 +1,6 @@
 package com.project.password.manager.auth.jwt;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.project.password.manager.configuration.IJwtConfiguration;

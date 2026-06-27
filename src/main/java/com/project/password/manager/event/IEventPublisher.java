@@ -1,6 +1,6 @@
 package com.project.password.manager.event;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public interface IEventPublisher {
 

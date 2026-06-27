@@ -3,7 +3,7 @@ package com.project.password.manager.model.database.file.storage;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.password.manager.model.ICustomRole;

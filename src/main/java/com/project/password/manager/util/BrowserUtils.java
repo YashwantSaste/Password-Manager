@@ -3,7 +3,7 @@ package com.project.password.manager.util;
 import java.awt.Desktop;
 import java.net.URI;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public final class BrowserUtils {
 

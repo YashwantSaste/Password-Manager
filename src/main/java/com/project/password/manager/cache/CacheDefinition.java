@@ -1,7 +1,7 @@
 package com.project.password.manager.cache;
 
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public final class CacheDefinition<K, V> {
 

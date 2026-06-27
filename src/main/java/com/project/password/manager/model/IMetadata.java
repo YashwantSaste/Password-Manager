@@ -2,7 +2,7 @@ package com.project.password.manager.model;
 
 import java.time.LocalDateTime;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public interface IMetadata {
 

@@ -2,13 +2,14 @@ package com.project.password.manager.cli.handlers;
 
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.cli.runtime.CliTheme;
 import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IUser;
+import com.project.password.manager.model.IUserGroup;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.UserRole;
 import com.project.password.manager.model.VaultScope;
@@ -86,7 +87,28 @@ public final class CliViewPrinter {
 	@NotNull
 	public static String formatRole(@NotNull ICustomRole role) {
 		return section(CliTheme.badge("role") + "  " + CliTheme.title(role.roleName()), field("role", role.roleName()),
-				field("roleId", valueOrDash(role.getId())));
+				field("roleId", valueOrDash(role.getId())),
+				field("scope", role.scope().getType().name() + ":" + valueOrDash(role.scope().getScopeId())),
+				field("can", formatPermission(role)));
+	}
+
+	@NotNull
+	public static String formatGroups(@NotNull List<IUserGroup> groups) {
+		if (groups.isEmpty()) {
+			return CliTheme.muted("No user groups found.");
+		}
+		StringBuilder builder = new StringBuilder();
+		for (IUserGroup group : groups) {
+			appendSection(builder, formatGroup(group));
+		}
+		return builder.toString();
+	}
+
+	@NotNull
+	public static String formatGroup(@NotNull IUserGroup group) {
+		return section(CliTheme.badge("group") + "  " + CliTheme.title(group.getName()),
+				field("groupId", valueOrDash(group.getId())), field("name", group.getName()),
+				field("users", joinValues(group.getUsers())));
 	}
 
 	@NotNull
@@ -217,6 +239,12 @@ public final class CliViewPrinter {
 			builder.append(role.name());
 		}
 		return builder.toString();
+	}
+
+	@NotNull
+	private static String formatPermission(@NotNull ICustomRole role) {
+		return "read=" + role.can().read() + ", create=" + role.can().create() + ", modify=" + role.can().modify()
+				+ ", delete=" + role.can().delete();
 	}
 
 	@NotNull

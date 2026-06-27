@@ -2,7 +2,7 @@ package com.project.password.manager.model.database.file.storage;
 
 import java.time.LocalDateTime;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.configuration.application.Configuration;
 import com.project.password.manager.model.IMetadata;

@@ -1,6 +1,6 @@
 package com.project.password.manager.cli.commands.customization.role;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.cli.commands.DelegatingCliCommand;
 import com.project.password.manager.cli.handlers.customization.role.CustomRoleGetCommandHandler;

@@ -5,7 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.database.DataRepository;
@@ -21,6 +21,7 @@ import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.UserRole;
 import com.project.password.manager.util.Logger;
 import com.project.password.manager.util.ModelObjectMapperFactory;
+import com.project.password.manager.validation.utlis.UserValidationUtils;
 
 public class UserService {
 
@@ -122,11 +123,7 @@ public class UserService {
 
 	@NotNull
 	public IUser requireUser(@NotNull String userId) {
-		IUser user = userRepository.findById(userId);
-		if (user == null) {
-			throw new IllegalArgumentException("User not found: " + userId);
-		}
-		return user;
+		return UserValidationUtils.requireUser(userRepository, userId);
 	}
 
 	private boolean isLastAdmin(@NotNull IUser user) {

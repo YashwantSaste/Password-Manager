@@ -2,7 +2,7 @@ package com.project.password.manager.event;
 
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.event.listener.IEventListener;
 

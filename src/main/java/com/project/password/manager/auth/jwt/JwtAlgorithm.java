@@ -1,6 +1,6 @@
 package com.project.password.manager.auth.jwt;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public enum JwtAlgorithm {
 	HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512;

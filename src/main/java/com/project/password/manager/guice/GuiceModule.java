@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.inject.AbstractModule;
@@ -35,6 +35,11 @@ import com.project.password.manager.cli.commands.entry.EntryGetCommand;
 import com.project.password.manager.cli.commands.entry.EntryListCommand;
 import com.project.password.manager.cli.commands.entry.EntrySearchCommand;
 import com.project.password.manager.cli.commands.entry.EntryUpdateCommand;
+import com.project.password.manager.cli.commands.group.UserGroupAddUserCommand;
+import com.project.password.manager.cli.commands.group.UserGroupCreateCommand;
+import com.project.password.manager.cli.commands.group.UserGroupGetCommand;
+import com.project.password.manager.cli.commands.group.UserGroupListCommand;
+import com.project.password.manager.cli.commands.group.UserGroupRemoveUserCommand;
 import com.project.password.manager.cli.commands.team.CreateTeamCommand;
 import com.project.password.manager.cli.commands.team.GetTeamCommand;
 import com.project.password.manager.cli.commands.team.ListTeamCommand;
@@ -67,6 +72,11 @@ import com.project.password.manager.cli.handlers.entry.EntryGetCommandHandler;
 import com.project.password.manager.cli.handlers.entry.EntryListCommandHandler;
 import com.project.password.manager.cli.handlers.entry.EntrySearchCommandHandler;
 import com.project.password.manager.cli.handlers.entry.EntryUpdateCommandHandler;
+import com.project.password.manager.cli.handlers.group.UserGroupAddUserCommandHandler;
+import com.project.password.manager.cli.handlers.group.UserGroupCreateCommandHandler;
+import com.project.password.manager.cli.handlers.group.UserGroupGetCommandHandler;
+import com.project.password.manager.cli.handlers.group.UserGroupListCommandHandler;
+import com.project.password.manager.cli.handlers.group.UserGroupRemoveUserCommandHandler;
 import com.project.password.manager.cli.handlers.team.CreateTeamCommandHandler;
 import com.project.password.manager.cli.handlers.team.GetTeamCommandHandler;
 import com.project.password.manager.cli.handlers.team.ListTeamCommandHandler;
@@ -123,11 +133,13 @@ import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
+import com.project.password.manager.model.IUserGroup;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.database.file.storage.Metadata;
 import com.project.password.manager.model.database.file.storage.Team;
 import com.project.password.manager.model.database.file.storage.Token;
 import com.project.password.manager.model.database.file.storage.User;
+import com.project.password.manager.model.database.file.storage.UserGroup;
 import com.project.password.manager.model.database.file.storage.Vault;
 import com.project.password.manager.model.database.nosql.UserDocument;
 import com.project.password.manager.model.database.sql.JpaToken;
@@ -141,6 +153,7 @@ import com.project.password.manager.service.OAuth2LoginService;
 import com.project.password.manager.service.TeamService;
 import com.project.password.manager.service.TokenService;
 import com.project.password.manager.service.UserService;
+import com.project.password.manager.service.UserGroupService;
 import com.project.password.manager.service.VaultAccessService;
 import com.project.password.manager.service.VaultService;
 import com.project.password.manager.util.ModelObjectMapperFactory;
@@ -164,6 +177,7 @@ public class GuiceModule extends AbstractModule {
 			bind(IToken.class).to(Token.class);
 			bind(ITeam.class).to(Team.class);
 			bind(ICustomRole.class).to(CustomRole.class);
+			bind(IUserGroup.class).to(UserGroup.class);
 		} else {
 			switch (configuration.databaseConfiguration().type()) {
 			case IDatabaseConfiguration.DATABASE_TYPE_SQL: {
@@ -240,6 +254,12 @@ public class GuiceModule extends AbstractModule {
 	@Singleton
 	DataRepository<ICustomRole, String> provideCustomRoleRepository(IConfiguration configuration) {
 		return new DataRepositoryFactory(configuration).getRepository(ICustomRole.class, String.class);
+	}
+
+	@Provides
+	@Singleton
+	DataRepository<IUserGroup, String> provideUserGroupRepository(IConfiguration configuration) {
+		return new DataRepositoryFactory(configuration).getRepository(IUserGroup.class, String.class);
 	}
 
 	@Provides
@@ -377,8 +397,15 @@ public class GuiceModule extends AbstractModule {
 	@Provides
 	@Singleton
 	CustomRoleService provideCustomRoleService(DataRepository<ICustomRole, String> customRoleRepository,
-			DataRepository<IUser, String> userDataRepository) {
-		return new CustomRoleService(customRoleRepository, userDataRepository);
+			DataRepository<IUser, String> userDataRepository, IEntityEventSupport eventSupport) {
+		return new CustomRoleService(customRoleRepository, userDataRepository, eventSupport);
+	}
+
+	@Provides
+	@Singleton
+	UserGroupService provideUserGroupService(DataRepository<IUserGroup, String> userGroupRepository,
+			DataRepository<IUser, String> userRepository, IEntityEventSupport eventSupport) {
+		return new UserGroupService(userGroupRepository, userRepository, eventSupport);
 	}
 
 	@Provides
@@ -421,6 +448,11 @@ public class GuiceModule extends AbstractModule {
 				.register(EntrySearchCommand.class, EntrySearchCommandHandler.class)
 				.register(CustomRoleListCommand.class, CustomRoleListCommandHandler.class)
 				.register(CustomRoleGetCommand.class, CustomRoleGetCommandHandler.class)
-				.register(CustomRoleCreateCommand.class, CustomRoleCreateCommandHandler.class);
+				.register(CustomRoleCreateCommand.class, CustomRoleCreateCommandHandler.class)
+				.register(UserGroupListCommand.class, UserGroupListCommandHandler.class)
+				.register(UserGroupGetCommand.class, UserGroupGetCommandHandler.class)
+				.register(UserGroupCreateCommand.class, UserGroupCreateCommandHandler.class)
+				.register(UserGroupAddUserCommand.class, UserGroupAddUserCommandHandler.class)
+				.register(UserGroupRemoveUserCommand.class, UserGroupRemoveUserCommandHandler.class);
 	}
 }

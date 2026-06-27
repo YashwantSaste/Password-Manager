@@ -9,6 +9,7 @@ import com.project.password.manager.cli.commands.auth.WhoAmICommand;
 import com.project.password.manager.cli.commands.config.ConfigCommand;
 import com.project.password.manager.cli.commands.customization.role.CustomRoleCommand;
 import com.project.password.manager.cli.commands.entry.EntryCommand;
+import com.project.password.manager.cli.commands.group.UserGroupCommand;
 import com.project.password.manager.cli.commands.team.TeamCommand;
 import com.project.password.manager.cli.commands.theme.ThemeCommand;
 import com.project.password.manager.cli.commands.user.UserCommand;
@@ -20,7 +21,8 @@ import picocli.CommandLine.Command;
 @Command(name = "password-manager", mixinStandardHelpOptions = true, description = "Interactive password manager CLI.", subcommands = {
 		LoginCommand.class, OAuth2Command.class, SignupCommand.class, LogoutCommand.class, WhoAmICommand.class,
 		PingCommand.class, UserCommand.class, TeamCommand.class, ConfigCommand.class, ThemeCommand.class,
-		VaultCommand.class, EntryCommand.class, CustomRoleCommand.class, picocli.CommandLine.HelpCommand.class })
+		VaultCommand.class, EntryCommand.class, CustomRoleCommand.class, UserGroupCommand.class,
+		picocli.CommandLine.HelpCommand.class })
 public class BaseCommand implements Runnable {
 
 	@Override

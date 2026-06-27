@@ -5,7 +5,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.argon.Argon2Encoder;
 import com.project.password.manager.auth.token.SessionTokenRequest;

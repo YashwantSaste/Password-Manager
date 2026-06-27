@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.util.Logger;
 

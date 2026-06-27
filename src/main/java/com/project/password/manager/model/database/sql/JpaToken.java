@@ -1,6 +1,6 @@
 package com.project.password.manager.model.database.sql;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.model.IToken;
 

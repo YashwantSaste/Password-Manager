@@ -11,7 +11,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class NetworkRequestBuilder {

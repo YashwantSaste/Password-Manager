@@ -2,7 +2,7 @@ package com.project.password.manager.database.file.storage;
 
 import java.io.File;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.logging.ITransactionLogger;
 import com.project.password.manager.model.database.file.storage.Token;

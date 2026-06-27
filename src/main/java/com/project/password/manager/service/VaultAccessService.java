@@ -3,7 +3,7 @@ package com.project.password.manager.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.google.inject.Inject;
 import com.project.password.manager.database.DataRepository;

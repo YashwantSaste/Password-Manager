@@ -3,7 +3,7 @@ package com.project.password.manager.database;
 import java.io.File;
 
 import org.hibernate.SessionFactory;
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.configuration.IConfiguration;
 import com.project.password.manager.configuration.IDatabaseConfiguration;
@@ -12,6 +12,7 @@ import com.project.password.manager.database.file.storage.CustomRoleRepository;
 import com.project.password.manager.database.file.storage.FileEntryRepository;
 import com.project.password.manager.database.file.storage.TeamRepository;
 import com.project.password.manager.database.file.storage.TokenRepository;
+import com.project.password.manager.database.file.storage.UserGroupRepository;
 import com.project.password.manager.database.file.storage.UserRepository;
 import com.project.password.manager.database.file.storage.VaultRepository;
 import com.project.password.manager.database.postgres.hibernate.HibernateBootStrap;
@@ -25,6 +26,7 @@ import com.project.password.manager.model.IEntity;
 import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
+import com.project.password.manager.model.IUserGroup;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.database.sql.JpaEncryptedEntryRecord;
 import com.project.password.manager.model.database.sql.JpaToken;
@@ -85,6 +87,11 @@ public class DataRepositoryFactory {
 		if (entityClass.equals(ICustomRole.class)) {
 			@SuppressWarnings("unchecked")
 			DataRepository<T, Id> repo = (DataRepository<T, Id>) new CustomRoleRepository(workspace, transactionLogger);
+			return repo;
+		}
+		if (entityClass.equals(IUserGroup.class)) {
+			@SuppressWarnings("unchecked")
+			DataRepository<T, Id> repo = (DataRepository<T, Id>) new UserGroupRepository(workspace, transactionLogger);
 			return repo;
 		}
 		throw new IllegalArgumentException("No repository available for entity: " + entityClass.getName());

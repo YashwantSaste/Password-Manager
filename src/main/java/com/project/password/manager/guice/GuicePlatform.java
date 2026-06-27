@@ -1,6 +1,6 @@
 package com.project.password.manager.guice;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;

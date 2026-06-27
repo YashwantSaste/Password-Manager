@@ -3,7 +3,7 @@ package com.project.password.manager.configuration.application;
 import java.util.List;
 import java.util.Set;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public class ApplicationProperties {
 

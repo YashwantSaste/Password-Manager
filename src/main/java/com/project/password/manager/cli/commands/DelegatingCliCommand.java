@@ -1,6 +1,6 @@
 package com.project.password.manager.cli.commands;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.cli.handlers.CommandHandler;

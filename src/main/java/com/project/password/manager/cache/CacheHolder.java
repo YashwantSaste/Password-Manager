@@ -1,6 +1,6 @@
 package com.project.password.manager.cache;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.github.benmanes.caffeine.cache.Cache;
 

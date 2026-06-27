@@ -1,6 +1,6 @@
 package com.project.password.manager.model.payload;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.password.manager.model.INote;

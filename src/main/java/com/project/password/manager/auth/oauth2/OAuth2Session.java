@@ -1,6 +1,6 @@
 package com.project.password.manager.auth.oauth2;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.model.IUser;
 

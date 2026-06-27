@@ -1,6 +1,6 @@
 package com.project.password.manager.auth.oauth2;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

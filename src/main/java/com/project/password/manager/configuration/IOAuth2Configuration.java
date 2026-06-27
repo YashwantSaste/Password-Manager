@@ -3,7 +3,7 @@ package com.project.password.manager.configuration;
 import java.util.List;
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface IOAuth2Configuration extends IAuthenticationConfiguration {

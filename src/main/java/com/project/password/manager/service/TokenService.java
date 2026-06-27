@@ -2,7 +2,7 @@ package com.project.password.manager.service;
 
 import java.util.concurrent.TimeUnit;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.benmanes.caffeine.cache.Cache;

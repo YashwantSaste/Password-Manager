@@ -2,7 +2,7 @@ package com.project.password.manager.cli.handlers.customization.role;
 
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.google.inject.Inject;
 import com.project.password.manager.cli.commands.customization.role.CustomRoleListCommand;

@@ -1,6 +1,6 @@
 package com.project.password.manager.event.listener;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.event.IEvent;
 import com.project.password.manager.model.ITeam;

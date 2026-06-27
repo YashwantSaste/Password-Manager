@@ -3,7 +3,7 @@ package com.project.password.manager.cli.handlers;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.cli.runtime.CliOutput;
