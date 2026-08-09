@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.validation.constraints.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.project.password.manager.model.IUser;
+
+import jakarta.validation.constraints.NotNull;
 
 public class UserCache extends CacheBuilder<String, IUser> {
 
@@ -18,7 +20,6 @@ public class UserCache extends CacheBuilder<String, IUser> {
 	public static final CacheDefinition<String, IUser> USER_CACHE = new CacheDefinition<>("user-cache", String.class,
 			IUser.class);
 
-
 	public void invalidateUserFromCache(@NotNull String userId) {
 		cacheStore.invalidate(USER_CACHE, userId);
 	}
@@ -27,8 +28,13 @@ public class UserCache extends CacheBuilder<String, IUser> {
 		cacheStore.put(USER_CACHE, user.getId(), user);
 	}
 
+	@Nullable
+	public IUser getUserFromCache(@NotNull String userId) {
+		return cacheStore.get(USER_CACHE, userId);
+	}
+
 	@NotNull
-	public List<IUser> getCachedUsers(){
+	public List<IUser> getCachedUsers() {
 		List<IUser> user = new ArrayList<>();
 		for (Map.Entry<String, IUser> entry : getUserCacheFromStore().asMap().entrySet()) {
 			user.add(entry.getValue());

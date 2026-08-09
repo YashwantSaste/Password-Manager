@@ -3,20 +3,21 @@ package com.project.password.manager.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.validation.constraints.NotNull;
+import javax.annotation.Nullable;
 
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.event.IEntityEventSupport;
 import com.project.password.manager.exceptions.EntityNotFoundException;
-import com.project.password.manager.guice.PlatformEntityProvider;
+import com.project.password.manager.guice.Platform;
 import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.scope.IScope;
-import com.project.password.manager.model.scope.UserScope;
 import com.project.password.manager.permission.BasePermission;
-import com.project.password.manager.permission.IBasePermission;
+import com.project.password.manager.permission.IPermission;
 import com.project.password.manager.util.ValidationUtils;
 import com.project.password.manager.validation.utlis.UserValidationUtils;
+
+import jakarta.validation.constraints.NotNull;
 
 public class CustomRoleService {
 
@@ -24,7 +25,8 @@ public class CustomRoleService {
 	private final DataRepository<IUser, String> userRepository;
 	private final IEntityEventSupport eventSupport;
 
-	public CustomRoleService(@NotNull DataRepository<ICustomRole, String> customRoleRepository, @NotNull DataRepository<IUser, String> userRepository, @NotNull IEntityEventSupport eventSupport) {
+	public CustomRoleService(@NotNull DataRepository<ICustomRole, String> customRoleRepository,
+			@NotNull DataRepository<IUser, String> userRepository, @NotNull IEntityEventSupport eventSupport) {
 		this.customRoleRepository = customRoleRepository;
 		this.userRepository = userRepository;
 		this.eventSupport = eventSupport;
@@ -57,20 +59,20 @@ public class CustomRoleService {
 	}
 
 	public void createCustomRole(@NotNull String roleId, @NotNull String roleName) {
-		createCustomRole(roleId, roleName, new BasePermission(), new UserScope(""));
+		createCustomRole(roleId, roleName, new BasePermission(), null);
 	}
 
-	public void createCustomRole(@NotNull String roleId, @NotNull String roleName, @NotNull IBasePermission permission,
-			@NotNull IScope scope) {
+	public void createCustomRole(@NotNull String roleId, @NotNull String roleName, @NotNull IPermission permission,
+			@Nullable IScope scope) {
 		String normalizedRoleId = ValidationUtils.requireText(roleId, "Role id is required.");
 		String normalizedRoleName = ValidationUtils.requireText(roleName, "Role name is required.");
 		if (customRoleRepository.findById(normalizedRoleId) != null) {
 			throw new IllegalArgumentException("Custom role already exists: " + normalizedRoleId);
 		}
-		ICustomRole newRole = PlatformEntityProvider.getEntityProvider().getCustomRole();
+		ICustomRole newRole = Platform.getPlatformContext().getCustomRole();
 		newRole.setId(normalizedRoleId);
 		newRole.setRoleName(normalizedRoleName);
-		newRole.setPermissions(permission);
+		newRole.setPermission(permission);
 		newRole.setScope(scope);
 		customRoleRepository.save(newRole);
 		eventSupport.publishCreated(newRole);

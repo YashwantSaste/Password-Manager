@@ -1,9 +1,9 @@
 package com.project.password.manager.model;
 
-import jakarta.validation.constraints.NotNull;
-
 import com.project.password.manager.model.scope.IScope;
-import com.project.password.manager.permission.IBasePermission;
+import com.project.password.manager.permission.IPermission;
+
+import jakarta.validation.constraints.NotNull;
 
 public interface ICustomRole extends IEntity {
 
@@ -19,12 +19,12 @@ public interface ICustomRole extends IEntity {
 
 	@NotNull
 	IScope scope();
-	
-	@NotNull
-	IBasePermission can();
 
-	void setPermissions(@NotNull IBasePermission can);
-	
+	@NotNull
+	IPermission permission();
+
+	void setPermission(@NotNull IPermission can);
+
 	void setScope(@NotNull IScope scope);
 
 }

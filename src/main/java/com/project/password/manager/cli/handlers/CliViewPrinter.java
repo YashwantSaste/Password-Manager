@@ -2,7 +2,6 @@ package com.project.password.manager.cli.handlers;
 
 import java.util.List;
 
-import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.cli.runtime.CliTheme;
@@ -16,6 +15,8 @@ import com.project.password.manager.model.VaultScope;
 import com.project.password.manager.model.entry.EntryView;
 import com.project.password.manager.model.entry.NoteValue;
 import com.project.password.manager.model.entry.TagValue;
+
+import jakarta.validation.constraints.NotNull;
 
 public final class CliViewPrinter {
 
@@ -243,8 +244,8 @@ public final class CliViewPrinter {
 
 	@NotNull
 	private static String formatPermission(@NotNull ICustomRole role) {
-		return "read=" + role.can().read() + ", create=" + role.can().create() + ", modify=" + role.can().modify()
-				+ ", delete=" + role.can().delete();
+		return "read=" + role.permission().can().read() + ", create=" + role.permission().can().create() + ", modify="
+				+ role.permission().can().modify() + ", delete=" + role.permission().can().delete();
 	}
 
 	@NotNull

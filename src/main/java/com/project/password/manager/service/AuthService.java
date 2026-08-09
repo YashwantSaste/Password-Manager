@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 
 import com.project.password.manager.argon.Argon2Encoder;
 import com.project.password.manager.auth.token.SessionTokenRequest;
-import com.project.password.manager.guice.PlatformEntityProvider;
+import com.project.password.manager.guice.Platform;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.UserRole;
 import com.project.password.manager.util.KeyGenerator;
@@ -50,7 +50,7 @@ public class AuthService {
 		if (userService.getUser(username) != null) {
 			throw new RuntimeException("User already exists");
 		}
-		IUser newUser = PlatformEntityProvider.getEntityProvider().getUser();
+		IUser newUser = Platform.getPlatformContext().getUser();
 		newUser.setId(username);
 		newUser.setName(username);
 		newUser.setAuthVerifier(encoder.getHashValue(password));
@@ -78,7 +78,7 @@ public class AuthService {
 	@NotNull
 	private IUser createOAuth2User(@NotNull String userId, @NotNull String displayName) {
 		String generatedSecret = UUID.randomUUID().toString();
-		IUser oauthUser = PlatformEntityProvider.getEntityProvider().getUser();
+		IUser oauthUser = Platform.getPlatformContext().getUser();
 		oauthUser.setId(userId);
 		oauthUser.setName(displayName);
 		oauthUser.setAuthVerifier(encoder.getHashValue(generatedSecret));

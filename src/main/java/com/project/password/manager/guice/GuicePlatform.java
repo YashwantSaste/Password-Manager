@@ -1,9 +1,9 @@
 package com.project.password.manager.guice;
 
-import jakarta.validation.constraints.NotNull;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import jakarta.validation.constraints.NotNull;
 
 public class GuicePlatform {
 
@@ -15,22 +15,17 @@ public class GuicePlatform {
 	}
 
 	@NotNull
-	private static Injector injector() {
+	public static Injector getInjector() {
 		return HOLDER.INJECTOR;
 	}
 
 	@NotNull
-	public static Injector getInjector() {
-		return injector();
-	}
-
-	@NotNull
 	public static <T> T getInstance(@NotNull Class<T> type) {
-		return injector().getInstance(type);
+		return getInjector().getInstance(type);
 	}
 
 	public static void injectMembers(@NotNull Object object) {
-		injector().injectMembers(object);
+		getInjector().injectMembers(object);
 	}
 
 }

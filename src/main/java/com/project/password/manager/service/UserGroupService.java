@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.event.IEntityEventSupport;
 import com.project.password.manager.exceptions.EntityNotFoundException;
-import com.project.password.manager.guice.PlatformEntityProvider;
+import com.project.password.manager.guice.Platform;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IUserGroup;
 import com.project.password.manager.util.ValidationUtils;
@@ -40,7 +40,7 @@ public class UserGroupService {
 		for (String userId : userIds) {
 			UserValidationUtils.requireUser(userRepository, userId);
 		}
-		IUserGroup group = PlatformEntityProvider.getEntityProvider().getUserGroup();
+		IUserGroup group = Platform.getPlatformContext().getUserGroup();
 		group.setId(normalizedGroupId);
 		group.setName(normalizedGroupName);
 		group.setUsers(distinct(userIds));

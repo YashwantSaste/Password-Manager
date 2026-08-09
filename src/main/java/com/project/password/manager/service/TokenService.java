@@ -15,7 +15,7 @@ import com.project.password.manager.configuration.ICacheConfiguration;
 import com.project.password.manager.configuration.application.Configuration;
 import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.database.DataRepositoryFactory;
-import com.project.password.manager.guice.PlatformEntityProvider;
+import com.project.password.manager.guice.Platform;
 import com.project.password.manager.model.IToken;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.util.ValidationUtils;
@@ -109,7 +109,7 @@ public class TokenService {
 
 	private void persistToken(@NotNull IUser user, @NotNull String tokenValue,
 			@NotNull AuthenticationType authenticationType) {
-		IToken tokenEntity = PlatformEntityProvider.getEntityProvider().getToken();
+		IToken tokenEntity = Platform.getPlatformContext().getToken();
 		tokenEntity.setUserId(user.getId());
 		tokenEntity.setToken(tokenValue);
 		tokenEntity.setTokenType(authenticationType.value());

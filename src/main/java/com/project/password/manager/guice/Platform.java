@@ -11,9 +11,9 @@ import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IUserGroup;
 import com.project.password.manager.model.IVault;
 
-public class PlatformEntityProvider {
+public class Platform {
 
-	private PlatformEntityProvider() {
+	private Platform() {
 		/*
 		 * provided non persisted entity instance depending upon the {@code
 		 * IDatabaseConfiguration}
@@ -21,11 +21,11 @@ public class PlatformEntityProvider {
 	}
 
 	private static final class HOLDER {
-		private static final PlatformEntityProvider INSTANCE = new PlatformEntityProvider();
+		private static final Platform INSTANCE = new Platform();
 	}
 
 	@NotNull
-	public static PlatformEntityProvider getEntityProvider() {
+	public static Platform getPlatformContext() {
 		return HOLDER.INSTANCE;
 	}
 

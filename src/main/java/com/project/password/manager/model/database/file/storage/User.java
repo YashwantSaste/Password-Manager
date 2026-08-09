@@ -3,14 +3,14 @@ package com.project.password.manager.model.database.file.storage;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.IMetadata;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
 import com.project.password.manager.model.UserRole;
+
+import jakarta.validation.constraints.NotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements IUser, IFileStorableEntity {
@@ -157,4 +157,5 @@ public class User implements IUser, IFileStorableEntity {
 	public void setCustomRoles(@NotNull List<ICustomRole> customRoles) {
 		this.customRoles = customRoles;
 	}
+
 }

@@ -2,12 +2,16 @@ package com.project.password.manager.user.management;
 
 import java.util.List;
 
-import jakarta.validation.constraints.NotNull;
+import javax.annotation.Nullable;
 
+import com.project.password.manager.auth.session.ISession;
 import com.project.password.manager.cache.UserCache;
+import com.project.password.manager.guice.GuicePlatform;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.UserRole;
 import com.project.password.manager.service.UserService;
+
+import jakarta.validation.constraints.NotNull;
 
 public class UserPool implements IUserPool {
 
@@ -48,5 +52,21 @@ public class UserPool implements IUserPool {
 
 	private void loadUsersInCache() {
 		cache.addUsersToCache(getAllUsers());
+	}
+
+	@Override
+	@Nullable
+	public IUser getUser(@NotNull String userId) {
+		IUser cachedUser = cache.getUserFromCache(userId);
+		if (cachedUser != null) {
+			return cachedUser;
+		}
+		return userService.getUser(userId);
+	}
+
+	@Nullable
+	public IUser getCurrentLoggedInUser() {
+		ISession session = GuicePlatform.getInstance(ISession.class);
+		return userService.getUser(session.getCurrentSession().userId());
 	}
 }

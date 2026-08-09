@@ -1,19 +1,19 @@
 package com.project.password.manager.model;
 
-import jakarta.validation.constraints.NotNull;
-
 import com.project.password.manager.model.database.file.storage.IFileStorableEntity;
 import com.project.password.manager.model.scope.IScope;
 import com.project.password.manager.model.scope.UserScope;
 import com.project.password.manager.permission.BasePermission;
-import com.project.password.manager.permission.IBasePermission;
+import com.project.password.manager.permission.IPermission;
+
+import jakarta.validation.constraints.NotNull;
 
 public class CustomRole implements IFileStorableEntity, ICustomRole {
 
 	private String id;
 	private String roleName;
-	private IBasePermission can = new BasePermission();
-	private IScope scope = new UserScope("");
+	private IPermission permission = new BasePermission();
+	private IScope scope = new UserScope();
 
 	public CustomRole() {
 		// Required by Jackson
@@ -54,36 +54,30 @@ public class CustomRole implements IFileStorableEntity, ICustomRole {
 	}
 
 	@Override
-	public void setId(@NotNull String roleId) {
-		id = roleId;
+	public void setId(@NotNull String id) {
+		this.id = id;
 	}
 
 	@Override
 	@NotNull
-	public IBasePermission can() {
-		if (can == null) {
-			can = new BasePermission();
-		}
-		return can;
+	public IPermission permission() {
+		return permission;
 	}
 
 	@Override
-	public void setPermissions(@NotNull IBasePermission can) {
-		this.can = can;
+	public void setPermission(@NotNull IPermission permission) {
+		this.permission = permission;
 	}
 
 	@Override
 	@NotNull
 	public IScope scope() {
-		if (scope == null) {
-			scope = new UserScope("");
-		}
 		return scope;
 	}
 
 	@Override
 	public void setScope(@NotNull IScope scope) {
-		this.scope=scope;
+		this.scope = scope;
 	}
 
 }

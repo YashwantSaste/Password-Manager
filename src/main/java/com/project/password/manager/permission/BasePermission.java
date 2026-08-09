@@ -2,10 +2,10 @@ package com.project.password.manager.permission;
 
 import java.util.Set;
 
-import jakarta.validation.constraints.NotNull;
-
 import com.project.password.manager.model.ICustomRole;
 import com.project.password.manager.model.UserRole;
+
+import jakarta.validation.constraints.NotNull;
 
 public class BasePermission implements IBasePermission {
 
@@ -15,7 +15,11 @@ public class BasePermission implements IBasePermission {
 	private boolean create;
 
 	public BasePermission() {
-		this(false, false, false, false);
+		this(true, false, false, false);
+	}
+
+	public BasePermission(@NotNull UserRole role) {
+		createPermissionForRole(role);
 	}
 
 	public BasePermission(boolean read, boolean delete, boolean modify, boolean create) {
@@ -62,7 +66,8 @@ public class BasePermission implements IBasePermission {
 	}
 
 	@Override
-	public @NotNull Set<ICustomRole> allowedCustomRoles() {
+	@NotNull
+	public Set<ICustomRole> allowedCustomRoles() {
 		return Set.of();
 	}
 
@@ -84,6 +89,15 @@ public class BasePermission implements IBasePermission {
 	@Override
 	public void setCreate(boolean create) {
 		this.create = create;
+	}
+
+	@NotNull
+	private BasePermission createPermissionForRole(@NotNull UserRole role) {
+		if (role.equals(UserRole.ADMIN)) {
+			return (BasePermission) createBasePermissionForAdmin();
+		} else {
+			return (BasePermission) createBasePermissionForUser();
+		}
 	}
 
 }

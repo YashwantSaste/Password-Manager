@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +22,7 @@ import com.project.password.manager.event.IEntityEventSupport;
 import com.project.password.manager.event.listener.EventLoggingListener;
 import com.project.password.manager.exceptions.EntityNotFoundException;
 import com.project.password.manager.exceptions.UserNotFoundException;
-import com.project.password.manager.guice.PlatformEntityProvider;
+import com.project.password.manager.guice.Platform;
 import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.IVault;
@@ -31,6 +30,8 @@ import com.project.password.manager.model.Status;
 import com.project.password.manager.model.VaultPayload;
 import com.project.password.manager.model.VaultScope;
 import com.project.password.manager.util.ModelObjectMapperFactory;
+
+import jakarta.validation.constraints.NotNull;
 
 public class VaultService {
 	@NotNull
@@ -186,7 +187,7 @@ public class VaultService {
 	}
 
 	@NotNull
-	private IVault getVault(@NotNull String vaultId) {
+	public IVault getVault(@NotNull String vaultId) {
 		String normalizedVaultId = requireText(vaultId, "Vault id");
 		IVault vault = vaultRepository.findById(normalizedVaultId);
 		if (vault == null) {
@@ -203,7 +204,7 @@ public class VaultService {
 	@NotNull
 	private IVault createScopedVault(@NotNull VaultScope scope, @NotNull String scopeId, @NotNull String vaultName) {
 		String vaultId = UUID.randomUUID().toString();
-		IVault vault = PlatformEntityProvider.getEntityProvider().getVault();
+		IVault vault = Platform.getPlatformContext().getVault();
 		vault.setId(vaultId);
 		vault.setName(requireText(vaultName, "Vault name"));
 		vault.setScope(scope);

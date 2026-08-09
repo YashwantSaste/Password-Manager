@@ -14,7 +14,7 @@ import com.project.password.manager.database.DataRepository;
 import com.project.password.manager.exceptions.EntityNotFoundException;
 import com.project.password.manager.exceptions.IlleagalAccessException;
 import com.project.password.manager.exceptions.UnauthorizedSessionException;
-import com.project.password.manager.guice.PlatformEntityProvider;
+import com.project.password.manager.guice.Platform;
 import com.project.password.manager.model.ITeam;
 import com.project.password.manager.model.IUser;
 import com.project.password.manager.model.Status;
@@ -40,7 +40,7 @@ public class TeamService {
 		if (teamRepository.findById(teamName) != null) {
 			throw new IllegalArgumentException("Team already exists: " + teamName);
 		}
-		ITeam team = PlatformEntityProvider.getEntityProvider().getTeam();
+		ITeam team = Platform.getPlatformContext().getTeam();
 		team.setId(teamName);
 		team.setName(teamName);
 		team.setOwners(List.of(initiatorUser.getId()));

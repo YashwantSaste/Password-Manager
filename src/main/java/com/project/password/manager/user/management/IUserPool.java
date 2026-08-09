@@ -2,9 +2,11 @@ package com.project.password.manager.user.management;
 
 import java.util.List;
 
-import jakarta.validation.constraints.NotNull;
+import javax.annotation.Nullable;
 
 import com.project.password.manager.model.IUser;
+
+import jakarta.validation.constraints.NotNull;
 
 public interface IUserPool {
 
@@ -16,4 +18,10 @@ public interface IUserPool {
 
 	@NotNull
 	List<IUser> getAllUsers();
+
+	@Nullable
+	IUser getUser(@NotNull String userId);
+
+	@NotNull
+	IUser getCurrentLoggedInUser();
 }

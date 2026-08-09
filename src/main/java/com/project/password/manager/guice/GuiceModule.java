@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.inject.AbstractModule;
@@ -13,6 +12,8 @@ import com.google.inject.Singleton;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.project.password.manager.argon.Argon2Encoder;
+import com.project.password.manager.auth.session.CliApplicationSession;
+import com.project.password.manager.auth.session.ISession;
 import com.project.password.manager.auth.token.JwtSessionTokenStrategy;
 import com.project.password.manager.auth.token.OAuth2SessionTokenStrategy;
 import com.project.password.manager.auth.token.SessionTokenStrategy;
@@ -152,11 +153,13 @@ import com.project.password.manager.service.EntryService;
 import com.project.password.manager.service.OAuth2LoginService;
 import com.project.password.manager.service.TeamService;
 import com.project.password.manager.service.TokenService;
-import com.project.password.manager.service.UserService;
 import com.project.password.manager.service.UserGroupService;
+import com.project.password.manager.service.UserService;
 import com.project.password.manager.service.VaultAccessService;
 import com.project.password.manager.service.VaultService;
 import com.project.password.manager.util.ModelObjectMapperFactory;
+
+import jakarta.validation.constraints.NotNull;
 
 public class GuiceModule extends AbstractModule {
 
@@ -412,6 +415,15 @@ public class GuiceModule extends AbstractModule {
 	@Singleton
 	CommandHandlerInvoker provideCommandHandlerInvoker() {
 		return new CommandHandlerInvoker();
+	}
+
+	@Provides
+	@Singleton
+	ISession provideSession(CliSession cliSession) {
+		if (Configuration.getInstance().cliConfiguration().isEnabled()) {
+			return new CliApplicationSession(cliSession);
+		}
+		throw new RuntimeException("CLI is not enabled.");
 	}
 
 	@Provides

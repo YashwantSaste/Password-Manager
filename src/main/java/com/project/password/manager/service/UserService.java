@@ -5,7 +5,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.validation.constraints.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.project.password.manager.database.DataRepository;
@@ -22,6 +21,8 @@ import com.project.password.manager.model.UserRole;
 import com.project.password.manager.util.Logger;
 import com.project.password.manager.util.ModelObjectMapperFactory;
 import com.project.password.manager.validation.utlis.UserValidationUtils;
+
+import jakarta.validation.constraints.NotNull;
 
 public class UserService {
 
@@ -57,6 +58,10 @@ public class UserService {
 		this.tokenService = tokenService;
 		this.eventSupport = eventSupport;
 		this.customRoleService = customRoleService;
+	}
+
+	public TokenService getTokenService() {
+		return tokenService;
 	}
 
 	@Nullable
